@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account | Tour Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="JS/translation.js"></script>
+    <style>
+      .bg-img {
+        object-fit: cover;
+        object-position: center;
+      }
+    </style>
+  </head>
+  <body class="relative min-h-screen bg-black overflow-hidden">
+    <!-- 🔸 Blurred Placeholder -->
+    <div class="absolute inset-0">
+      <img
+        src="../img/sign in background.png"
+        class="w-full h-full object-cover blur-xl scale-105"
+        alt="blurred beach placeholder"
+      />
+    </div>
+
+    <!-- 🔸 Full Image -->
+    <img
+      src="../img/sign in background.png"
+      class="absolute inset-0 w-full h-full bg-img transition-opacity duration-700 opacity-0"
+      loading="lazy"
+      onload="this.style.opacity=1"
+      alt="background beach"
+    />
+
+    <!-- 🔸 Content Container -->
+    <div
+      class="relative z-10 flex items-center justify-center min-h-screen px-4 bg-black bg-opacity-40"
+    >
+      <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+        <h1
+          data-i18n="signup.title"
+          class="text-3xl font-bold text-center text-gray-800 mb-4"
+        >
+          Create Account
+        </h1>
+        <p
+          data-i18n="signup.subtitle"
+          class="text-center text-gray-500 text-sm mb-6"
+        >
+          Join the adventure and explore new destinations
+        </p>
+
+        <form class="space-y-4">
+          <div>
+            <label
+              data-i18n="signup.name"
+              class="block text-sm text-gray-600 mb-1"
+              for="name"
+              >Full Name</label
+            >
+            <input
+              id="name"
+              type="text"
+              placeholder="Jane Doe"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label
+              data-i18n="signup.email"
+              class="block text-sm text-gray-600 mb-1"
+              for="email"
+              >Email</label
+            >
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label
+              data-i18n="signup.pass"
+              class="block text-sm text-gray-600 mb-1"
+              for="password"
+              >Password</label
+            >
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label
+              data-i18n="signup.confirmPass"
+              class="block text-sm text-gray-600 mb-1"
+              for="confirm-password"
+              >Confirm Password</label
+            >
+            <input
+              id="confirm-password"
+              type="password"
+              placeholder="••••••••"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
+          <button
+            data-i18n="signup.button"
+            type="submit"
+            class="w-full bg-yellow-400 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-yellow-500 transition"
+          >
+            Create Account
+          </button>
+        </form>
+
+        <p
+          data-i18n="signup.haveAccount"
+          class="text-center text-xs text-gray-400 mt-6"
+        >
+          Already have an account?
+          <a
+            data-i18n="signup.signin"
+            href="sign in.html"
+            class="text-yellow-500 hover:underline"
+            >Sign in</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

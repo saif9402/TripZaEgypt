@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="css/output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <title>Trip</title>
+  </head>
+  <body class="text-gray-800 font-sans">
+    <!-- Header (reuse your responsive header here) -->
+    <div id="header-placeholder"></div>
+
+    <!-- Trip Header -->
+    <section class="max-w-7xl mx-auto px-4 py-20">
+      <div class="flex flex-col md:flex-row gap-8">
+        <div class="md:w-2/3">
+          <h1 class="text-3xl font-bold mb-2">
+            Vintage Double Decker Bus Tour & Thames River Cruise
+          </h1>
+          <div class="text-sm text-gray-500 mb-4">
+            Sightseeing | <span class="text-yellow-500">★★★★☆</span> (854
+            reviews)
+          </div>
+          <img
+            src="https://source.unsplash.com/800x400/?mountains"
+            alt="Main Image"
+            class="rounded-lg w-full mb-4"
+          />
+
+          <div class="grid grid-cols-6 gap-2 mb-6">
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?mountains"
+            />
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?river"
+            />
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?forest"
+            />
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?tour"
+            />
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?city"
+            />
+            <img
+              alt="img"
+              class="rounded-md w-full h-20 object-cover"
+              src="https://source.unsplash.com/100x100/?sunset"
+            />
+          </div>
+
+          <!-- Enhanced Feature Details -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-6 border rounded-lg p-6 mb-8 bg-white"
+          >
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-ban text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Free Cancellation</h4>
+                <p class="text-sm text-gray-600">
+                  Cancel up to 24 hours in advance to receive a full refund
+                </p>
+              </div>
+            </div>
+
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-shield-virus text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Health Precautions</h4>
+                <p class="text-sm text-gray-600">
+                  Special health and safety measures apply. Learn more
+                </p>
+              </div>
+            </div>
+
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-mobile-alt text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Mobile Ticketing</h4>
+                <p class="text-sm text-gray-600">
+                  Use your phone or print your voucher
+                </p>
+              </div>
+            </div>
+
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-clock text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Duration 3.5 Hours</h4>
+                <p class="text-sm text-gray-600">
+                  Check availability to see starting times.
+                </p>
+              </div>
+            </div>
+
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-bolt text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Instant Confirmation</h4>
+                <p class="text-sm text-gray-600">
+                  Don't wait for the confirmation!
+                </p>
+              </div>
+            </div>
+
+            <!-- Item -->
+            <div class="flex items-start gap-4">
+              <i class="fas fa-user-tie text-green-600 text-xl mt-1"></i>
+              <div>
+                <h4 class="font-semibold">Live Tour Guide In English</h4>
+                <p class="text-sm text-gray-600">English</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Description</h2>
+            <p class="text-gray-600">
+              Explore the historic sights of London in style aboard a classic
+              double-decker bus. Discover landmarks such as Big Ben, the London
+              Eye, and cruise the Thames River. Your expert guide provides rich
+              historical insight and travel tips.
+            </p>
+          </div>
+
+          <!-- Activity & Inclusions -->
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Activity</h2>
+            <ul class="list-disc ml-6 text-gray-700 space-y-1">
+              <li>Tour on vintage double-decker</li>
+              <li>River Thames cruise</li>
+              <li>Changing of the Guard</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">
+              What Is Included / Not Included
+            </h2>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-1">Included</h4>
+                <ul class="list-disc ml-5 text-gray-700 space-y-1">
+                  <li>Bus tour</li>
+                  <li>River cruise</li>
+                  <li>Professional guide</li>
+                  <li>Gratuities</li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-semibold mb-1">Not Included</h4>
+                <ul class="list-disc ml-5 text-gray-700 space-y-1">
+                  <li>Meals</li>
+                  <li>Personal expenses</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map (Placeholder) -->
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Meeting Point</h2>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d243647.85866317328!2d-0.28170619999999996!3d51.5285582!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8a00a7dbd0fd1%3A0x49e6e9b1479f2676!2sLondon!5e0!3m2!1sen!2suk!4v1618338701413!5m2!1sen!2suk"
+              width="100%"
+              height="300"
+              style="border: 0"
+              allowfullscreen=""
+              loading="lazy"
+              class="rounded-lg"
+            ></iframe>
+          </div>
+
+          <section class="max-w-7xl mx-auto px-4 py-12">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold">Related Tours In Today</h2>
+              <div class="flex space-x-2">
+                <button
+                  title="button"
+                  class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
+                >
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button
+                  title="button"
+                  class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            >
+              <!-- Tour Card -->
+              <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <img
+                  src="https://source.unsplash.com/400x200/?alaska,road"
+                  alt="Tour"
+                  class="w-full h-40 object-cover"
+                />
+                <div class="p-4">
+                  <h3 class="text-sm font-semibold mb-2">
+                    Alaska: Westminster to Greenwich River Thames
+                  </h3>
+                  <ul class="text-xs text-gray-600 space-y-1 mb-3">
+                    <li><i class="fas fa-clock mr-1"></i> Duration 2 hours</li>
+                    <li>
+                      <i class="fas fa-shuttle-van mr-1"></i> Transport Facility
+                    </li>
+                    <li><i class="fas fa-users mr-1"></i> Family Plan</li>
+                  </ul>
+                  <div class="flex justify-between items-center text-sm">
+                    <div class="text-yellow-500">
+                      ★★★★☆ <span class="text-gray-500 ml-1">584 reviews</span>
+                    </div>
+                    <div class="text-green-600 font-semibold">
+                      $35.00
+                      <span class="text-gray-400 text-xs">per person</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Repeat the above .bg-white block 3 more times and change content accordingly -->
+              <!-- Tip: Put dynamic generation in JS or a template loop if needed -->
+            </div>
+          </section>
+        </div>
+
+        <!-- Booking Sidebar -->
+        <div class="md:w-1/3">
+          <div class="bg-white p-6 rounded-lg shadow-md sticky top-24">
+            <h3 class="font-bold text-lg mb-4">Booking</h3>
+
+            <!-- Date Selection -->
+            <label class="block text-sm font-medium mb-1">Date</label>
+            <input type="date" class="w-full border px-3 py-2 rounded mb-4" />
+
+            <!-- Number of Adults -->
+            <label class="block text-sm font-medium mb-1">Adults</label>
+            <input
+              type="number"
+              min="1"
+              value="2"
+              class="w-full border px-3 py-2 rounded mb-4"
+              placeholder="Number of adults"
+            />
+
+            <!-- Number of Children -->
+            <label class="block text-sm font-medium mb-1">Children</label>
+            <input
+              type="number"
+              min="0"
+              value="0"
+              class="w-full border px-3 py-2 rounded"
+              placeholder="Number of children"
+            />
+            <p class="text-xs text-gray-500 mb-4">
+              Children are charged at <strong>50% of the adult price</strong>.
+            </p>
+
+            <!-- Price and Booking -->
+            <div class="text-2xl font-bold mb-2">$78.90</div>
+            <button
+              class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded"
+            >
+              Confirm Booking
+            </button>
+            <button class="w-full mt-2 text-sm text-gray-500">
+              ❤️ Save to Wishlist
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer (reuse your site footer here) -->
+    <div id="footer-placeholder"></div>
+    <script src="JS/translation.js"></script>
+    <script src="JS/transition.js"></script>
+    <script src="JS/includes.js"></script>
+  </body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="css/output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+
+    <title>Tour Guide</title>
+  </head>
+  <body class="font-sans text-gray-800">
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <!-- Hero Section + Search Box Combined -->
+    <div class="relative">
+      <section
+        class="relative z-0 h-[91vh] bg-cover bg-center flex items-center justify-center"
+        style="background-image: url('../img/Home.png')"
+      >
+        <div class="text-center text-black space-y-4">
+          <h1 data-i18n="hero.title" class="text-3xl md:text-5xl font-semibold">
+            We Find The Best Tours For You
+          </h1>
+          <p
+            data-i18n="hero.subtitle"
+            class="text-sm md:text-base max-w-lg mx-auto italic"
+          >
+            Discover unforgettable adventures in Hurghada — from desert safaris
+            to Red Sea cruises, all at unbeatable prices.
+          </p>
+          <button
+            class="bg-white text-black px-6 py-2 rounded-full font-medium mt-4 flex items-center space-x-2 mx-auto"
+          >
+            <div class="relative w-6 h-6">
+              <span class="ping-circle"></span>
+              <img
+                src="https://img.icons8.com/ios-filled/50/000000/play--v1.png"
+                alt="Play Icon"
+                class="w-6 h-6 relative z-10"
+              />
+            </div>
+            <span data-i18n="hero.video">Watch Video</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Floating Search Box -->
+      <div
+        class="absolute rounded-4xl bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10 w-full max-w-4xl px-4"
+      >
+        <div
+          class="bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
+        >
+          <!-- Trips -->
+          <div class="flex flex-col flex-1 w-full sm:w-auto">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-map-marker-alt"></i>
+              <span data-i18n="search.trips">Trips</span>
+            </div>
+            <input
+              type="text"
+              data-i18n-placeholder="search.trip.placeholder"
+              placeholder="Search A Trip"
+              class="px-4 py-2 border rounded w-full italic"
+            />
+          </div>
+
+          <!-- Guests -->
+          <div class="flex flex-col flex-1 w-full sm:w-auto">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-user-friends"></i>
+              <span data-i18n="search.guests">Guests</span>
+            </div>
+            <input
+              type="text"
+              data-i18n-placeholder="search.guests.placeholder"
+              placeholder="Guests"
+              class="px-4 py-2 border rounded w-full italic"
+            />
+          </div>
+
+          <!-- Date -->
+          <div class="flex flex-col flex-1 w-full sm:w-auto">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-calendar-alt"></i>
+              <span data-i18n="search.date">Date</span>
+            </div>
+            <input type="date" class="px-4 py-2 border rounded w-full italic" />
+          </div>
+
+          <!-- Search Button -->
+          <div class="flex items-end w-full sm:w-auto">
+            <button
+              data-i18n="search.label"
+              class="bg-yellow-400 px-6 py-2 rounded-3xl font-semibold shadow-md w-full sm:w-auto"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explore Popular Trips -->
+    <div class="text-center px-4 mt-20">
+      <h2 data-i18n="trips.sectionTitle" class="text-2xl font-bold mb-2">
+        Explore Popular Trips
+      </h2>
+      <p data-i18n="trips.sectionDesc" class="text-sm mb-4 italic">
+        Browse our top-rated experiences in Hurghada — from thrilling desert
+        safaris to relaxing Red Sea escapes.
+      </p>
+      <div class="flex flex-wrap justify-center gap-2 mb-6">
+        <button
+          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
+        >
+          Safari
+        </button>
+        <button
+          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
+        >
+          Ocean Bay
+        </button>
+        <button
+          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
+        >
+          Paradise
+        </button>
+        <button
+          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
+        >
+          Hiking
+        </button>
+      </div>
+    </div>
+
+    <!-- Featured Destination Section -->
+    <div class="px-4 mb-12 relative flex justify-center">
+      <!-- Background Image -->
+      <section
+        class="relative z-0 h-[50vh] bg-cover bg-center w-full max-w-7xl rounded-xl flex items-end justify-center"
+        style="background-image: url('../img/most\ popular.png')"
+      >
+        <!-- Floating Info Card -->
+        <a
+          href="trip details.html"
+          class="absolute bottom-0 translate-y-1/2 bg-white rounded-2xl shadow-lg p-6 max-w-4xl w-full mx-auto z-10"
+        >
+          <!-- Title -->
+          <h3 class="text-3xl font-bold text-gray-800 mb-2">Orange Bay</h3>
+          <!-- Description -->
+          <p class="text-gray-600 text-sm mb-4">
+            Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet
+            sint. Velit officia consequat duis enim velit mollit. Exercitation
+            veniam consequat sunt nostrud amet.
+          </p>
+          <!-- Tags -->
+          <div class="flex flex-wrap gap-3">
+            <span
+              class="bg-purple-100 text-purple-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+            >
+              <i class="fas fa-subway text-xs"></i> Public Transportations
+            </span>
+            <span
+              class="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+            >
+              <i class="fas fa-leaf text-xs"></i> Nature & Adventure
+            </span>
+            <span
+              class="bg-yellow-100 text-yellow-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+            >
+              <i class="fas fa-taxi text-xs"></i> Private Transportations
+            </span>
+            <span
+              class="bg-red-100 text-red-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+            >
+              <i class="fas fa-briefcase text-xs"></i> Business Tours
+            </span>
+            <span
+              class="bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
+            >
+              <i class="fas fa-map-marker-alt text-xs"></i> Local Visit
+            </span>
+          </div>
+        </a>
+      </section>
+    </div>
+
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-24 m-11"
+    >
+      <!-- Card Template Start -->
+      <a
+        href="#"
+        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+      >
+        <img
+          src="https://via.placeholder.com/400x200"
+          alt="Trip Image"
+          class="w-full h-48 object-cover"
+        />
+        <div class="p-4">
+          <h2 class="text-lg font-semibold text-gray-800">
+            Westminster to Greenwich River Thames
+          </h2>
+          <ul class="mt-2 text-sm text-gray-600 space-y-1">
+            <li class="flex items-center">
+              <span class="mr-2">🕒</span>Duration 2 hours
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">🚐</span>Transport Facility
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+            </li>
+          </ul>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center text-yellow-500">
+              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+            </div>
+            <div class="text-green-600 font-semibold text-lg">
+              $35.00 <span class="text-sm text-gray-500">/person</span>
+            </div>
+          </div>
+        </div>
+      </a>
+      <!-- Card Template End -->
+
+      <!-- Duplicate and update content accordingly -->
+      <a
+        href="#"
+        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+      >
+        <img
+          src="https://via.placeholder.com/400x200"
+          alt="Trip Image"
+          class="w-full h-48 object-cover"
+        />
+        <div class="p-4">
+          <h2 class="text-lg font-semibold text-gray-800">
+            Vintage Double Decker Bus Tour & Thames
+          </h2>
+          <ul class="mt-2 text-sm text-gray-600 space-y-1">
+            <li class="flex items-center">
+              <span class="mr-2">🕒</span>Duration 2 hours
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">🚐</span>Transport Facility
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+            </li>
+          </ul>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center text-yellow-500">
+              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+            </div>
+            <div class="text-green-600 font-semibold text-lg">
+              $35.00 <span class="text-sm text-gray-500">/person</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a
+        href="#"
+        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+      >
+        <img
+          src="https://via.placeholder.com/400x200"
+          alt="Trip Image"
+          class="w-full h-48 object-cover"
+        />
+        <div class="p-4">
+          <h2 class="text-lg font-semibold text-gray-800">
+            Magic of London Tour with Afternoon Tea at
+          </h2>
+          <ul class="mt-2 text-sm text-gray-600 space-y-1">
+            <li class="flex items-center">
+              <span class="mr-2">🕒</span>Duration 2 hours
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">🚐</span>Transport Facility
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+            </li>
+          </ul>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center text-yellow-500">
+              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+            </div>
+            <div class="text-green-600 font-semibold text-lg">
+              $35.00 <span class="text-sm text-gray-500">/person</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a
+        href="#"
+        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+      >
+        <img
+          src="https://via.placeholder.com/400x200"
+          alt="Trip Image"
+          class="w-full h-48 object-cover"
+        />
+        <div class="p-4">
+          <h2 class="text-lg font-semibold text-gray-800">
+            Magic of London Tour with Afternoon Tea at
+          </h2>
+          <ul class="mt-2 text-sm text-gray-600 space-y-1">
+            <li class="flex items-center">
+              <span class="mr-2">🕒</span>Duration 2 hours
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">🚐</span>Transport Facility
+            </li>
+            <li class="flex items-center">
+              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+            </li>
+          </ul>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center text-yellow-500">
+              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+            </div>
+            <div class="text-green-600 font-semibold text-lg">
+              $35.00 <span class="text-sm text-gray-500">/person</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Most Booked Trip Section -->
+    <section class="relative h-[600px] w-full overflow-hidden text-white">
+      <!-- 🔵 Blurred Background Image -->
+      <div class="absolute inset-0">
+        <img
+          src="../img/trending.png"
+          alt="Blurred Background"
+          class="w-full h-full object-cover blur-md scale-110"
+        />
+        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+      </div>
+
+      <!-- 🌟 Foreground Content -->
+      <div
+        class="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10 px-6 py-16 h-full"
+      >
+        <!-- 🎨 Blob-Shaped Trip Image -->
+        <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
+          <svg
+            viewBox="0 0 200 200"
+            class="absolute w-full h-full"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <clipPath id="blobClip">
+              <path
+                fill="#fff"
+                d="M49.7,-63.3C63.6,-56.7,74.2,-42.6,76.5,-27.6C78.8,-12.6,72.7,3.2,65.3,16.4C57.9,29.6,49.1,40.3,38.3,50.1C27.4,60,13.7,68.9,-2.5,72.2C-18.8,75.5,-37.6,73.3,-50.4,62.6C-63.2,51.9,-70.1,32.8,-71.8,14.8C-73.4,-3.2,-69.9,-20.1,-61.5,-34.2C-53.1,-48.3,-39.9,-59.5,-25.2,-66.6C-10.5,-73.6,5.6,-76.5,20.6,-72.3C35.6,-68.2,49.7,-56.3,49.7,-63.3Z"
+                transform="translate(100 100)"
+              />
+            </clipPath>
+            <image
+              id="trip-image"
+              href="https://via.placeholder.com/400"
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid slice"
+              clip-path="url(#blobClip)"
+            />
+          </svg>
+        </div>
+
+        <!-- 📄 Trip Details -->
+        <div class="flex-1 space-y-4">
+          <span
+            data-i18n="trend.name"
+            class="bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block"
+            >TRENDING NOW</span
+          >
+
+          <a href="#" class="flex">
+            <span class="text-3xl font-bold text-gray-100 mb-2"
+              >Orange Bay</span
+            >
+          </a>
+          <div class="flex items-center text-sm space-x-3 text-gray-100">
+            <span>📍 <span id="location">Hurghada</span></span>
+            <span>|</span>
+            <span class="flex items-center gap-1">
+              <span class="text-yellow-400 text-lg">★★★★★</span>
+              <span id="rating" class="font-semibold">4.9</span>
+              (<span id="reviews">300 reviews</span>)
+            </span>
+          </div>
+
+          <p class="text-gray-200 max-w-xl" id="description">
+            Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet
+            sint. Velit officia consequat duis enim velit mollit. Exercitation
+            veniam consequat sunt nostrud amet.
+          </p>
+
+          <div class="flex items-center gap-4 pt-4">
+            <a
+              data-i18n="trend.button"
+              id="book-link"
+              href="#"
+              class="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-full shadow-lg transition"
+              >Book Now</a
+            >
+            <button
+              class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center"
+            >
+              🤍
+            </button>
+            <button
+              class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center"
+            >
+              🔗
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="px-4 py-16 max-w-7xl mx-auto">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8"
+      >
+        <div>
+          <h2 data-i18n="gallery.title" class="text-2xl font-bold mb-2">
+            From The Gallery
+          </h2>
+          <p data-i18n="gallery.subtitle" class="text-gray-600 italic">
+            Moments captured. Memories made. Discover Hurghada through our lens.
+          </p>
+        </div>
+        <!-- <a
+          href="#"
+          class="mt-4 md:mt-0 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+        >
+          View All Images
+        </a> -->
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <img
+          src="https://source.unsplash.com/400x500/?forest"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?lake"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?mountains"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?hills"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?river"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?bridge"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?sunset"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+        <img
+          src="https://source.unsplash.com/400x500/?beach"
+          alt="Gallery Image"
+          class="rounded-lg object-cover w-full h-64"
+        />
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-placeholder"></div>
+    <script src="JS/translation.js"></script>
+    <script src="JS/transition.js"></script>
+    <script src="JS/includes.js"></script>
+  </body>
+</html>
