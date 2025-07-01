@@ -1,5 +1,10 @@
 function includeHTML(id, file, onDone) {
-  fetch(file)
+  // Determine base path depending on current file location
+  const currentPath = window.location.pathname;
+  const isInPagesFolder = currentPath.includes("/pages/");
+  const fullPath = isInPagesFolder ? `../${file}` : file;
+
+  fetch(fullPath)
     .then((res) => res.text())
     .then((html) => {
       document.getElementById(id).innerHTML = html;
@@ -7,6 +12,19 @@ function includeHTML(id, file, onDone) {
     })
     .catch((err) => console.error(`Error loading ${file}:`, err));
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+  includeHTML(
+    "header-placeholder",
+    "pages/header.html",
+    checkAllIncludesLoaded
+  );
+  includeHTML(
+    "footer-placeholder",
+    "pages/footer.html",
+    checkAllIncludesLoaded
+  );
+});
 
 function afterIncludesLoaded() {
   const savedLang = localStorage.getItem("lang") || "en";
@@ -32,6 +50,14 @@ function checkAllIncludesLoaded() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  includeHTML("header-placeholder", "header.html", checkAllIncludesLoaded);
-  includeHTML("footer-placeholder", "footer.html", checkAllIncludesLoaded);
+  includeHTML(
+    "header-placeholder",
+    "pages/header.html",
+    checkAllIncludesLoaded
+  );
+  includeHTML(
+    "footer-placeholder",
+    "pages/footer.html",
+    checkAllIncludesLoaded
+  );
 });
