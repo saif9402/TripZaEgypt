@@ -28,39 +28,53 @@
     <!-- Hero Section + Search Box Combined -->
     <div class="relative">
       <section
-        class="relative z-0 h-[91vh] bg-cover bg-center flex items-center justify-center"
-        style="background-image: url('img/Home.png')"
+        class="relative z-0 h-[50vh] md:h-[100vh] w-full overflow-hidden"
       >
-        <div class="text-center text-black space-y-4">
-          <h1 data-i18n="hero.title" class="text-3xl md:text-5xl font-semibold">
-            We Find The Best Tours For You
-          </h1>
-          <p
-            data-i18n="hero.subtitle"
-            class="text-sm md:text-base max-w-lg mx-auto italic"
-          >
-            Discover unforgettable adventures in Hurghada — from desert safaris
-            to Red Sea cruises, all at unbeatable prices.
-          </p>
-          <button
-            class="bg-white text-black px-6 py-2 rounded-full font-medium mt-4 flex items-center space-x-2 mx-auto"
-          >
-            <div class="relative w-6 h-6">
-              <span class="ping-circle"></span>
-              <img
-                src="https://img.icons8.com/ios-filled/50/000000/play--v1.png"
-                alt="Play Icon"
-                class="w-6 h-6 relative z-10"
-              />
-            </div>
-            <span data-i18n="hero.video">Watch Video</span>
-          </button>
+        <!-- Background Image -->
+        <img
+          src="img/Home.png"
+          alt="Hero Background"
+          class="absolute inset-0 w-full h-full object-contain md:object-cover"
+        />
+
+        <!-- Foreground Content -->
+        <div
+          class="relative z-10 flex items-center justify-center h-full w-full px-4"
+        >
+          <div class="text-center text-black space-y-4">
+            <h1
+              data-i18n="hero.title"
+              class="text-3xl md:text-5xl font-semibold"
+            >
+              We Find The Best Tours For You
+            </h1>
+            <p
+              data-i18n="hero.subtitle"
+              class="text-sm md:text-base max-w-lg mx-auto italic"
+            >
+              Discover unforgettable adventures in Hurghada — from desert
+              safaris to Red Sea cruises, all at unbeatable prices.
+            </p>
+            <button
+              class="text-black px-6 py-2 rounded-full font-medium mt-4 flex items-center space-x-2 mx-auto"
+            >
+              <div class="relative w-6 h-6">
+                <span class="ping-circle"></span>
+                <img
+                  src="https://img.icons8.com/ios-filled/50/000000/play--v1.png"
+                  alt="Play Icon"
+                  class="w-6 h-6 relative z-10"
+                />
+              </div>
+              <span data-i18n="hero.video">Watch Video</span>
+            </button>
+          </div>
         </div>
       </section>
 
       <!-- Floating Search Box -->
       <!-- Responsive Centered Search Box -->
-      <div class="relative bottom-12 inset-x-0 z-10 px-4 flex justify-center">
+      <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center">
         <div
           class="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
         >
@@ -206,7 +220,7 @@
     </div>
 
     <div
-      class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-15 mt-60"
+      class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-15 mt-50"
     >
       <!-- Card Template Start -->
       <a
