@@ -1,5 +1,4 @@
 function includeHTML(id, file, onDone) {
-  // Determine base path depending on current file location
   const currentPath = window.location.pathname;
   const isInPagesFolder = currentPath.includes("/pages/");
   const fullPath = isInPagesFolder ? `../${file}` : file;
@@ -7,7 +6,14 @@ function includeHTML(id, file, onDone) {
   fetch(fullPath)
     .then((res) => res.text())
     .then((html) => {
-      document.getElementById(id).innerHTML = html;
+      const el = document.getElementById(id);
+      el.innerHTML = html;
+
+      // Re-initialize Alpine.js
+      if (window.Alpine) {
+        window.Alpine.initTree(el);
+      }
+
       onDone?.();
     })
     .catch((err) => console.error(`Error loading ${file}:`, err));
