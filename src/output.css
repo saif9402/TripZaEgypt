@@ -253,6 +253,9 @@
   .inset-x-0 {
     inset-inline: calc(var(--spacing) * 0);
   }
+  .inset-x-1 {
+    inset-inline: calc(var(--spacing) * 1);
+  }
   .inset-x-4 {
     inset-inline: calc(var(--spacing) * 4);
   }
