@@ -288,6 +288,15 @@ function setLanguage(lang) {
     if (translations[lang] && translations[lang][key]) {
       el.textContent = translations[lang][key];
     }
+    const mobileLangLabel = document.getElementById("mobileLangLabel");
+    if (mobileLangLabel) {
+      mobileLangLabel.innerText = lang.toUpperCase();
+    }
+
+    const currentLang = document.getElementById("currentLang");
+    if (currentLang) {
+      currentLang.innerText = lang.toUpperCase();
+    }
   });
 
   // Placeholders
