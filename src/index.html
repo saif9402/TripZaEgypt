@@ -6,10 +6,6 @@
     <link href="./output.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/styles.css" />
     <link
-      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
     />
@@ -28,7 +24,6 @@
     <!-- Header -->
     <!-- <div id="header-placeholder"></div> -->
     <header
-      x-data="{ open: false }"
       class="fixed top-0 left-0 w-full z-20 bg-black/30 backdrop-blur-sm text-white shadow-sm border-b border-white/10 p-3 flex justify-between"
     >
       <!-- Logo -->
@@ -134,7 +129,7 @@
         </div>
 
         <!-- Sign In Button -->
-        <a href="/pages/sign in.html">
+        <a href="/pages/sign-in.html">
           <button
             data-i18n="nav.signin"
             class="bg-yellow-400 text-black font-semibold py-1 px-4 rounded"
@@ -144,6 +139,7 @@
         </a>
       </nav>
 
+      <!-- Mobile Side Drawer (From Right) -->
       <!-- Mobile Side Drawer (From Right) -->
       <div
         x-show="open"
@@ -162,35 +158,22 @@
           class="w-72 bg-white text-gray-800 p-6 space-y-4 shadow-lg h-full overflow-y-auto"
         >
           <div class="flex justify-between items-center mb-6">
-            <h2 data-i18n="menu.name" class="text-lg font-bold">Menu</h2>
+            <h2 class="text-lg font-bold">Menu</h2>
             <button @click="open = false" class="text-gray-500 text-2xl">
               &times;
             </button>
           </div>
 
-          <a
-            href="/index.html"
-            data-i18n="nav.home"
-            class="block hover:text-teal-600"
-            >Home</a
-          >
-          <a
-            href="/pages/about-us.html"
-            data-i18n="nav.about"
-            class="block hover:text-teal-600"
+          <a href="/index.html" class="block hover:text-teal-600">Home</a>
+          <a href="/pages/about-us.html" class="block hover:text-teal-600"
             >About Us</a
           >
-          <a
-            href="/pages/trips-list.html"
-            data-i18n="nav.trips"
-            class="block hover:text-teal-600"
+          <a href="/pages/trips-list.html" class="block hover:text-teal-600"
             >Our Trips</a
           >
 
           <div class="mt-4">
-            <h3 data-i18n="menu.lang" class="text-sm font-semibold mb-2">
-              Language
-            </h3>
+            <h3 class="text-sm font-semibold mb-2">Language</h3>
             <ul class="space-y-1">
               <li>
                 <a
@@ -210,24 +193,24 @@
               </li>
               <li>
                 <a
-                  onclick="setLanguage('ru')"
                   href="#"
+                  onclick="setLanguage('ru')"
                   class="block hover:text-teal-600"
                   >RU</a
                 >
               </li>
               <li>
                 <a
-                  onclick="setLanguage('pl')"
                   href="#"
+                  onclick="setLanguage('pl')"
                   class="block hover:text-teal-600"
                   >PL</a
                 >
               </li>
               <li>
                 <a
-                  onclick="setLanguage('cz')"
                   href="#"
+                  onclick="setLanguage('cz')"
                   class="block hover:text-teal-600"
                   >CZ</a
                 >
@@ -237,7 +220,6 @@
 
           <a href="/pages/sign-in.html">
             <button
-              data-i18n="nav.signin"
               class="w-full bg-yellow-400 mt-6 text-black font-semibold py-2 rounded"
             >
               Sign In
@@ -285,7 +267,7 @@
 
       <!-- Floating Search Box -->
       <!-- Responsive Centered Search Box -->
-      <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center">
+      <div class="relative bottom inset-x-4 z-10 pb-4 px-4 flex justify-center">
         <div
           class="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
         >
