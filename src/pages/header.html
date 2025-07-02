@@ -1,6 +1,6 @@
 <header
   x-data="{ open: false }"
-  class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-black/60 to-transparent text-white p-4 flex justify-between items-center"
+  class="fixed top-0 left-0 w-full z-20 bg-black/30 backdrop-blur-sm text-white shadow-sm border-b border-white/10 p-3 flex justify-between"
 >
   <!-- Logo -->
   <div data-i18n="nav.title" class="text-lg font-bold">tour guide</div>
@@ -15,7 +15,7 @@
   </button>
 
   <!-- Desktop Nav -->
-  <nav class="hidden md:flex space-x-6 items-center">
+  <nav class="hidden md:flex space-x-4 items-center">
     <a
       data-i18n="nav.home"
       href="/src/index.html"

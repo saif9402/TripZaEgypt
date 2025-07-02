@@ -48,16 +48,3 @@ function checkAllIncludesLoaded() {
   loadedCount++;
   if (loadedCount === 2) afterIncludesLoaded(); // header + footer
 }
-
-window.addEventListener("DOMContentLoaded", () => {
-  includeHTML(
-    "header-placeholder",
-    "pages/header.html",
-    checkAllIncludesLoaded
-  );
-  includeHTML(
-    "footer-placeholder",
-    "pages/footer.html",
-    checkAllIncludesLoaded
-  );
-});

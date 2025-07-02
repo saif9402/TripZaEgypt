@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="output.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/styles.css" />
+    <link href="./output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
@@ -59,14 +59,13 @@
       </section>
 
       <!-- Floating Search Box -->
-      <div
-        class="absolute rounded-4xl bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10 w-full max-w-4xl px-4"
-      >
+      <!-- Responsive Centered Search Box -->
+      <div class="relative bottom-12 inset-x-0 z-10 px-4 flex justify-center">
         <div
-          class="bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
+          class="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
         >
           <!-- Trips -->
-          <div class="flex flex-col flex-1 w-full sm:w-auto">
+          <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
             >
@@ -75,14 +74,14 @@
             </div>
             <input
               type="text"
-              data-i18n-placeholder="search.trip.placeholder"
               placeholder="Search A Trip"
               class="px-4 py-2 border rounded w-full italic"
+              data-i18n-placeholder="search.trip.placeholder"
             />
           </div>
 
           <!-- Guests -->
-          <div class="flex flex-col flex-1 w-full sm:w-auto">
+          <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
             >
@@ -91,14 +90,14 @@
             </div>
             <input
               type="text"
-              data-i18n-placeholder="search.guests.placeholder"
               placeholder="Guests"
               class="px-4 py-2 border rounded w-full italic"
+              data-i18n-placeholder="search.guests.placeholder"
             />
           </div>
 
           <!-- Date -->
-          <div class="flex flex-col flex-1 w-full sm:w-auto">
+          <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
             >
@@ -122,7 +121,7 @@
     </div>
 
     <!-- Explore Popular Trips -->
-    <div class="text-center px-4 mt-20">
+    <div class="text-center px-4 mt-2">
       <h2 data-i18n="trips.sectionTitle" class="text-2xl font-bold mb-2">
         Explore Popular Trips
       </h2>
@@ -164,7 +163,7 @@
         <!-- Floating Info Card -->
         <a
           href="pages/trip details.html"
-          class="absolute bottom-0 translate-y-1/2 bg-white rounded-2xl shadow-lg p-6 max-w-4xl w-full mx-auto z-10"
+          class="relative bottom-15 translate-y-1/2 bg-white rounded-2xl shadow-lg p-6 max-w-4xl w-full mx-auto z-10"
         >
           <!-- Title -->
           <h3 class="text-3xl font-bold text-gray-800 mb-2">Orange Bay</h3>
@@ -207,7 +206,7 @@
     </div>
 
     <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-24 m-11"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-20 m-15"
     >
       <!-- Card Template Start -->
       <a
@@ -356,12 +355,15 @@
     <!-- Most Booked Trip Section -->
     <section class="relative h-[600px] w-full overflow-hidden text-white">
       <!-- 🔵 Blurred Background Image -->
-      <div class="absolute inset-0">
+      <div class="absolute inset-0 isolate">
+        <!-- Blurred background image -->
         <img
           src="img/trending.png"
           alt="Blurred Background"
-          class="w-full h-full object-cover blur-md scale-110"
+          class="w-full h-full object-cover scale-110"
         />
+
+        <!-- Overlay on top of blurred image -->
         <div class="absolute inset-0 bg-black bg-opacity-40"></div>
       </div>
 
