@@ -298,6 +298,9 @@
   .m-15 {
     margin: calc(var(--spacing) * 15);
   }
+  .m-auto {
+    margin: auto;
+  }
   .mx-auto {
     margin-inline: auto;
   }
@@ -318,6 +321,15 @@
   }
   .mt-8 {
     margin-top: calc(var(--spacing) * 8);
+  }
+  .mt-44 {
+    margin-top: calc(var(--spacing) * 44);
+  }
+  .mt-50 {
+    margin-top: calc(var(--spacing) * 50);
+  }
+  .mt-px {
+    margin-top: 1px;
   }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
