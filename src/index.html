@@ -26,12 +26,234 @@
     class="font-sans text-gray-800"
   >
     <!-- Header -->
-    <div id="header-placeholder"></div>
+    <!-- <div id="header-placeholder"></div> -->
+    <header
+      x-data="{ open: false }"
+      class="fixed top-0 left-0 w-full z-20 bg-black/30 backdrop-blur-sm text-white shadow-sm border-b border-white/10 p-3 flex justify-between"
+    >
+      <!-- Logo -->
+      <div data-i18n="nav.title" class="text-lg font-bold">tour guide</div>
+
+      <!-- Hamburger Icon (Mobile) -->
+      <button
+        title="nav button"
+        @click="open = true"
+        class="md:hidden text-white text-2xl"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex space-x-4 items-center">
+        <a
+          data-i18n="nav.home"
+          href="/index.html"
+          class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+          >Home</a
+        >
+        <a
+          data-i18n="nav.about"
+          href="/pages/about-us.html"
+          class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+          >About Us</a
+        >
+        <a
+          data-i18n="nav.trips"
+          href="/pages/trips-list.html"
+          class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+          >Our Trips</a
+        >
+
+        <!-- Language Dropdown -->
+        <div x-data="{ langOpen: false }" class="relative">
+          <button
+            id="currentLang"
+            @click="langOpen = !langOpen"
+            class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+          >
+            EN
+          </button>
+          <ul
+            x-show="langOpen"
+            x-cloak
+            @click.away="langOpen = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-1"
+            class="absolute right-0 mt-2 w-32 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden animate-fade-in"
+          >
+            <li>
+              <a
+                onclick="setLanguage('en')"
+                href=""
+                class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100 transition-colors duration-150"
+              >
+                <img src="/img/flags/en.jpeg" alt="EN" class="w-4 h-4" /> EN
+              </a>
+            </li>
+            <li>
+              <a
+                onclick="setLanguage('deu')"
+                href=""
+                class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100 transition-colors duration-150"
+              >
+                <img src="/img/flags/deu.png" alt="DEU" class="w-4 h-4" /> DEU
+              </a>
+            </li>
+            <li>
+              <a
+                onclick="setLanguage('ru')"
+                href=""
+                class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100 transition-colors duration-150"
+              >
+                <img src="/img/flags/ru.png" alt="RU" class="w-4 h-4" /> RU
+              </a>
+            </li>
+            <li>
+              <a
+                onclick="setLanguage('pl')"
+                href=""
+                class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100 transition-colors duration-150"
+              >
+                <img src="/img/flags/pl.png" alt="PL" class="w-4 h-4" /> PL
+              </a>
+            </li>
+            <li>
+              <a
+                onclick="setLanguage('cz')"
+                href=""
+                class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100 transition-colors duration-150"
+              >
+                <img src="/img/flags/cs.png" alt="CS" class="w-4 h-4" /> CZ
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Sign In Button -->
+        <a href="/pages/sign in.html">
+          <button
+            data-i18n="nav.signin"
+            class="bg-yellow-400 text-black font-semibold py-1 px-4 rounded"
+          >
+            Sign In
+          </button>
+        </a>
+      </nav>
+
+      <!-- Mobile Side Drawer (From Right) -->
+      <div
+        x-show="open"
+        x-transition:enter="transition transform duration-300"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition transform duration-300"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        class="fixed inset-0 z-50 flex justify-end"
+        @click.away="open = false"
+        x-cloak
+      >
+        <!-- Drawer Panel -->
+        <div
+          class="w-72 bg-white text-gray-800 p-6 space-y-4 shadow-lg h-full overflow-y-auto"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h2 data-i18n="menu.name" class="text-lg font-bold">Menu</h2>
+            <button @click="open = false" class="text-gray-500 text-2xl">
+              &times;
+            </button>
+          </div>
+
+          <a
+            href="/index.html"
+            data-i18n="nav.home"
+            class="block hover:text-teal-600"
+            >Home</a
+          >
+          <a
+            href="/pages/about-us.html"
+            data-i18n="nav.about"
+            class="block hover:text-teal-600"
+            >About Us</a
+          >
+          <a
+            href="/pages/trips-list.html"
+            data-i18n="nav.trips"
+            class="block hover:text-teal-600"
+            >Our Trips</a
+          >
+
+          <div class="mt-4">
+            <h3 data-i18n="menu.lang" class="text-sm font-semibold mb-2">
+              Language
+            </h3>
+            <ul class="space-y-1">
+              <li>
+                <a
+                  href="#"
+                  onclick="setLanguage('en')"
+                  class="block hover:text-teal-600"
+                  >EN</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onclick="setLanguage('deu')"
+                  class="block hover:text-teal-600"
+                  >DEU</a
+                >
+              </li>
+              <li>
+                <a
+                  onclick="setLanguage('ru')"
+                  href="#"
+                  class="block hover:text-teal-600"
+                  >RU</a
+                >
+              </li>
+              <li>
+                <a
+                  onclick="setLanguage('pl')"
+                  href="#"
+                  class="block hover:text-teal-600"
+                  >PL</a
+                >
+              </li>
+              <li>
+                <a
+                  onclick="setLanguage('cz')"
+                  href="#"
+                  class="block hover:text-teal-600"
+                  >CZ</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <a href="/pages/sign-in.html">
+            <button
+              data-i18n="nav.signin"
+              class="w-full bg-yellow-400 mt-6 text-black font-semibold py-2 rounded"
+            >
+              Sign In
+            </button>
+          </a>
+        </div>
+
+        <!-- Backdrop -->
+        <div class="flex-1 bg-black bg-opacity-50" @click="open = false"></div>
+      </div>
+    </header>
 
     <!-- Hero Section + Search Box Combined -->
     <div class="relative">
       <section
-        class="relative z-0 h-[91vh] bg-cover bg-center flex items-center justify-center"
+        class="relative z-0 h-[100vh] bg-cover bg-center flex items-center justify-center"
         style="background-image: url('img/Home.png')"
       >
         <div class="text-center text-black space-y-4">
@@ -63,7 +285,7 @@
 
       <!-- Floating Search Box -->
       <!-- Responsive Centered Search Box -->
-      <div class="relative bottom-12 inset-x-0 z-10 px-4 flex justify-center">
+      <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center">
         <div
           class="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
         >
