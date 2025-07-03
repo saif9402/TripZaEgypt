@@ -7,7 +7,6 @@
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="JS/translation.js"></script>
     <style>
       .bg-img {
         object-fit: cover;
@@ -122,11 +121,8 @@
           </button>
         </form>
 
-        <p
-          data-i18n="signup.haveAccount"
-          class="text-center text-xs text-gray-400 mt-6"
-        >
-          Already have an account?
+        <p class="text-center text-xs text-gray-400 mt-6">
+          <span data-i18n="signup.haveAccount">Already have an account?</span>
           <a
             data-i18n="signup.signin"
             href="sign-in.html"
@@ -136,5 +132,7 @@
         </p>
       </div>
     </div>
+    <script src="../JS/translation.js"></script>
+    <script src="../JS/transition.js"></script>
   </body>
 </html>
