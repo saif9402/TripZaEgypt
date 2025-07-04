@@ -25,60 +25,174 @@
     <!-- Header -->
     <div id="header-placeholder"></div>
 
-    <!-- Hero Section + Search Box Combined -->
+    <!-- Hero Section-->
     <div class="relative">
       <section
         class="relative z-0 h-[50vh] md:h-[100vh] w-full overflow-hidden"
       >
-        <!-- Background Image -->
-        <img
-          src="img/Home.png"
-          alt="Hero Background"
-          class="absolute inset-0 w-full h-full object-cover md:object-cover"
-        />
-
-        <!-- Foreground Content -->
+        <!-- Slider Container -->
         <div
-          class="relative z-10 flex items-center justify-center h-full w-full px-4"
+          id="slider"
+          class="flex transition-transform duration-700 ease-in-out h-full"
         >
-          <div class="text-center text-black space-y-4">
-            <h1
-              data-i18n="hero.title"
-              class="text-3xl md:text-5xl font-semibold"
-            >
-              We Find The Best Tours For You
-            </h1>
-            <p
-              data-i18n="hero.subtitle"
-              class="text-sm md:text-base max-w-lg mx-auto italic"
-            >
-              Discover unforgettable adventures in Hurghada — from desert
-              safaris to Red Sea cruises, all at unbeatable prices.
-            </p>
-            <button
-              class="text-black px-6 py-2 rounded-full font-medium mt-4 flex items-center space-x-2 mx-auto"
-            >
-              <div class="relative w-6 h-6">
-                <span class="ping-circle"></span>
-                <img
-                  src="https://img.icons8.com/ios-filled/50/000000/play--v1.png"
-                  alt="Play Icon"
-                  class="w-6 h-6 relative z-10"
-                />
-              </div>
-              <span data-i18n="hero.video">Watch Video</span>
-            </button>
-          </div>
+          <!-- Images -->
+          <img
+            alt="img"
+            src="img/Home.png"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home2.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home3.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home4.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home5.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home6.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home7.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home8.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home9.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home10.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home11.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home12.jpg"
+            class="w-full h-full object-contain"
+          />
+          <img
+            alt="img"
+            src="img/Home13.jpg"
+            class="w-full h-full object-contain"
+          />
         </div>
+
+        <!-- Next/Prev Buttons -->
+        <button
+          id="prevBtn"
+          class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black"
+        >
+          ‹
+        </button>
+        <button
+          id="nextBtn"
+          class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black"
+        >
+          ›
+        </button>
+
+        <!-- Pagination Dots -->
+        <div
+          id="dots"
+          class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10"
+        ></div>
       </section>
+
+      <script>
+        const slider = document.getElementById("slider");
+        const images = slider.children;
+        const totalImages = images.length;
+        let currentIndex = 0;
+
+        // Set dynamic width
+        slider.style.width = `${totalImages * 100}%`;
+
+        // Create dots
+        const dotsContainer = document.getElementById("dots");
+        for (let i = 0; i < totalImages; i++) {
+          const dot = document.createElement("button");
+          dot.className =
+            "w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all";
+          dot.addEventListener("click", () => goToSlide(i));
+          dotsContainer.appendChild(dot);
+        }
+
+        function updateSlider() {
+          slider.style.transform = `translateX(-${
+            (100 / totalImages) * currentIndex
+          }%)`;
+          updateDots();
+        }
+
+        function updateDots() {
+          const dots = dotsContainer.children;
+          for (let i = 0; i < dots.length; i++) {
+            dots[i].classList.remove("bg-white");
+            dots[i].classList.add("bg-white/50");
+          }
+          dots[currentIndex].classList.remove("bg-white/50");
+          dots[currentIndex].classList.add("bg-white");
+        }
+
+        function goToSlide(index) {
+          currentIndex = index;
+          updateSlider();
+        }
+
+        // Auto-slide
+        setInterval(() => {
+          currentIndex = (currentIndex + 1) % totalImages;
+          updateSlider();
+        }, 2000);
+
+        // Manual buttons
+        document.getElementById("prevBtn").addEventListener("click", () => {
+          currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+          updateSlider();
+        });
+
+        document.getElementById("nextBtn").addEventListener("click", () => {
+          currentIndex = (currentIndex + 1) % totalImages;
+          updateSlider();
+        });
+
+        // Initial dot highlight
+        updateDots();
+      </script>
 
       <!-- Floating Search Box -->
       <!-- Responsive Centered Search Box -->
-      <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center">
+      <!-- <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center">
         <div
           class="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
         >
-          <!-- Trips -->
+          Trips
           <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
@@ -94,7 +208,7 @@
             />
           </div>
 
-          <!-- Guests -->
+          Guests
           <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
@@ -110,7 +224,7 @@
             />
           </div>
 
-          <!-- Date -->
+          Date
           <div class="flex flex-col flex-1 min-w-[150px]">
             <div
               class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
@@ -121,7 +235,7 @@
             <input type="date" class="px-4 py-2 border rounded w-full italic" />
           </div>
 
-          <!-- Search Button -->
+          Search Button
           <div class="flex items-end w-full sm:w-auto">
             <button
               data-i18n="search.label"
@@ -131,7 +245,7 @@
             </button>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <!-- Explore Popular Trips -->
