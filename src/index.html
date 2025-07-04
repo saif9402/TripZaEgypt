@@ -31,77 +31,7 @@
         class="relative z-0 h-[50vh] md:h-[100vh] w-full overflow-hidden"
       >
         <!-- Slider Container -->
-        <div
-          id="slider"
-          class="flex transition-transform duration-700 ease-in-out h-full"
-        >
-          <!-- Images -->
-          <img
-            alt="img"
-            src="img/Home.png"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home2.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home3.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home4.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home5.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home6.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home7.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home8.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home9.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home10.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home11.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home12.jpg"
-            class="w-full h-full object-contain"
-          />
-          <img
-            alt="img"
-            src="img/Home13.jpg"
-            class="w-full h-full object-contain"
-          />
-        </div>
+        <div id="slider" class="relative w-full h-full overflow-hidden"></div>
 
         <!-- Next/Prev Buttons -->
         <button
@@ -125,65 +55,107 @@
       </section>
 
       <script>
+        const imagePaths = [
+          "img/Home.png",
+          "img/Home2.jpg",
+          "img/Home3.jpg",
+          "img/Home4.jpg",
+          "img/Home5.jpg",
+          "img/Home6.jpg",
+          "img/Home7.jpg",
+          "img/Home8.jpg",
+          "img/Home9.jpg",
+          "img/Home10.jpg",
+          "img/Home11.jpg",
+          "img/Home12.jpg",
+          "img/Home13.jpg",
+        ];
+
         const slider = document.getElementById("slider");
-        const images = slider.children;
-        const totalImages = images.length;
-        let currentIndex = 0;
-
-        // Set dynamic width
-        slider.style.width = `${totalImages * 100}%`;
-
-        // Create dots
         const dotsContainer = document.getElementById("dots");
-        for (let i = 0; i < totalImages; i++) {
-          const dot = document.createElement("button");
-          dot.className =
-            "w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all";
-          dot.addEventListener("click", () => goToSlide(i));
-          dotsContainer.appendChild(dot);
-        }
+        let currentIndex = 0;
+        let intervalId;
 
-        function updateSlider() {
-          slider.style.transform = `translateX(-${
-            (100 / totalImages) * currentIndex
-          }%)`;
+        function renderImage(index) {
+          // Create and style new image
+          const img = document.createElement("img");
+          img.src = imagePaths[index];
+          img.alt = `Image ${index + 1}`;
+          img.className =
+            "w-full h-full object-contain opacity-0 transition-opacity duration-700 absolute inset-0";
+
+          // Clear slider and insert image
+          slider.innerHTML = "";
+          slider.appendChild(img);
+
+          // Delay the fade-in just enough to trigger transition reliably
+          setTimeout(() => {
+            img.classList.add("opacity-100");
+          }, 20); // ~1 frame delay
+
           updateDots();
         }
 
         function updateDots() {
-          const dots = dotsContainer.children;
-          for (let i = 0; i < dots.length; i++) {
-            dots[i].classList.remove("bg-white");
-            dots[i].classList.add("bg-white/50");
-          }
-          dots[currentIndex].classList.remove("bg-white/50");
-          dots[currentIndex].classList.add("bg-white");
+          Array.from(dotsContainer.children).forEach((dot, i) => {
+            dot.classList.toggle("bg-white", i === currentIndex);
+            dot.classList.toggle("bg-white/50", i !== currentIndex);
+          });
         }
 
         function goToSlide(index) {
           currentIndex = index;
-          updateSlider();
+          renderImage(currentIndex);
         }
 
-        // Auto-slide
-        setInterval(() => {
-          currentIndex = (currentIndex + 1) % totalImages;
-          updateSlider();
-        }, 2000);
+        function nextSlide() {
+          const nextIndex = (currentIndex + 1) % imagePaths.length;
+          goToSlide(nextIndex);
+        }
 
-        // Manual buttons
-        document.getElementById("prevBtn").addEventListener("click", () => {
-          currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-          updateSlider();
+        function prevSlide() {
+          const prevIndex =
+            (currentIndex - 1 + imagePaths.length) % imagePaths.length;
+          goToSlide(prevIndex);
+        }
+
+        function startAutoSlide() {
+          intervalId = setInterval(nextSlide, 2000);
+        }
+
+        function stopAutoSlide() {
+          clearInterval(intervalId);
+        }
+
+        // Create dots
+        imagePaths.forEach((_, index) => {
+          const dot = document.createElement("button");
+          dot.className =
+            "w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all";
+          dot.addEventListener("click", () => {
+            stopAutoSlide();
+            goToSlide(index);
+            startAutoSlide();
+          });
+          dotsContainer.appendChild(dot);
         });
 
+        // Button Events
         document.getElementById("nextBtn").addEventListener("click", () => {
-          currentIndex = (currentIndex + 1) % totalImages;
-          updateSlider();
+          stopAutoSlide();
+          nextSlide();
+          startAutoSlide();
         });
 
-        // Initial dot highlight
-        updateDots();
+        document.getElementById("prevBtn").addEventListener("click", () => {
+          stopAutoSlide();
+          prevSlide();
+          startAutoSlide();
+        });
+
+        // Init
+        renderImage(currentIndex);
+        startAutoSlide();
       </script>
 
       <!-- Floating Search Box -->
