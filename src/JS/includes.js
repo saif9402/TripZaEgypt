@@ -38,6 +38,39 @@ function afterIncludesLoaded() {
     });
   }
 
+  // ✅ Inject categories into desktop and mobile "Our Trips" dropdowns
+  fetch("https://tourguidehurghda.runasp.net/api/Category/GetAllCategories")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.succeeded && data.data?.data) {
+        const categories = data.data.data;
+
+        const desktopDropdown = document.getElementById("tripsDropdown");
+        const mobileDropdown = document.getElementById("mobileTripsDropdown");
+
+        if (desktopDropdown) {
+          categories.forEach((cat) => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="block px-4 py-2 hover:bg-gray-100">${cat.name}</a>`;
+            desktopDropdown.appendChild(li);
+          });
+        }
+
+        if (mobileDropdown) {
+          categories.forEach((cat) => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="hover:text-blue-500">${cat.name}</a>`;
+            mobileDropdown.appendChild(li);
+          });
+        }
+      } else {
+        console.warn("No categories found in API response");
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading categories for header:", err);
+    });
+
   if (typeof bindPageTransitions === "function") {
     bindPageTransitions();
   }
