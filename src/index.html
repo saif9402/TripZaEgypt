@@ -26,6 +26,7 @@
     <div id="header-placeholder"></div>
 
     <!-- Hero Section-->
+
     <div class="relative">
       <section
         class="relative z-0 h-[50vh] md:h-[100vh] w-full overflow-hidden"
@@ -53,110 +54,6 @@
           class="relative bottom-4 transform justify-center items-center flex gap-2 z-10"
         ></div>
       </section>
-
-      <script>
-        const imagePaths = [
-          "img/Home.png",
-          "img/Home2.jpg",
-          "img/Home3.jpg",
-          "img/Home4.jpg",
-          "img/Home5.jpg",
-          "img/Home6.jpg",
-          "img/Home7.jpg",
-          "img/Home8.jpg",
-          "img/Home9.jpg",
-          "img/Home10.jpg",
-          "img/Home11.jpg",
-          "img/Home12.jpg",
-          "img/Home13.jpg",
-        ];
-
-        const slider = document.getElementById("slider");
-        const dotsContainer = document.getElementById("dots");
-        let currentIndex = 0;
-        let intervalId;
-
-        function renderImage(index) {
-          // Create and style new image
-          const img = document.createElement("img");
-          img.src = imagePaths[index];
-          img.alt = `Image ${index + 1}`;
-          img.className =
-            "w-full h-full object-contain opacity-0 transition-opacity duration-700 absolute inset-0";
-
-          // Clear slider and insert image
-          slider.innerHTML = "";
-          slider.appendChild(img);
-
-          // Delay the fade-in just enough to trigger transition reliably
-          setTimeout(() => {
-            img.classList.add("opacity-100");
-          }, 20); // ~1 frame delay
-
-          updateDots();
-        }
-
-        function updateDots() {
-          Array.from(dotsContainer.children).forEach((dot, i) => {
-            dot.classList.toggle("bg-white", i === currentIndex);
-            dot.classList.toggle("bg-white/50", i !== currentIndex);
-          });
-        }
-
-        function goToSlide(index) {
-          currentIndex = index;
-          renderImage(currentIndex);
-        }
-
-        function nextSlide() {
-          const nextIndex = (currentIndex + 1) % imagePaths.length;
-          goToSlide(nextIndex);
-        }
-
-        function prevSlide() {
-          const prevIndex =
-            (currentIndex - 1 + imagePaths.length) % imagePaths.length;
-          goToSlide(prevIndex);
-        }
-
-        function startAutoSlide() {
-          intervalId = setInterval(nextSlide, 2000);
-        }
-
-        function stopAutoSlide() {
-          clearInterval(intervalId);
-        }
-
-        // Create dots
-        imagePaths.forEach((_, index) => {
-          const dot = document.createElement("button");
-          dot.className =
-            "w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-all";
-          dot.addEventListener("click", () => {
-            stopAutoSlide();
-            goToSlide(index);
-            startAutoSlide();
-          });
-          dotsContainer.appendChild(dot);
-        });
-
-        // Button Events
-        document.getElementById("nextBtn").addEventListener("click", () => {
-          stopAutoSlide();
-          nextSlide();
-          startAutoSlide();
-        });
-
-        document.getElementById("prevBtn").addEventListener("click", () => {
-          stopAutoSlide();
-          prevSlide();
-          startAutoSlide();
-        });
-
-        // Init
-        renderImage(currentIndex);
-        startAutoSlide();
-      </script>
 
       <!-- Floating Search Box -->
       <!-- Responsive Centered Search Box -->
@@ -548,74 +445,12 @@
       </div>
     </section>
 
-    <!-- Gallery Section -->
-    <section class="px-4 py-16 max-w-7xl mx-auto">
-      <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8"
-      >
-        <div>
-          <h2 data-i18n="gallery.title" class="text-2xl font-bold mb-2">
-            From The Gallery
-          </h2>
-          <p data-i18n="gallery.subtitle" class="text-gray-600 italic">
-            Moments captured. Memories made. Discover Hurghada through our lens.
-          </p>
-        </div>
-        <!-- <a
-          href="#"
-          class="mt-4 md:mt-0 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-        >
-          View All Images
-        </a> -->
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <img
-          src="https://source.unsplash.com/400x500/?forest"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?lake"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?mountains"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?hills"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?river"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?bridge"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?sunset"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-        <img
-          src="https://source.unsplash.com/400x500/?beach"
-          alt="Gallery Image"
-          class="rounded-lg object-cover w-full h-64"
-        />
-      </div>
-    </section>
-
     <!-- Footer -->
     <div id="footer-placeholder"></div>
     <script src="JS/translation.js"></script>
     <script src="JS/transition.js"></script>
     <script src="JS/includes.js"></script>
+    <script src="JS/renderingImages.js"></script>
+    <script src="JS/video.js"></script>
   </body>
 </html>
