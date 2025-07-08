@@ -27,6 +27,7 @@ const translations = {
     "trend.sectionTitle": "Explore Some of Our Trending Trips",
     "trend.sectionDesc":
       "Browse our Best Seller Trips in Hurghada — from thrilling desert safaris to relaxing Red Sea escapes",
+    "trend.btn": "Explore All the Trips",
     "gallery.title": "From The Gallery",
     "gallery.sybtitle":
       "Moments captured. Memories made. Discover Hurghada through our lens.",

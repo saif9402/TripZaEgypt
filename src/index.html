@@ -76,7 +76,7 @@
 
     <!-- Most Booked Trip Section -->
     <section
-      class="relative h-[600px] w-full overflow-hidden text-white mt-7 mb-10"
+      class="relative h-[600px] w-full overflow-hidden text-white mt-7 mb-3"
     >
       <!-- 🔵 Blurred Background Image -->
       <div class="absolute inset-0 isolate">
@@ -154,7 +154,7 @@
               data-i18n="trend.button"
               id="book-link"
               href="#"
-              class="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-full shadow-lg transition"
+              class="bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition"
               >Book Now</a
             >
             <button
@@ -172,6 +172,16 @@
       </div>
     </section>
 
+    <div class="text-center mb-7">
+      <a href="/pages/trips-list">
+        <button
+          data-i18n="trend.btn"
+          class="bg-white/20 backdrop-blur-md text-yellow-500 font-bold px-6 py-2 rounded-full shadow-lg hover:bg-yellow-400 hover:text-white transition duration-300"
+        >
+          Explore All the Trips
+        </button>
+      </a>
+    </div>
     <!-- Explore Popular Trips -->
     <div class="text-center px-4 mt-2">
       <h2 data-i18n="trips.sectionTitle" class="text-2xl font-bold mb-2">
@@ -257,150 +267,169 @@
       </section>
     </div>
 
-    <div
-      class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7 mt-60 md:mt-28 lg:mt-36"
-    >
-      <!-- Card Template Start -->
-      <a
-        href="#"
-        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+    <div class="relative mt-60 md:mt-28 lg:mt-36 px-4 scrollbar-hide">
+      <div
+        class="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 min-w-[600px] md:min-w-0"
       >
-        <img
-          src="https://via.placeholder.com/400x200"
-          alt="Trip Image"
-          class="w-full h-48 object-cover"
-        />
-        <div class="p-4">
-          <h2 class="text-lg font-semibold text-gray-800">
-            Westminster to Greenwich River Thames
-          </h2>
-          <ul class="mt-2 text-sm text-gray-600 space-y-1">
-            <li class="flex items-center">
-              <span class="mr-2">🕒</span>Duration 2 hours
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">🚐</span>Transport Facility
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-            </li>
-          </ul>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center text-yellow-500">
-              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-            </div>
-            <div class="text-green-600 font-semibold text-lg">
-              $35.00 <span class="text-sm text-gray-500">/person</span>
-            </div>
-          </div>
-        </div>
-      </a>
-      <!-- Card Template End -->
+        <!-- Place cards here -->
 
-      <!-- Duplicate and update content accordingly -->
-      <a
-        href="#"
-        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-      >
-        <img
-          src="https://via.placeholder.com/400x200"
-          alt="Trip Image"
-          class="w-full h-48 object-cover"
-        />
-        <div class="p-4">
-          <h2 class="text-lg font-semibold text-gray-800">
-            Vintage Double Decker Bus Tour & Thames
-          </h2>
-          <ul class="mt-2 text-sm text-gray-600 space-y-1">
-            <li class="flex items-center">
-              <span class="mr-2">🕒</span>Duration 2 hours
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">🚐</span>Transport Facility
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-            </li>
-          </ul>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center text-yellow-500">
-              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-            </div>
-            <div class="text-green-600 font-semibold text-lg">
-              $35.00 <span class="text-sm text-gray-500">/person</span>
+        <!-- Card Template Start -->
+        <a
+          href="#"
+          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          <img
+            src="https://via.placeholder.com/400x200"
+            alt="Trip Image"
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h2 class="text-lg font-semibold text-gray-800">
+              Westminster to Greenwich River Thames
+            </h2>
+            <ul class="mt-2 text-sm text-gray-600 space-y-1">
+              <li class="flex items-center">
+                <span class="mr-2">🕒</span>Duration 2 hours
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">🚐</span>Transport Facility
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+              </li>
+            </ul>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center text-yellow-500">
+                ★★★★☆
+                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+              </div>
+              <div class="text-green-600 font-semibold text-lg">
+                $35.00 <span class="text-sm text-gray-500">/person</span>
+              </div>
             </div>
           </div>
-        </div>
-      </a>
+        </a>
+        <!-- Card Template End -->
 
-      <a
-        href="#"
-        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-      >
-        <img
-          src="https://via.placeholder.com/400x200"
-          alt="Trip Image"
-          class="w-full h-48 object-cover"
-        />
-        <div class="p-4">
-          <h2 class="text-lg font-semibold text-gray-800">
-            Magic of London Tour with Afternoon Tea at
-          </h2>
-          <ul class="mt-2 text-sm text-gray-600 space-y-1">
-            <li class="flex items-center">
-              <span class="mr-2">🕒</span>Duration 2 hours
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">🚐</span>Transport Facility
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-            </li>
-          </ul>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center text-yellow-500">
-              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-            </div>
-            <div class="text-green-600 font-semibold text-lg">
-              $35.00 <span class="text-sm text-gray-500">/person</span>
+        <!-- Duplicate and update content accordingly -->
+        <a
+          href="#"
+          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          <img
+            src="https://via.placeholder.com/400x200"
+            alt="Trip Image"
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h2 class="text-lg font-semibold text-gray-800">
+              Vintage Double Decker Bus Tour & Thames
+            </h2>
+            <ul class="mt-2 text-sm text-gray-600 space-y-1">
+              <li class="flex items-center">
+                <span class="mr-2">🕒</span>Duration 2 hours
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">🚐</span>Transport Facility
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+              </li>
+            </ul>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center text-yellow-500">
+                ★★★★☆
+                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+              </div>
+              <div class="text-green-600 font-semibold text-lg">
+                $35.00 <span class="text-sm text-gray-500">/person</span>
+              </div>
             </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <a
-        href="#"
-        class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-      >
-        <img
-          src="https://via.placeholder.com/400x200"
-          alt="Trip Image"
-          class="w-full h-48 object-cover"
-        />
-        <div class="p-4">
-          <h2 class="text-lg font-semibold text-gray-800">
-            Magic of London Tour with Afternoon Tea at
-          </h2>
-          <ul class="mt-2 text-sm text-gray-600 space-y-1">
-            <li class="flex items-center">
-              <span class="mr-2">🕒</span>Duration 2 hours
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">🚐</span>Transport Facility
-            </li>
-            <li class="flex items-center">
-              <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-            </li>
-          </ul>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center text-yellow-500">
-              ★★★★☆ <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-            </div>
-            <div class="text-green-600 font-semibold text-lg">
-              $35.00 <span class="text-sm text-gray-500">/person</span>
+        <a
+          href="#"
+          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          <img
+            src="https://via.placeholder.com/400x200"
+            alt="Trip Image"
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h2 class="text-lg font-semibold text-gray-800">
+              Magic of London Tour with Afternoon Tea at
+            </h2>
+            <ul class="mt-2 text-sm text-gray-600 space-y-1">
+              <li class="flex items-center">
+                <span class="mr-2">🕒</span>Duration 2 hours
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">🚐</span>Transport Facility
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+              </li>
+            </ul>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center text-yellow-500">
+                ★★★★☆
+                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+              </div>
+              <div class="text-green-600 font-semibold text-lg">
+                $35.00 <span class="text-sm text-gray-500">/person</span>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
+
+        <a
+          href="#"
+          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          <img
+            src="https://via.placeholder.com/400x200"
+            alt="Trip Image"
+            class="w-full h-48 object-cover"
+          />
+          <div class="p-4">
+            <h2 class="text-lg font-semibold text-gray-800">
+              Magic of London Tour with Afternoon Tea at
+            </h2>
+            <ul class="mt-2 text-sm text-gray-600 space-y-1">
+              <li class="flex items-center">
+                <span class="mr-2">🕒</span>Duration 2 hours
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">🚐</span>Transport Facility
+              </li>
+              <li class="flex items-center">
+                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
+              </li>
+            </ul>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center text-yellow-500">
+                ★★★★☆
+                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
+              </div>
+              <div class="text-green-600 font-semibold text-lg">
+                $35.00 <span class="text-sm text-gray-500">/person</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="text-center mt-7 mb-7">
+      <a href="/pages/trips-list">
+        <button
+          data-i18n="trend.btn"
+          class="bg-white/20 backdrop-blur-md text-yellow-500 font-bold px-6 py-2 rounded-full shadow-lg hover:bg-yellow-400 hover:text-white transition duration-300"
+        >
+          Explore All the Trips
+        </button>
       </a>
     </div>
 
