@@ -19,11 +19,14 @@ const translations = {
     "search.guests.placeholder": "Guests",
     "search.date": "Date",
 
-    "trips.sectionTitle": "Explore Popular Trips",
+    "trips.sectionTitle": "Explore Trips By Category",
     "trips.sectionDesc":
       "Browse our top-rated experiences in Hurghada — from thrilling desert safaris to relaxing Red Sea escapes.",
     "trend.name": "Trending Now",
     "trend.button": "Book Now",
+    "trend.sectionTitle": "Explore Some of Our Trending Trips",
+    "trend.sectionDesc":
+      "Browse our Best Seller Trips in Hurghada — from thrilling desert safaris to relaxing Red Sea escapes",
     "gallery.title": "From The Gallery",
     "gallery.sybtitle":
       "Moments captured. Memories made. Discover Hurghada through our lens.",
