@@ -58,6 +58,66 @@
       </section>
     </div>
 
+    <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center mt-3">
+        <div
+          class="w-full max-w-4xl shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
+        >
+          <!-- Trips -->
+          <div class="flex flex-col flex-1 min-w-[150px]">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-map-marker-alt"></i>
+              <span data-i18n="search.trips">Trips</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Search A Trip"
+              class="px-4 py-2 border rounded w-full italic"
+              data-i18n-placeholder="search.trip.placeholder"
+            />
+          </div>
+
+          <!-- Guests -->
+          <div class="flex flex-col flex-1 min-w-[150px]">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-user-friends"></i>
+              <span data-i18n="search.guests">Guests</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Guests"
+              class="px-4 py-2 border rounded w-full italic"
+              data-i18n-placeholder="search.guests.placeholder"
+            />
+          </div>
+
+          <!-- Date -->
+          <div class="flex flex-col flex-1 min-w-[150px]">
+            <div
+              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+            >
+              <i class="fas fa-calendar-alt"></i>
+              <span data-i18n="search.date">Date</span>
+            </div>
+            <input type="date" class="px-4 py-2 border rounded w-full italic" />
+          </div>
+
+          <!-- Search Button -->
+          <div class="flex items-end w-full sm:w-auto">
+            <button
+              data-i18n="search.label"
+              class="bg-yellow-400 px-6 py-2 rounded-3xl font-semibold shadow-md w-full sm:w-auto"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Trending Trips Title Section -->
     <div
       class="text-center px-4 bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-inner rounded-lg mb-2 mt-6"
