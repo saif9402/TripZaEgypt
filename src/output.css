@@ -454,6 +454,9 @@
   .h-full {
     height: 100%;
   }
+  .h-max {
+    height: max-content;
+  }
   .min-h-screen {
     min-height: 100vh;
   }
