@@ -1330,6 +1330,11 @@
       height: calc(var(--spacing) * 20);
     }
   }
+  .md\:h-24 {
+    @media (width >= 48rem) {
+      height: calc(var(--spacing) * 24);
+    }
+  }
   .md\:h-\[100vh\] {
     @media (width >= 48rem) {
       height: 100vh;
