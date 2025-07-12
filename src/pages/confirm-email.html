@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta charset="UTF-8" />
+    <title>Confirm Email</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        text-align: center;
+      }
+      #message {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+      }
+      .error {
+        color: #c00;
+      }
+      .success {
+        color: #080;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Confirming Your Email…</h1>
+    <div id="message">Please wait.</div>
+
+    <script>
+      (async function confirmEmail() {
+        const msgEl = document.getElementById("message");
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get("userId");
+        const token = params.get("token");
+
+        if (!userId || !token) {
+          msgEl.textContent = "Missing confirmation parameters.";
+          msgEl.classList.add("error");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/auth/confirm-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, token }),
+          });
+
+          if (!res.ok) {
+            // Try to read ProblemDetails or fallback
+            let errorText = "Confirmation failed.";
+            try {
+              const err = await res.json();
+              errorText =
+                err.detail ||
+                Object.values(err.errors || {})
+                  .flat()
+                  .join("; ");
+            } catch {}
+            msgEl.textContent = errorText;
+            msgEl.classList.add("error");
+            return;
+          }
+
+          const { accessToken, refreshToken, refreshTokenExpiresOn } =
+            await res.json();
+
+          // Store tokens (consider security trade-offs; HTTP-only cookies are safer)
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("refreshTokenExpiresOn", refreshTokenExpiresOn);
+
+          msgEl.textContent = "Email confirmed! Redirecting…";
+          msgEl.classList.add("success");
+
+          // Redirect after 2s to your app’s dashboard/home
+          setTimeout(() => {
+            window.location.href = "/dashboard.html";
+          }, 2000);
+        } catch (ex) {
+          console.error(ex);
+          msgEl.textContent = "An unexpected error occurred.";
+          msgEl.classList.add("error");
+        }
+      })();
+    </script>
+  </body>
+</html>
