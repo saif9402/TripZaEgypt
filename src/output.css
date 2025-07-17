@@ -1327,6 +1327,11 @@
       display: none;
     }
   }
+  .md\:h-14 {
+    @media (width >= 48rem) {
+      height: calc(var(--spacing) * 14);
+    }
+  }
   .md\:h-16 {
     @media (width >= 48rem) {
       height: calc(var(--spacing) * 16);
