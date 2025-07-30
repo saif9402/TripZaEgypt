@@ -2,12 +2,12 @@
   x-data="{ open: false }"
   class="fixed top-0 left-0 w-full z-20 bg-black/20 backdrop-blur-sm text-white shadow-none border-b border-white/10 px-4 py-2 flex justify-between items-center"
 >
-  <div class="flex items-center justify-center h-8 md:h-12">
+  <div class="flex items-center justify-center h-9 md:h-13">
     <a href="/index.html" class="block h-full">
       <img
         src="/img/Vector.png"
         alt="logo header"
-        class="h-full max-h-8 object-contain mx-auto"
+        class="h-full max-h-9 object-contain mx-auto"
       />
     </a>
   </div>
@@ -170,6 +170,17 @@
     x-transition:leave-end="-translate-y-full"
     x-cloak
   >
+    <!-- Mobile Logo -->
+    <div class="flex justify-center items-center mb-4">
+      <a href="/index.html" class="block h-10">
+        <img
+          src="/img/Vector.png"
+          alt="logo mobile"
+          class="h-10 object-contain"
+        />
+      </a>
+    </div>
+
     <button
       title="b"
       class="text-black text-2xl absolute top-4 right-4"
