@@ -47,6 +47,8 @@
             body: JSON.stringify({ userId, token }),
           });
 
+          console.log("response: ", res);
+
           if (!res.ok) {
             // Try to read ProblemDetails or fallback
             let errorText = "Confirmation failed.";
