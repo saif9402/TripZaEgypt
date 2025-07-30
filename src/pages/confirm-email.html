@@ -42,7 +42,7 @@
 
         try {
           const res = await fetch("/api/auth/confirm-email", {
-            method: "GET",
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId, token }),
           });
