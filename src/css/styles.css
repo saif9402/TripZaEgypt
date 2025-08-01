@@ -52,10 +52,6 @@
   display: none;
 }
 
-.bg-img {
-  object-fit: cover;
-  object-position: center;
-}
 @keyframes fade-in-up {
   from {
     opacity: 0;
