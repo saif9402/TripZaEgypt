@@ -13,7 +13,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
     />
-    
+
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
@@ -22,7 +22,6 @@
     <title>Tour Guide</title>
   </head>
   <body
-  
     class="font-sans text-gray-800 bg-gradient-to-r from-blue-50 via-white to-blue-50"
   >
     <!-- Header -->
@@ -60,61 +59,60 @@
     </div>
 
     <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center mt-3">
-        <div
-          class="w-full max-w-4xl shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
-        >
-          <!-- Trips -->
-          <div class="flex flex-col flex-1 min-w-[150px]">
-            <div
-              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-            >
-              <i class="fas fa-map-marker-alt"></i>
-              <span data-i18n="search.trips">Trips</span>
-            </div>
-            <input
-              type="text"
-              placeholder="Search A Trip"
-              class="px-4 py-2 border rounded w-full italic"
-              data-i18n-placeholder="search.trip.placeholder"
-            />
+      <div
+        class="w-full max-w-4xl shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
+      >
+        <!-- Trips -->
+        <div class="flex flex-col flex-1 min-w-[150px]">
+          <div
+            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+          >
+            <i class="fas fa-map-marker-alt"></i>
+            <span data-i18n="search.trips">Trips</span>
           </div>
+          <input
+            type="text"
+            placeholder="Search A Trip"
+            class="px-4 py-2 border rounded w-full italic"
+            data-i18n-placeholder="search.trip.placeholder"
+          />
+        </div>
 
-          <!-- Guests -->
-          <div class="flex flex-col flex-1 min-w-[150px]">
-            <div
-              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-            >
-              <i class="fas fa-user-friends"></i>
-              <span data-i18n="search.guests">Guests</span>
-            </div>
-            <input
-              type="text"
-              placeholder="Guests"
-              class="px-4 py-2 border rounded w-full italic"
-              data-i18n-placeholder="search.guests.placeholder"
-            />
+        <!-- Guests -->
+        <div class="flex flex-col flex-1 min-w-[150px]">
+          <div
+            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+          >
+            <i class="fas fa-user-friends"></i>
+            <span data-i18n="search.guests">Guests</span>
           </div>
+          <input
+            type="text"
+            placeholder="Guests"
+            class="px-4 py-2 border rounded w-full italic"
+            data-i18n-placeholder="search.guests.placeholder"
+          />
+        </div>
 
-          <!-- Date -->
-          <div class="flex flex-col flex-1 min-w-[150px]">
-            <div
-              class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-            >
-              <i class="fas fa-calendar-alt"></i>
-              <span data-i18n="search.date">Date</span>
-            </div>
-            <input type="date" class="px-4 py-2 border rounded w-full italic" />
+        <!-- Date -->
+        <div class="flex flex-col flex-1 min-w-[150px]">
+          <div
+            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
+          >
+            <i class="fas fa-calendar-alt"></i>
+            <span data-i18n="search.date">Date</span>
           </div>
+          <input type="date" class="px-4 py-2 border rounded w-full italic" />
+        </div>
 
-          <!-- Search Button -->
-          <div class="flex items-end w-full sm:w-auto">
-            <button
-              data-i18n="search.label"
-              class="bg-yellow-400 px-6 py-2 rounded-3xl font-semibold shadow-md w-full sm:w-auto"
-            >
-              Search
-            </button>
-          </div>
+        <!-- Search Button -->
+        <div class="flex items-end w-full sm:w-auto">
+          <button
+            data-i18n="search.label"
+            class="bg-yellow-400 px-6 py-2 rounded-3xl font-semibold shadow-md w-full sm:w-auto"
+          >
+            Search
+          </button>
         </div>
       </div>
     </div>
@@ -252,27 +250,17 @@
         Browse our top-rated experiences in Hurghada — from thrilling desert
         safaris to relaxing Red Sea escapes.
       </p>
-      <div class="flex flex-wrap justify-center gap-2 mb-6">
-        <button
-          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
-        >
-          Safari
-        </button>
-        <button
-          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
-        >
-          Ocean Bay
-        </button>
-        <button
-          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
-        >
-          Paradise
-        </button>
-        <button
-          class="bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition"
-        >
-          Hiking
-        </button>
+
+      <div
+        id="categoryButtons"
+        class="flex flex-wrap justify-center gap-2 mb-6"
+      ></div>
+
+      <div
+        id="categoryTrips"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 mt-6"
+      >
+        <!-- Trip cards will be injected here -->
       </div>
     </div>
 
@@ -330,7 +318,7 @@
 
     <div class="relative mt-18 md:mt-16 lg:mt-12 px-4 scrollbar-hide">
       <div
-        class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7  mt-18 md:mt-16 lg:mt-12"
+        class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7 mt-18 md:mt-16 lg:mt-12"
       >
         <!-- Place cards here -->
 

@@ -36,6 +36,7 @@ function fetchAndRenderCategories() {
       if (data.succeeded && data.data?.data) {
         const categories = data.data.data;
 
+        // 1️⃣ Render Header Dropdowns (already existing)
         const desktopDropdown = document.getElementById("tripsDropdown");
         const mobileDropdown = document.getElementById("mobileTripsDropdown");
 
@@ -61,12 +62,26 @@ function fetchAndRenderCategories() {
             mobileDropdown.appendChild(li);
           });
         }
+
+        // 2️⃣ Render Category Filter Buttons
+        const categoryButtons = document.getElementById("categoryButtons");
+        if (categoryButtons) {
+          categoryButtons.innerHTML = "";
+          categories.forEach((cat) => {
+            const btn = document.createElement("button");
+            btn.className =
+              "bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition";
+            btn.textContent = cat.name;
+            btn.addEventListener("click", () => loadTripsByCategory(cat.id));
+            categoryButtons.appendChild(btn);
+          });
+        }
       } else {
         console.warn("No categories found in API response");
       }
     })
     .catch((err) => {
-      console.error("Error loading categories for header:", err);
+      console.error("Error loading categories for header & filter:", err);
     });
 }
 
