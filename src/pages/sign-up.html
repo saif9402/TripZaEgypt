@@ -7,14 +7,11 @@
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      .bg-img {
-        object-fit: cover;
-        object-position: center;
-      }
-    </style>
   </head>
   <body class="relative min-h-screen bg-black overflow-hidden">
+    <!-- ✅ Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
     <!-- 🔸 Blurred Placeholder -->
     <div class="absolute inset-0">
       <img
@@ -38,32 +35,19 @@
       class="relative z-10 flex items-center justify-center min-h-screen px-4 bg-black bg-opacity-40"
     >
       <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <!-- <h1
-          data-i18n="signup.title"
-          class="text-3xl font-bold text-center text-gray-800 mb-4"
-        >
-          Create Account
-        </h1>
-        <p
-          data-i18n="signup.subtitle"
-          class="text-center text-gray-500 text-sm mb-6"
-        >
-          Join the adventure and explore new destinations
-        </p> -->
         <div class="p-6 flex items-center justify-center">
           <img src="../img/Vector.png" alt="main logo" />
         </div>
 
-        <form class="space-y-4">
+        <!-- ✅ Registration Form -->
+        <form id="registerForm" class="space-y-4">
           <div>
-            <label
-              data-i18n="signup.name"
-              class="block text-sm text-gray-600 mb-1"
-              for="name"
+            <label class="block text-sm text-gray-600 mb-1" for="name"
               >Full Name</label
             >
             <input
               id="name"
+              name="FullName"
               type="text"
               placeholder="Jane Doe"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
@@ -71,14 +55,12 @@
             />
           </div>
           <div>
-            <label
-              data-i18n="signup.email"
-              class="block text-sm text-gray-600 mb-1"
-              for="email"
+            <label class="block text-sm text-gray-600 mb-1" for="email"
               >Email</label
             >
             <input
               id="email"
+              name="Email"
               type="email"
               placeholder="you@example.com"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
@@ -86,14 +68,38 @@
             />
           </div>
           <div>
-            <label
-              data-i18n="signup.pass"
-              class="block text-sm text-gray-600 mb-1"
-              for="password"
+            <label class="block text-sm text-gray-600 mb-1" for="country"
+              >Country</label
+            >
+            <select
+              id="country"
+              name="Country"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white"
+            >
+              <option value="">Select Country</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1" for="phone"
+              >Phone Number</label
+            >
+            <input
+              id="phone"
+              name="PhoneNumber"
+              type="text"
+              placeholder="+1234567890"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1" for="password"
               >Password</label
             >
             <input
               id="password"
+              name="Password"
               type="password"
               placeholder="••••••••"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
@@ -102,7 +108,6 @@
           </div>
           <div>
             <label
-              data-i18n="signup.confirmPass"
               class="block text-sm text-gray-600 mb-1"
               for="confirm-password"
               >Confirm Password</label
@@ -116,7 +121,6 @@
             />
           </div>
           <button
-            data-i18n="signup.button"
             type="submit"
             class="w-full bg-yellow-400 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-yellow-500 transition"
           >
@@ -124,17 +128,189 @@
           </button>
         </form>
 
+        <!-- Divider -->
+        <div class="relative my-6">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <!-- Google Sign-up -->
+        <a
+          href="https://localhost:7134/api/ExternalAuth/google-redirect-login"
+          class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-sm hover:bg-gray-50 transition no-underline"
+        >
+          <img
+            src="https://www.google.com/favicon.ico"
+            alt="Google logo"
+            class="w-5 h-5"
+          />
+          <span class="text-black">Sign up with Google</span>
+        </a>
+
         <p class="text-center text-xs text-gray-400 mt-6">
-          <span data-i18n="signup.haveAccount">Already have an account?</span>
-          <a
-            data-i18n="signup.signin"
-            href="sign-in.html"
-            class="text-yellow-500 hover:underline"
+          Already have an account?
+          <a href="sign-in.html" class="text-yellow-500 hover:underline"
             >Sign in</a
           >
         </p>
       </div>
     </div>
+
+    <!-- ✅ JS to Submit FormData and Show Toasts Based on Status -->
+    <script>
+      const countrySelect = document.getElementById("country");
+      const countries = [
+        "Afghanistan",
+        "Albania",
+        "Algeria",
+        "Argentina",
+        "Australia",
+        "Austria",
+        "Bahrain",
+        "Bangladesh",
+        "Belgium",
+        "Brazil",
+        "Canada",
+        "Chile",
+        "China",
+        "Colombia",
+        "Denmark",
+        "Egypt",
+        "Finland",
+        "France",
+        "Germany",
+        "Greece",
+        "India",
+        "Indonesia",
+        "Iran",
+        "Iraq",
+        "Ireland",
+        "Israel",
+        "Italy",
+        "Japan",
+        "Jordan",
+        "Kenya",
+        "Kuwait",
+        "Lebanon",
+        "Libya",
+        "Malaysia",
+        "Mexico",
+        "Morocco",
+        "Netherlands",
+        "New Zealand",
+        "Nigeria",
+        "Norway",
+        "Oman",
+        "Pakistan",
+        "Peru",
+        "Philippines",
+        "Poland",
+        "Portugal",
+        "Qatar",
+        "Romania",
+        "Russia",
+        "Saudi Arabia",
+        "Singapore",
+        "South Africa",
+        "South Korea",
+        "Spain",
+        "Sri Lanka",
+        "Sudan",
+        "Sweden",
+        "Switzerland",
+        "Syria",
+        "Thailand",
+        "Tunisia",
+        "Turkey",
+        "UAE",
+        "UK",
+        "USA",
+        "Ukraine",
+        "Uzbekistan",
+        "Venezuela",
+        "Vietnam",
+        "Yemen",
+        "Zimbabwe",
+      ];
+
+      countries.forEach((country) => {
+        const option = document.createElement("option");
+        option.value = country;
+        option.textContent = country;
+        countrySelect.appendChild(option);
+      });
+
+      function showToast(message, type = "success") {
+        const toastContainer = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = `
+          max-w-sm w-full px-4 py-3 rounded-lg shadow-lg text-white animate-fade-in-up transition
+          ${type === "success" ? "bg-green-600" : "bg-red-600"}
+        `;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2");
+          toast.addEventListener("transitionend", () => toast.remove());
+        }, 5000);
+      }
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const form = e.target;
+          const password = form.Password.value;
+          const confirmPassword =
+            document.getElementById("confirm-password").value;
+
+          if (password !== confirmPassword) {
+            showToast("Passwords do not match!", "error");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("Email", form.Email.value);
+          formData.append("FullName", form.FullName.value);
+          formData.append("Country", form.Country.value);
+          formData.append("Password", form.Password.value);
+          formData.append("PhoneNumber", form.PhoneNumber.value);
+
+          try {
+            const response = await fetch("/api/Auth/Register", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+            const toastType = result.succeeded ? "success" : "error";
+            console.log(result);
+
+            const message =
+              result.errors?.join(", ") ||
+              result.message ||
+              (toastType === "success"
+                ? "Registration successful!"
+                : "Registration failed.");
+
+            showToast(message, toastType);
+
+            if (result.succeeded) {
+              form.reset();
+            }
+          } catch (err) {
+            console.error(err);
+            showToast("Network error. Please try again.", "error");
+          }
+        });
+    </script>
+
+    <!-- Optional Scripts -->
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
   </body>
