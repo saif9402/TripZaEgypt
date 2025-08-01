@@ -148,7 +148,10 @@
               // Optionally redirect:
               window.location.href = "profile.html";
             } else {
-              showToast(result.message || "Invalid credentials.", "error");
+              showToast(
+                result.errors?.join(", ") || "Invalid credentials.",
+                "error"
+              );
             }
           } catch (error) {
             console.error(error);
