@@ -39,7 +39,7 @@ function afterIncludesLoaded() {
   }
 
   // ✅ Inject categories into desktop and mobile "Our Trips" dropdowns
-  fetch("https://tourguidehurghda.runasp.net/api/Category/GetAllCategories")
+  fetch("/api/Category/GetAllCategories")
     .then((res) => res.json())
     .then((data) => {
       if (data.succeeded && data.data?.data) {
