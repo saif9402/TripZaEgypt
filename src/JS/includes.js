@@ -38,8 +38,10 @@ function afterIncludesLoaded() {
     });
   }
 
-  // ✅ Inject categories into desktop and mobile "Our Trips" dropdowns
-  fetch("/api/Category/GetAllCategories")
+  const langCode = localStorage.getItem("lang") || "en";
+  const langId = langCode === "deu" ? 3 : 1; // Map language code to langId
+
+  fetch(`/api/Category/GetAllCategories/${langId}`)
     .then((res) => res.json())
     .then((data) => {
       if (data.succeeded && data.data?.data) {

@@ -301,6 +301,9 @@ function setLanguage(lang) {
     if (currentLang) {
       currentLang.innerText = lang.toUpperCase();
     }
+    localStorage.setItem("lang", lang);
+    // 🟡 Refetch categories
+    afterIncludesLoaded();
   });
 
   // Placeholders
