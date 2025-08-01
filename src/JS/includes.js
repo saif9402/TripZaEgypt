@@ -26,20 +26,9 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-function afterIncludesLoaded() {
-  const savedLang = localStorage.getItem("lang") || "en";
-  setLanguage(savedLang);
-
-  // Attach event listener AFTER footer is loaded
-  const select = document.getElementById("languageSelect");
-  if (select) {
-    select.addEventListener("change", () => {
-      setLanguage(select.value);
-    });
-  }
-
+function fetchAndRenderCategories() {
   const langCode = localStorage.getItem("lang") || "en";
-  const langId = langCode === "deu" ? 3 : 1; // Map language code to langId
+  const langId = langCode === "deu" ? 3 : 1;
 
   fetch(`/api/Category/GetAllCategories/${langId}`)
     .then((res) => res.json())
@@ -51,6 +40,12 @@ function afterIncludesLoaded() {
         const mobileDropdown = document.getElementById("mobileTripsDropdown");
 
         if (desktopDropdown) {
+          desktopDropdown.innerHTML = `
+            <li>
+              <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
+            </li>
+            <li><hr class="border-t border-gray-200 my-1" /></li>
+          `;
           categories.forEach((cat) => {
             const li = document.createElement("li");
             li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="block px-4 py-2 hover:bg-gray-100">${cat.name}</a>`;
@@ -59,6 +54,7 @@ function afterIncludesLoaded() {
         }
 
         if (mobileDropdown) {
+          mobileDropdown.innerHTML = "";
           categories.forEach((cat) => {
             const li = document.createElement("li");
             li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="hover:text-blue-500">${cat.name}</a>`;
@@ -72,6 +68,20 @@ function afterIncludesLoaded() {
     .catch((err) => {
       console.error("Error loading categories for header:", err);
     });
+}
+
+function afterIncludesLoaded() {
+  const savedLang = localStorage.getItem("lang") || "en";
+  setLanguage(savedLang);
+
+  const select = document.getElementById("languageSelect");
+  if (select) {
+    select.addEventListener("change", () => {
+      setLanguage(select.value);
+    });
+  }
+
+  fetchAndRenderCategories(); // ✅ call once here
 
   if (typeof bindPageTransitions === "function") {
     bindPageTransitions();

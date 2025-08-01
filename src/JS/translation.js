@@ -118,26 +118,15 @@ const translations = {
 };
 
 function setLanguage(lang) {
+  // Set texts
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (translations[lang] && translations[lang][key]) {
       el.textContent = translations[lang][key];
     }
-    const mobileLangLabel = document.getElementById("mobileLangLabel");
-    if (mobileLangLabel) {
-      mobileLangLabel.innerText = lang.toUpperCase();
-    }
-
-    const currentLang = document.getElementById("currentLang");
-    if (currentLang) {
-      currentLang.innerText = lang.toUpperCase();
-    }
-    localStorage.setItem("lang", lang);
-    // 🟡 Refetch categories
-    afterIncludesLoaded();
   });
 
-  // Placeholders
+  // Set placeholders
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (translations[lang]?.[key]) {
@@ -145,17 +134,25 @@ function setLanguage(lang) {
     }
   });
 
-  // Set selected option
+  // Update language display buttons
+  const mobileLangLabel = document.getElementById("mobileLangLabel");
+  if (mobileLangLabel) mobileLangLabel.innerText = lang.toUpperCase();
+
+  const currentLang = document.getElementById("currentLang");
+  if (currentLang) currentLang.innerText = lang.toUpperCase();
+
+  const langBtn = document.getElementById("currentLang");
+  if (langBtn) langBtn.textContent = lang.toUpperCase();
+
+  // Set selected option in dropdown
   const select = document.getElementById("languageSelect");
   if (select) select.value = lang;
 
-  // Update the language button display
-  const langBtn = document.getElementById("currentLang");
-  if (langBtn) {
-    langBtn.textContent = lang.toUpperCase();
-  }
-
+  // Save lang + refresh categories
   localStorage.setItem("lang", lang);
+
+  // ✅ Only call this ONCE, at the end:
+  fetchAndRenderCategories(); // 👇 new function (moved from includes.js)
 }
 
 // Initial load
