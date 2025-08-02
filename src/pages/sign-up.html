@@ -6,9 +6,17 @@
     <title>Create Account | Tour Guide</title>
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
-  <body class="relative min-h-screen bg-black overflow-y-scroll scroll-auto">
+  <body class="relative h-screen overflow-hidden">
     <!-- ✅ Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
@@ -32,104 +40,169 @@
 
     <!-- 🔸 Content Container -->
     <div
-      class="relative z-10 flex items-center justify-center min-h-screen px-4 bg-black bg-opacity-40"
+      class="relative z-10 flex items-center justify-center h-screen px-4 bg-black/40"
     >
-      <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+      <div
+        class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto overflow-hidden justify-center items-center"
+      >
         <div class="p-6 flex items-center justify-center">
           <img src="../img/Vector.png" alt="main logo" />
         </div>
 
         <!-- ✅ Registration Form -->
-        <form id="registerForm" class="space-y-4">
-          <div>
-            <label class="block text-sm text-gray-600 mb-1" for="name"
-              >Full Name</label
-            >
-            <input
-              id="name"
-              name="FullName"
-              type="text"
-              placeholder="Jane Doe"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required
-            />
+        <form id="registerForm">
+          <div class="relative min-h-[290px] sm:min-h-[290px] md:min-h-[290px]">
+            <!-- Step 1 -->
+            <div class="step step-active" data-step="1">
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="name"
+                    class="block text-sm font-medium text-gray-600"
+                    >Full Name</label
+                  >
+                  <input
+                    id="name"
+                    name="FullName"
+                    type="text"
+                    placeholder="Jane Doe"
+                    class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="country"
+                    class="block text-sm font-medium text-gray-600"
+                    >Country</label
+                  >
+                  <select
+                    id="country"
+                    name="Country"
+                    required
+                    class="w-full mt-1 px-2 py-1 bg-white text-sm focus:outline-none"
+                  >
+                    <option value="">Select Country</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    for="phone"
+                    class="block text-sm font-medium text-gray-600"
+                    >Phone Number</label
+                  >
+                  <input
+                    id="phone"
+                    name="PhoneNumber"
+                    type="text"
+                    placeholder="+1234567890"
+                    class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-4">
+                <button
+                  type="button"
+                  class="next-step bg-yellow-400 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step step-hidden" data-step="2">
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="email"
+                    class="block text-sm font-medium text-gray-600"
+                    >Email</label
+                  >
+                  <input
+                    id="email"
+                    name="Email"
+                    type="email"
+                    placeholder="you@example.com"
+                    class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
+                    required
+                  />
+                </div>
+
+                <div class="relative">
+                  <label
+                    for="password"
+                    class="block text-sm font-medium text-gray-600"
+                    >Password</label
+                  >
+                  <input
+                    id="password"
+                    name="Password"
+                    type="password"
+                    placeholder="••••••••"
+                    class="w-full mt-1 px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
+                    required
+                  />
+                  <button
+                    title="Password"
+                    type="button"
+                    onclick="togglePassword('password', this)"
+                    class="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                    tabindex="-1"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+
+                <div class="relative">
+                  <label
+                    for="confirm-password"
+                    class="block text-sm font-medium text-gray-600"
+                    >Confirm Password</label
+                  >
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    class="w-full mt-1 px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
+                    required
+                  />
+                  <button
+                    title="Confirm password"
+                    type="button"
+                    onclick="togglePassword('confirm-password', this)"
+                    class="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                    tabindex="-1"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex justify-between pt-4">
+                <button
+                  type="button"
+                  class="prev-step text-gray-600 hover:underline"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  class="bg-yellow-400 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500"
+                >
+                  Create Account
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm text-gray-600 mb-1" for="email"
-              >Email</label
-            >
-            <input
-              id="email"
-              name="Email"
-              type="email"
-              placeholder="you@example.com"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 mb-1" for="country"
-              >Country</label
-            >
-            <select
-              id="country"
-              name="Country"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white"
-            >
-              <option value="">Select Country</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 mb-1" for="phone"
-              >Phone Number</label
-            >
-            <input
-              id="phone"
-              name="PhoneNumber"
-              type="text"
-              placeholder="+1234567890"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 mb-1" for="password"
-              >Password</label
-            >
-            <input
-              id="password"
-              name="Password"
-              type="password"
-              placeholder="••••••••"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label
-              class="block text-sm text-gray-600 mb-1"
-              for="confirm-password"
-              >Confirm Password</label
-            >
-            <input
-              id="confirm-password"
-              type="password"
-              placeholder="••••••••"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-yellow-400 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-yellow-500 transition"
-          >
-            Create Account
-          </button>
         </form>
 
         <!-- Divider -->
-        <div class="relative my-6">
+        <div class="relative my-3">
           <div class="absolute inset-0 flex items-center">
             <div class="w-full border-t border-gray-300"></div>
           </div>
@@ -243,6 +316,11 @@
         option.textContent = country;
         countrySelect.appendChild(option);
       });
+      new TomSelect("#country", {
+        create: false,
+        sortField: "text",
+        placeholder: "Select a country...",
+      });
 
       function showToast(message, type = "success") {
         const toastContainer = document.getElementById("toast-container");
@@ -308,6 +386,61 @@
             showToast("Network error. Please try again.", "error");
           }
         });
+      function togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector("i");
+
+        const isVisible = input.type === "text";
+        input.type = isVisible ? "password" : "text";
+
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+      }
+
+      // Wizard Navigation
+      const steps = document.querySelectorAll(".step");
+      let currentStep = 0;
+
+      function showStep(index) {
+        steps.forEach((step, i) => {
+          if (i === index) {
+            step.classList.remove("step-hidden");
+            step.classList.add("step-active");
+          } else {
+            step.classList.remove("step-active");
+            step.classList.add("step-hidden");
+          }
+        });
+      }
+
+      document.querySelectorAll(".next-step").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const current = steps[currentStep];
+          const inputs = current.querySelectorAll("input, select");
+          let valid = true;
+
+          inputs.forEach((input) => {
+            if (!input.checkValidity()) {
+              input.reportValidity();
+              valid = false;
+            }
+          });
+
+          if (valid) {
+            currentStep++;
+            showStep(currentStep);
+          }
+        });
+      });
+
+      document.querySelectorAll(".prev-step").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          currentStep--;
+          showStep(currentStep);
+        });
+      });
+
+      showStep(currentStep);
     </script>
 
     <!-- Optional Scripts -->

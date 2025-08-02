@@ -65,3 +65,40 @@
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out;
 }
+.ts-wrapper {
+  border: 1px solid #d1d5db; /* Tailwind gray-300 */
+  border-radius: 0.5rem; /* Tailwind rounded-lg */
+  padding: 0rem 0rem;
+}
+.ts-wrapper.focus {
+  border-color: #000; /* Tailwind yellow-400 */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3); /* focus ring */
+}
+.step {
+  position: absolute;
+  inset: 0;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateX(2rem); /* slide in from right */
+  pointer-events: none;
+}
+
+.step.step-active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.step.step-hidden {
+  opacity: 0;
+  transform: translateX(2rem); /* same offset to keep direction consistent */
+  pointer-events: none;
+  z-index: 0;
+}
+.ts-input::before {
+  content: attr(data-placeholder);
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.5); /* Tailwind black/50 */
+  pointer-events: none;
+}
