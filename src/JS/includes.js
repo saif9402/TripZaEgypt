@@ -27,22 +27,23 @@ function checkAuthAndIncludeHeader() {
   }
 
   fetch("/api/User/GetToken", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    method: POST,
+    credentials: "include",
   })
-    .then((res) => res.json())
-    .then((data) => {
+    .then(async (res) => {
+      if (!res.ok) throw new Error("Response not OK");
+
+      const text = await res.text(); // because response is text/plain
+      const data = JSON.parse(text); // manually parse JSON string
+
       if (data?.succeeded && data?.data?.email) {
-        // Valid token and user info returned
-        window.currentUser = data.data; // optional global
+        window.currentUser = data.data;
         includeHTML(
           "header-placeholder",
           "pages/header-auth.html",
           checkAllIncludesLoaded
         );
       } else {
-        // Invalid or expired token
         localStorage.removeItem("accessToken");
         includeHTML(
           "header-placeholder",
