@@ -152,10 +152,6 @@
           document.getElementById("profileLocation").value = user.country || "";
           document.getElementById("profileEmail").value = user.email || "";
 
-          document.querySelector("aside img").src =
-            user.profilePictureURL?.startsWith("http")
-              ? user.profilePictureURL
-              : `/img/${user.profilePictureURL || "default-user.png"}`;
           document.querySelector("aside h2").textContent =
             user.fullName || "User";
           document.querySelector("aside p").textContent =
