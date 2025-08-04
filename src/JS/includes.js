@@ -26,7 +26,7 @@ function checkAuthAndIncludeHeader() {
     return;
   }
 
-  fetch("/api/User/GetToken", {
+  fetch("/api/Auth/GetToken", {
     method: "POST",
     credentials: "include",
   })
