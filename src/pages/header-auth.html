@@ -1,0 +1,153 @@
+<header
+  x-data="{ open: false, profileOpen: false }"
+  class="fixed top-0 left-0 w-full z-20 bg-black/20 backdrop-blur-sm text-white border-b border-white/10 px-4 py-1 flex justify-between items-center"
+>
+  <!-- Logo -->
+  <a href="/index.html" class="h-9 md:h-13 block">
+    <img
+      src="/img/Vector.png"
+      alt="logo header"
+      class="h-full object-contain"
+    />
+  </a>
+
+  <!-- Mobile Hamburger -->
+  <button @click="open = true" class="md:hidden text-white text-2xl">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Desktop Navigation -->
+  <nav class="hidden md:flex items-center space-x-4">
+    <a
+      href="/index.html"
+      class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30"
+      >Home</a
+    >
+    <a
+      href="/pages/about-us.html"
+      class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30"
+      >About Us</a
+    >
+    <a
+      href="/pages/trips-list.html"
+      class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30"
+      >Trips</a
+    >
+
+    <!-- Profile Dropdown -->
+    <div x-data="{ dropdownOpen: false }" class="relative">
+      <button
+        @click="dropdownOpen = !dropdownOpen"
+        class="flex items-center space-x-2 focus:outline-none"
+      >
+        <img
+          id="userAvatar"
+          src="/img/default-user.png"
+          class="w-8 h-8 rounded-full object-cover border-2 border-white"
+        />
+        <span id="userName" class="font-semibold">User</span>
+        <i class="fas fa-chevron-down ml-1"></i>
+      </button>
+
+      <div
+        x-show="dropdownOpen"
+        @click.away="dropdownOpen = false"
+        x-transition
+        x-cloak
+        class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl z-50"
+      >
+        <a href="/pages/profile.html" class="block px-4 py-2 hover:bg-gray-100"
+          >Profile</a
+        >
+        <button
+          onclick="logout()"
+          class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Overlay -->
+  <div
+    class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+    x-show="open"
+    @click="open = false"
+    x-transition.opacity
+    x-cloak
+  ></div>
+
+  <!-- Mobile Drawer -->
+  <aside
+    class="fixed top-0 left-0 w-full bg-white shadow-md z-50 p-6 text-black transform transition-transform"
+    x-show="open"
+    x-transition:enter="transform transition ease-out duration-300"
+    x-transition:enter-start="-translate-y-full"
+    x-transition:enter-end="translate-y-0"
+    x-transition:leave="transform transition ease-in duration-300"
+    x-transition:leave-start="translate-y-0"
+    x-transition:leave-end="-translate-y-full"
+    x-cloak
+  >
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center mb-4">
+      <a href="/index.html">
+        <img src="/img/Vector.png" class="h-10" alt="logo" />
+      </a>
+      <button @click="open = false" class="text-black text-2xl">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- User Info -->
+    <div class="flex items-center gap-3 mb-6">
+      <img
+        id="mobileUserAvatar"
+        src="/img/default-user.png"
+        class="w-10 h-10 rounded-full object-cover border"
+      />
+      <div>
+        <div id="mobileUserName" class="font-semibold text-black">User</div>
+        <div class="text-sm text-gray-500" id="mobileUserEmail">
+          user@example.com
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Links -->
+    <nav class="flex flex-col space-y-2">
+      <a href="/index.html" class="hover:text-blue-500">Home</a>
+      <a href="/pages/about-us.html" class="hover:text-blue-500">About Us</a>
+      <a href="/pages/trips-list.html" class="hover:text-blue-500">Trips</a>
+      <a href="/pages/profile.html" class="hover:text-blue-500">Profile</a>
+      <button
+        onclick="logout()"
+        class="text-left text-red-600 hover:text-red-800"
+      >
+        Logout
+      </button>
+    </nav>
+  </aside>
+</header>
+
+<script>
+  // Inject user info into desktop and mobile headers
+  if (window.currentUser) {
+    const { fullName, email, profilePictureURL } = currentUser;
+
+    document.getElementById("userName").textContent = fullName || "User";
+    document.getElementById("mobileUserName").textContent = fullName || "User";
+    document.getElementById("mobileUserEmail").textContent =
+      email || "user@example.com";
+
+    const avatarSrc = profilePictureURL || "/img/default-user.png";
+    document.getElementById("userAvatar").src = avatarSrc;
+    document.getElementById("mobileUserAvatar").src = avatarSrc;
+  }
+
+  function logout() {
+    localStorage.removeItem("accessToken");
+    location.reload();
+  }
+</script>

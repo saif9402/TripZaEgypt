@@ -13,12 +13,56 @@ function includeHTML(id, file, onDone) {
     .catch((err) => console.error(`Error loading ${file}:`, err));
 }
 
+function checkAuthAndIncludeHeader() {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    // Not logged in
+    includeHTML(
+      "header-placeholder",
+      "pages/header.html",
+      checkAllIncludesLoaded
+    );
+    return;
+  }
+
+  fetch("/api/User/GetToken", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data?.succeeded && data?.data?.email) {
+        // Valid token and user info returned
+        window.currentUser = data.data; // optional global
+        includeHTML(
+          "header-placeholder",
+          "pages/header-auth.html",
+          checkAllIncludesLoaded
+        );
+      } else {
+        // Invalid or expired token
+        localStorage.removeItem("accessToken");
+        includeHTML(
+          "header-placeholder",
+          "pages/header.html",
+          checkAllIncludesLoaded
+        );
+      }
+    })
+    .catch((err) => {
+      console.error("Auth check failed:", err);
+      includeHTML(
+        "header-placeholder",
+        "pages/header.html",
+        checkAllIncludesLoaded
+      );
+    });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  includeHTML(
-    "header-placeholder",
-    "pages/header.html",
-    checkAllIncludesLoaded
-  );
+  checkAuthAndIncludeHeader();
   includeHTML(
     "footer-placeholder",
     "pages/footer.html",

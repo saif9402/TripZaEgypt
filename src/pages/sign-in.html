@@ -144,6 +144,9 @@
 
             if (response.ok && result.succeeded) {
               showToast("Login successful!", "success");
+
+              localStorage.setItem("accessToken", result.data.accessToken);
+
               // Optionally redirect:
               window.location.href = "profile.html";
             } else {

@@ -18,6 +18,11 @@
       defer
     ></script>
     <title>Profile</title>
+    <script>
+      if (!localStorage.getItem("accessToken")) {
+        window.location.href = "/pages/login.html";
+      }
+    </script>
   </head>
   <body class="bg-gray-100 font-sans">
     <!-- Navbar -->
@@ -69,33 +74,26 @@
             <div>
               <label class="block text-sm font-medium">Name:</label>
               <input
+                id="profileName"
                 type="text"
                 class="w-full border px-3 py-2 rounded"
-                value="Masum Rana"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium">Date Of Birth:</label>
-              <input
-                type="text"
-                class="w-full border px-3 py-2 rounded"
-                value="15/03/1886"
-              />
-            </div>
+
             <div>
               <label class="block text-sm font-medium">Phone:</label>
               <input
+                id="profilePhone"
                 type="text"
                 class="w-full border px-3 py-2 rounded"
-                value="+46-7644 394 68"
               />
             </div>
             <div>
               <label class="block text-sm font-medium">Location:</label>
               <input
+                id="profileLocation"
                 type="text"
                 class="w-full border px-3 py-2 rounded"
-                value="Gothenburg"
               />
             </div>
             <button
@@ -111,9 +109,10 @@
             <div>
               <label class="block text-sm font-medium">Email Address:</label>
               <input
+                disabled
+                id="profileEmail"
                 type="email"
                 class="w-full border px-3 py-2 rounded"
-                value="masumrana15@gmail.com"
               />
             </div>
             <div>
@@ -148,5 +147,27 @@
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.currentUser) {
+          const user = window.currentUser;
+
+          // Inject values into the profile form
+          document.getElementById("profileName").value = user.fullName || "";
+          document.getElementById("profilePhone").value =
+            user.phoneNumber || "";
+          document.getElementById("profileLocation").value = user.country || "";
+          document.getElementById("profileEmail").value = user.email || "";
+
+          // If you want to also update profile picture and name on sidebar:
+          document.querySelector("aside img").src =
+            user.profilePictureURL || "https://via.placeholder.com/100";
+          document.querySelector("aside h2").textContent =
+            user.fullName || "User";
+          document.querySelector("aside p").textContent =
+            user.country || "Location";
+        }
+      });
+    </script>
   </body>
 </html>
