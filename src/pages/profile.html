@@ -148,26 +148,31 @@
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      function populateProfileWhenReady() {
         if (window.currentUser) {
           const user = window.currentUser;
 
-          // Inject values into the profile form
           document.getElementById("profileName").value = user.fullName || "";
           document.getElementById("profilePhone").value =
             user.phoneNumber || "";
           document.getElementById("profileLocation").value = user.country || "";
           document.getElementById("profileEmail").value = user.email || "";
 
-          // If you want to also update profile picture and name on sidebar:
           document.querySelector("aside img").src =
-            user.profilePictureURL || "https://via.placeholder.com/100";
+            user.profilePictureURL?.startsWith("http")
+              ? user.profilePictureURL
+              : `/img/${user.profilePictureURL || "default-user.png"}`;
           document.querySelector("aside h2").textContent =
             user.fullName || "User";
           document.querySelector("aside p").textContent =
             user.country || "Location";
+        } else {
+          // wait and try again shortly
+          setTimeout(populateProfileWhenReady, 100);
         }
-      });
+      }
+
+      document.addEventListener("DOMContentLoaded", populateProfileWhenReady);
     </script>
   </body>
 </html>
