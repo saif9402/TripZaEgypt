@@ -1446,6 +1446,11 @@
       display: none;
     }
   }
+  .md\:h-12 {
+    @media (width >= 48rem) {
+      height: calc(var(--spacing) * 12);
+    }
+  }
   .md\:h-13 {
     @media (width >= 48rem) {
       height: calc(var(--spacing) * 13);
