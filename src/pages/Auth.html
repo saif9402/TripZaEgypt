@@ -79,10 +79,11 @@
       try {
         const response = await fetch(`/api/exchange-code/${code}`, {
           method: "GET",
-          credentials: "include" // ✅ Required to accept HTTP-only cookies like RefreshToken
+          
         });
 
         if (!response.ok) {
+            console.log(response.json());
           throw new Error("Unauthorized or server error");
         }
 
