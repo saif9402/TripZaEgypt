@@ -1,29 +1,31 @@
 export default async function handler(req, res) {
-    const backendCallbackUrl = 'https://tourguidehurghda.runasp.net/api/ExternalAuth/GoogleCallback';
+    const BACKEND_GOOGLE_CALLBACK_URL =
+      'https://tourguidehurghda.runasp.net/api/ExternalAuth/GoogleCallback';
   
-    const backendResponse = await fetch(backendCallbackUrl, {
+    // Forward the request to your backend
+    const backendResponse = await fetch(BACKEND_GOOGLE_CALLBACK_URL, {
       method: req.method,
       headers: {
         ...req.headers,
       },
-      redirect: 'manual', // prevent auto-redirect
+      redirect: 'manual',
     });
   
-    // Forward Set-Cookie
+    // ✅ Pass through Set-Cookie headers from backend to browser
     const setCookie = backendResponse.headers.get('set-cookie');
     if (setCookie) {
       res.setHeader('Set-Cookie', setCookie);
     }
   
-    // Forward redirect (if GoogleCallback returns 302)
+    // ✅ Forward redirect response to frontend (if backend returns a 302)
     const location = backendResponse.headers.get('location');
     if (location) {
       res.writeHead(302, { Location: location });
       return res.end();
     }
   
-    // Fallback for non-redirect responses
-    const text = await backendResponse.text();
-    res.status(backendResponse.status).send(text);
+    // ✅ Fallback: return body as-is (should rarely be hit)
+    const responseText = await backendResponse.text();
+    res.status(backendResponse.status).send(responseText);
   }
   
