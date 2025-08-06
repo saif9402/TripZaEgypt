@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @keyframes progress {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animate-progress {
+      background: linear-gradient(90deg, #4285F4 0%, #34A853 25%, #FBBC05 50%, #EA4335 75%, #4285F4 100%);
+      background-size: 300% 100%;
+      animation: progress 1.5s linear infinite;
+      border-radius: 9999px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-bounce {
+      animation: bounce 1s infinite;
+    }
+    .google-gradient {
+      background: linear-gradient(135deg, #4285F4 0%, #34A853 50%, #FBBC05 100%);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-white to-gray-50 min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-sm w-full flex flex-col items-center">
+    <div class="relative w-20 h-20 mb-8">
+      <div class="absolute inset-0 bg-white rounded-full shadow-lg flex items-center justify-center">
+        <div class="google-gradient w-full h-full rounded-full flex items-center justify-center animate-pulse">
+          <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none">
+            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" fill="white"/>
+            <path d="M12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5Z" stroke="white" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-2xl font-medium text-gray-800 mb-2">Signing in</h1>
+    <p class="text-gray-500 mb-6">Connecting to your account</p>
+
+    <div class="w-full max-w-xs mb-8">
+      <div class="relative h-1.5 bg-gray-200 rounded-full overflow-hidden mb-2">
+        <div class="absolute top-0 left-0 h-full animate-progress w-full"></div>
+      </div>
+      <p class="text-xs text-gray-500 text-center">Securing your connection</p>
+    </div>
+
+    <div class="mb-8">
+      <div class="flex justify-center space-x-2">
+        <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+        <div class="w-3 h-3 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+        <div class="w-3 h-3 bg-yellow-500 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+        <div class="w-3 h-3 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.6s;"></div>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-400 mb-6">This should only take a few seconds</p>
+    <button onclick="cancelAuth()" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">Cancel</button>
+  </div>
+
+  <script>
+    async function exchangeCode() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (!code) {
+        console.error("Missing code in query.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/ExternalAuth/exchange-code/${code}`, {
+          method: "GET",
+          
+        });
+
+        if (!response.ok) {
+            console.log(response.json());
+          throw new Error("Unauthorized or server error");
+        }
+
+        const result = await response.json();
+        if (result.succeeded && result.data && result.data.accessToken) {
+          localStorage.setItem("accessToken", result.data.accessToken);
+
+          // ✅ 
+          window.location.href = "../index.html";
+        } else {
+          console.error("Exchange failed:", result.message);
+        }
+      } catch (error) {
+        console.error("Failed to exchange code:", error);
+      }
+    }
+
+    function cancelAuth() {
+      window.location.href = "/sign-in.html";
+    }
+
+    // Call on load
+    exchangeCode();
+  </script>
+</body>
+</html>
