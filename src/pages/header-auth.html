@@ -136,11 +136,21 @@
     <!-- Sign In Button -->
     <div x-data="{ langOpen: false }" class="relative">
       <button
-        id="currentLang"
-        @click="langOpen = !langOpen"
-        class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+        id="userIcon"
+        @click="userMenuOpen = !userMenuOpen"
+        class="focus:outline-none w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition flex items-center justify-center"
       >
-        EN
+        <!-- User SVG Icon -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-white"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M10 10a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-6 2-6 4v1h12v-1c0-2-2-4-6-4z"
+          />
+        </svg>
       </button>
       <ul
         x-show="langOpen"
