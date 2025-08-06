@@ -2,7 +2,6 @@
   x-data="{ open: false }"
   class="fixed top-0 left-0 w-full z-20 bg-black/20 backdrop-blur-sm text-white shadow-none border-b border-white/10 px-4 py-1 flex justify-between items-center"
 >
-  <!-- Logo -->
   <div class="flex items-center justify-start h-9 md:h-12">
     <img
       src="/img/Header.svg"
@@ -20,7 +19,7 @@
     <i class="fas fa-bars"></i>
   </button>
 
-  <!-- Desktop Navigation -->
+  <!-- Desktop Nav -->
   <nav class="hidden md:flex space-x-4 items-center">
     <a
       data-i18n="nav.home"
@@ -41,87 +40,73 @@
       >
         Our Trips
       </button>
-      <!-- Profile Dropdown -->
-      <div x-data="{ dropdownOpen: false }" class="relative">
-        <button
-          @click="dropdownOpen = !dropdownOpen"
-          class="flex items-center space-x-2 focus:outline-none"
-        >
-          <img
-            id="userAvatar"
-            src="/img/default-user.png"
-            class="w-8 h-8 rounded-full object-cover border-2 border-white"
-          />
-        </button>
-        <!-- Dropdown -->
-        <ul
-          x-show="openTrips"
-          x-cloak
-          @click.away="openTrips = false"
-          x-transition:enter="transition ease-out duration-200"
-          x-transition:enter-start="opacity-0 translate-y-1"
-          x-transition:enter-end="opacity-100 translate-y-0"
-          x-transition:leave="transition ease-in duration-150"
-          x-transition:leave-start="opacity-100 translate-y-0"
-          x-transition:leave-end="opacity-0 translate-y-1"
-          class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
-          id="tripsDropdown"
-        >
-          <!-- All Trips (special item) -->
-          <li>
-            <a
-              href="/pages/trips-list.html"
-              class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50"
-            >
-              All Trips
-            </a>
-          </li>
+      <!-- Dropdown -->
+      <ul
+        x-show="openTrips"
+        x-cloak
+        @click.away="openTrips = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-1"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-1"
+        class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
+        id="tripsDropdown"
+      >
+        <!-- All Trips (special item) -->
+        <li>
+          <a
+            href="/pages/trips-list.html"
+            class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50"
+          >
+            All Trips
+          </a>
+        </li>
 
-          <!-- Divider -->
-          <li><hr class="border-t border-gray-200 my-1" /></li>
+        <!-- Divider -->
+        <li><hr class="border-t border-gray-200 my-1" /></li>
 
-          <!-- Categories will be injected here -->
-        </ul>
-      </div>
+        <!-- Categories will be injected here -->
+      </ul>
+    </div>
 
-      <!-- Language Dropdown -->
-      <div x-data="{ langOpen: false }" class="relative">
-        <button
-          id="currentLang"
-          @click="langOpen = !langOpen"
-          class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
-        >
-          EN
-        </button>
-        <ul
-          x-show="langOpen"
-          x-cloak
-          @click.away="langOpen = false"
-          x-transition:enter="transition ease-out duration-200"
-          x-transition:enter-start="opacity-0 translate-y-1"
-          x-transition:enter-end="opacity-100 translate-y-0"
-          x-transition:leave="transition ease-in duration-150"
-          x-transition:leave-start="opacity-100 translate-y-0"
-          x-transition:leave-end="opacity-0 translate-y-1"
-          class="absolute right-0 mt-2 w-32 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
-        >
-          <li>
-            <a
-              onclick="setLanguage('en')"
-              class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-              ><img title="img" src="/img/flags/en.jpeg" class="w-4 h-4" />
-              EN</a
-            >
-          </li>
-          <li>
-            <a
-              onclick="setLanguage('deu')"
-              class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-              ><img title="img" src="/img/flags/deu.png" class="w-4 h-4" />
-              DEU</a
-            >
-          </li>
-          <!-- <li>
+    <!-- Language Dropdown -->
+    <div x-data="{ langOpen: false }" class="relative">
+      <button
+        id="currentLang"
+        @click="langOpen = !langOpen"
+        class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+      >
+        EN
+      </button>
+      <ul
+        x-show="langOpen"
+        x-cloak
+        @click.away="langOpen = false"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-1"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-1"
+        class="absolute right-0 mt-2 w-32 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
+      >
+        <li>
+          <a
+            onclick="setLanguage('en')"
+            class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
+            ><img title="img" src="/img/flags/en.jpeg" class="w-4 h-4" /> EN</a
+          >
+        </li>
+        <li>
+          <a
+            onclick="setLanguage('deu')"
+            class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
+            ><img title="img" src="/img/flags/deu.png" class="w-4 h-4" /> DEU</a
+          >
+        </li>
+        <!-- <li>
           <a
             onclick="setLanguage('ru')"
             href="#"
@@ -145,29 +130,32 @@
             ><img title="img" src="/img/flags/cs.png" class="w-4 h-4" /> CZ</a
           >
         </li> -->
-        </ul>
-      </div>
+      </ul>
+    </div>
 
-      <div
-        x-show="dropdownOpen"
-        @click.away="dropdownOpen = false"
-        x-transition
-        x-cloak
-        class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-xl z-50"
+    <!-- Sign In Button -->
+    <div
+      x-show="dropdownOpen"
+      @click.away="dropdownOpen = false"
+      x-transition
+      x-cloak
+      class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
+    >
+      <a
+        href="/pages/profile.html"
+        class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+        >Profile</a
       >
-        <a href="/pages/profile.html" class="block px-4 py-2 hover:bg-gray-100"
-          >Profile</a
-        >
-        <button
-          onclick="logout()"
-          class="block w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Logout
-        </button>
-      </div>
+      <button
+        onclick="logout()"
+        class="block w-full text-left px-4 py-2 hover:bg-gray-100"
+      >
+        Logout
+      </button>
     </div>
   </nav>
 
+  <!-- Overlay -->
   <!-- Overlay -->
   <div
     class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
@@ -177,7 +165,7 @@
     @click="open = false"
   ></div>
 
-  <!-- Mobile Drawer -->
+  <!-- Mobile Top Drawer -->
   <aside
     class="fixed top-0 left-0 w-full h-fit bg-white shadow-md z-50 p-6 text-black transform transition-transform"
     x-show="open"
@@ -189,6 +177,7 @@
     x-transition:leave-end="-translate-y-full"
     x-cloak
   >
+    <!-- Mobile Logo -->
     <div class="flex items-center justify-start h-9 md:h-12">
       <img
         src="/img/Header.svg"
@@ -205,7 +194,6 @@
       <i class="fas fa-times"></i>
     </button>
 
-    <!-- Mobile Links -->
     <nav class="mt-2 flex flex-col space-y-1">
       <a href="/index.html" class="hover:text-blue-500" data-i18n="nav.home"
         >Home</a
@@ -227,6 +215,7 @@
           <!-- Categories injected here -->
         </ul>
       </div>
+
       <a href="/pages/profile.html" class="hover:text-blue-500">Profile</a>
       <button
         onclick="logout()"
@@ -234,6 +223,8 @@
       >
         Logout
       </button>
+
+      <!-- Language Switcher -->
       <div x-data="{ langOpen: false }" class="relative">
         <button
           id="mobileLangBtn"
