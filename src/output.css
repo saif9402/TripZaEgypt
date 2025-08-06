@@ -1534,6 +1534,12 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+  .sm\:border-b {
+    @media (width >= 40rem) {
+      border-bottom-style: var(--tw-border-style);
+      border-bottom-width: 1px;
+    }
+  }
   .sm\:p-5 {
     @media (width >= 40rem) {
       padding: calc(var(--spacing) * 5);
