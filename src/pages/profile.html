@@ -9,10 +9,6 @@
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
-    />
     <script
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
@@ -24,120 +20,104 @@
       }
     </script>
   </head>
-  <body class="bg-gray-100 font-sans">
+  <body class="bg-gray-50 font-sans text-gray-800">
     <!-- Navbar -->
     <div id="header-placeholder"></div>
 
-    <!-- Main Profile Section -->
-    <main class="max-w-6xl mx-auto mt-6 px-4 py-16">
-      <div class="bg-white shadow rounded-lg p-6 flex flex-col lg:flex-row">
+    <!-- Main Section -->
+    <main class="max-w-6xl mx-auto mt-10 px-6">
+      <div
+        class="bg-white shadow-lg rounded-2xl p-8 flex flex-col lg:flex-row gap-8"
+      >
         <!-- Sidebar -->
-        <aside
-          class="w-full lg:w-1/4 mb-6 lg:mb-0 lg:pr-6 border-b lg:border-b-0 lg:border-r"
-        >
+        <aside class="lg:w-1/4 w-full border-r border-gray-200">
           <div class="text-center">
-            <h2 class="text-xl font-semibold mt-2">Masum Rana</h2>
-            <p class="text-sm text-gray-500 flex items-center justify-center">
-              <svg
-                class="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M12 2C8.13 2 5 5.13 5 9c0 3.25 3.25 6.41 7 11.54 3.75-5.13 7-8.29 7-11.54 0-3.87-3.13-7-7-7z"
-                />
-              </svg>
-              Hurghada
+            <div
+              class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-3xl text-gray-500"
+            >
+              <i class="fas fa-user"></i>
+            </div>
+            <h2 id="sidebarName" class="text-2xl font-semibold">Masum Rana</h2>
+            <p
+              id="sidebarLocation"
+              class="text-sm text-gray-500 mt-1 flex items-center justify-center"
+            >
+              <i class="fas fa-map-marker-alt mr-1"></i> Hurghada
             </p>
           </div>
-          <div class="mt-6 space-y-2">
-            <button class="w-full bg-yellow-300 text-black py-2 rounded">
-              Profile Informations
+          <div class="mt-8 flex flex-col gap-3">
+            <button
+              class="w-full bg-yellow-400 hover:bg-yellow-500 transition text-black font-medium py-2 rounded-lg"
+            >
+              Profile Information
             </button>
-            <button class="w-full border py-2 rounded text-gray-700">
+            <button
+              class="w-full border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-medium py-2 rounded-lg"
+            >
               Booking History
             </button>
           </div>
         </aside>
 
-        <!-- Form Section -->
-        <section class="w-full lg:w-3/4 lg:pl-6">
-          <h2 class="text-lg font-semibold mb-4">Personal Information</h2>
-          <form class="space-y-4">
+        <!-- Main Form Section -->
+        <section class="lg:w-3/4 w-full">
+          <h2 class="text-xl font-semibold mb-6 border-b pb-2">
+            Personal Information
+          </h2>
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium">Name:</label>
+              <label class="block text-sm font-medium mb-1">Name</label>
               <input
+                disabled
                 id="profileName"
                 type="text"
-                class="w-full border px-3 py-2 rounded"
+                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
-
             <div>
-              <label class="block text-sm font-medium">Phone:</label>
+              <label class="block text-sm font-medium mb-1">Phone</label>
               <input
+                disabled
                 id="profilePhone"
                 type="text"
-                class="w-full border px-3 py-2 rounded"
+                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium">Location:</label>
+              <label class="block text-sm font-medium mb-1">Location</label>
               <input
+                disabled
                 id="profileLocation"
                 type="text"
-                class="w-full border px-3 py-2 rounded"
+                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
-            <button
-              type="submit"
-              class="bg-yellow-300 text-black px-6 py-2 rounded"
-            >
-              Save
-            </button>
           </form>
 
-          <h2 class="text-lg font-semibold mt-8 mb-4">Security</h2>
-          <form class="space-y-4">
+          <h2 class="text-xl font-semibold mt-10 mb-6 border-b pb-2">
+            Security
+          </h2>
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium">Email Address:</label>
+              <label class="block text-sm font-medium mb-1"
+                >Email Address</label
+              >
               <input
                 disabled
                 id="profileEmail"
                 type="email"
-                class="w-full border px-3 py-2 rounded"
+                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium">Password:</label>
-              <input
-                type="password"
-                class="w-full border px-3 py-2 rounded"
-                value="********"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium">Confirm Password:</label>
-              <input
-                type="password"
-                class="w-full border px-3 py-2 rounded"
-                value="********"
-              />
-            </div>
-            <button
-              type="submit"
-              class="bg-yellow-300 text-black px-6 py-2 rounded"
-            >
-              Save
-            </button>
           </form>
         </section>
       </div>
     </main>
 
     <!-- Footer -->
-    <div id="footer-placeholder"></div>
+    <div id="footer-placeholder" class="mt-10"></div>
+
+    <!-- Scripts -->
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
@@ -152,12 +132,14 @@
           document.getElementById("profileLocation").value = user.country || "";
           document.getElementById("profileEmail").value = user.email || "";
 
-          document.querySelector("aside h2").textContent =
+          document.getElementById("sidebarName").textContent =
             user.fullName || "User";
-          document.querySelector("aside p").textContent =
-            user.country || "Location";
+          document.getElementById(
+            "sidebarLocation"
+          ).innerHTML = `<i class="fas fa-map-marker-alt mr-1"></i> ${
+            user.country || "Location"
+          }`;
         } else {
-          // wait and try again shortly
           setTimeout(populateProfileWhenReady, 100);
         }
       }
