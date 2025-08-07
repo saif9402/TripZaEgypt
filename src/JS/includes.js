@@ -62,6 +62,90 @@ function checkAuthAndIncludeHeader() {
     });
 }
 
+function fetchAndRenderTrending() {
+  const langCode = localStorage.getItem("lang") || "en";
+  const langId = langCode === "deu" ? 1 : 2;
+
+  const url = `/api/Trip/GetAllTrips?IsTopRated=true&languageId=${langId}&pageNumber=1&pageSize=10`;
+
+  const section = document
+    .querySelector("section [data-i18n='trend.name']")
+    ?.closest("section");
+
+  // Helper: paint one trip into the section
+  function renderTrendingTrip(trip) {
+    const imgEl = document.getElementById("trip-image");
+    const titleEl = document.getElementById("trip-title");
+    const ratingEl = document.getElementById("rating");
+    const reviewsEl = document.getElementById("reviews");
+    const locationEl = document.getElementById("location");
+    const descEl = document.getElementById("description");
+    const bookLinkEl = document.getElementById("book-link");
+
+    const image = trip.mainImageURL || "img/trip-fallback.jpg";
+    if (imgEl) imgEl.setAttribute("href", image);
+    if (titleEl) titleEl.textContent = trip.name ?? "Top Rated Trip";
+    if (ratingEl) ratingEl.textContent = (trip.rating ?? 0).toFixed(1);
+    if (reviewsEl) reviewsEl.textContent = `${trip.reviews ?? 0} reviews`;
+    if (locationEl) locationEl.textContent = trip.category ?? "—";
+    if (descEl) {
+      // List API doesn’t return a description; keep a short generic line
+      descEl.textContent = "Hand‑picked, highly rated by travelers like you.";
+    }
+    if (bookLinkEl) bookLinkEl.href = `/pages/trip-details.html?id=${trip.id}`;
+  }
+
+  // Helper: optional preloader so image swaps feel snappier
+  function preloadImages(list) {
+    list.forEach((t) => {
+      const src = t.mainImageURL;
+      if (src) {
+        const img = new Image();
+        img.src = src;
+      }
+    });
+  }
+
+  fetch(url)
+    .then((res) => res.json())
+    .then((json) => {
+      const items = json?.data?.data || [];
+      if (!items.length) {
+        if (section) section.style.display = "none";
+        return;
+      }
+      if (section) section.style.display = "";
+
+      preloadImages(items);
+
+      // initial render
+      let i = 0;
+      renderTrendingTrip(items[i]);
+
+      // auto-rotate every 2s
+      let timer = setInterval(() => {
+        i = (i + 1) % items.length;
+        renderTrendingTrip(items[i]);
+      }, 2000);
+
+      // nice touch: pause on hover (optional)
+      if (section) {
+        section.addEventListener("mouseenter", () => clearInterval(timer));
+        section.addEventListener("mouseleave", () => {
+          clearInterval(timer);
+          timer = setInterval(() => {
+            i = (i + 1) % items.length;
+            renderTrendingTrip(items[i]);
+          }, 2000);
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load trending trips:", err);
+      if (section) section.style.display = "none";
+    });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   checkAuthAndIncludeHeader();
   includeHTML(
@@ -142,6 +226,7 @@ function afterIncludesLoaded() {
   }
 
   fetchAndRenderCategories(); // ✅ call once here
+  fetchAndRenderTrending();
 
   if (typeof bindPageTransitions === "function") {
     bindPageTransitions();
