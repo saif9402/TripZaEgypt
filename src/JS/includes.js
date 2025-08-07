@@ -73,7 +73,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function fetchAndRenderCategories() {
   const langCode = localStorage.getItem("lang") || "en";
-  const langId = langCode === "deu" ? 3 : 1;
+  const langId = langCode === "deu" ? 1 : 2;
 
   fetch(`/api/Category/GetAllCategories/${langId}`)
     .then((res) => res.json())
