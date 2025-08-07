@@ -16,7 +16,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
   </head>
-  <body class="relative h-screen overflow-hidden">
+  <body class="relative h-screen overflow-x-hidden overflow-y-auto">
     <!-- ✅ Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
@@ -24,26 +24,17 @@
     <div class="absolute inset-0">
       <img
         src="../img/sign in background.png"
-        class="w-full h-full object-cover blur-xl scale-105"
+        class="w-full h-full object-cover blur-xl"
         alt="blurred beach placeholder"
       />
     </div>
-
-    <!-- 🔸 Full Image -->
-    <img
-      src="../img/sign in background.png"
-      class="absolute inset-0 w-full h-full bg-img transition-opacity duration-700 opacity-0"
-      loading="lazy"
-      onload="this.style.opacity=1"
-      alt="background beach"
-    />
 
     <!-- 🔸 Content Container -->
     <div
       class="relative z-10 flex items-center justify-center h-screen px-4 bg-black/40"
     >
       <div
-        class="bg-white rounded-2xl shadow-xl p-3 sm:p-5 md:p-7 max-w-md w-full max-h-[90vh] overflow-y-auto overflow-hidden justify-center items-center"
+        class="bg-white rounded-2xl shadow-xl p-7 sm:p-7 md:p-7 max-w-md w-full max-h-[90vh] overflow-y-auto overflow-hidden justify-center items-center"
       >
         <div class="p-6 flex items-center justify-center">
           <img src="../img/Vector.png" alt="main logo" />
