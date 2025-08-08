@@ -150,6 +150,7 @@ function setLanguage(lang) {
 
   // Save lang + refresh categories
   localStorage.setItem("lang", lang);
+  window.refreshLangData?.(); // ← triggers trending + categories reload
 
   // ✅ Only call this ONCE, at the end:
   fetchAndRenderCategories(); // 👇 new function (moved from includes.js)

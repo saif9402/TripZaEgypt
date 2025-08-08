@@ -72,13 +72,19 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- Trending Now (Top Rated) ---
-async function fetchAndRenderTrendingTrip() {
+async function fetchAndRenderTrendingTrip(noCache = false) {
   const langCode = localStorage.getItem("lang") || "en";
   const langId = langCode === "deu" ? 1 : 2;
 
   const params = new URLSearchParams({
     IsTopRated: true,
     TranslationLanguageId: langId,
+  });
+
+  if (noCache) params.append("_ts", Date.now());
+
+  const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`, {
+    cache: "no-store",
   });
 
   try {
@@ -129,14 +135,27 @@ async function fetchAndRenderTrendingTrip() {
       : "img/trending.png";
     if (img) img.setAttribute("href", imgUrl);
 
-    // Little description line (since API doesn’t return activities)
+    const i18n =
+      {
+        en: {
+          mins: "min",
+          available: "Available now",
+          unavailable: "Currently unavailable",
+        },
+        deu: {
+          mins: "Min.",
+          available: "Jetzt verfügbar",
+          unavailable: "Derzeit nicht verfügbar",
+        },
+      }[langCode] || i18n.en;
+
     setText(
       "#activities",
       [
         `${top.category}`,
-        `${top.duration} min`,
-        top.isAvailable ? "Available now" : "Currently unavailable",
-      ].join("\n")
+        `${top.duration} ${i18n.mins}`,
+        top.isAvailable ? i18n.available : i18n.unavailable,
+      ].join(" • ")
     );
 
     // Book link -> details page
@@ -215,16 +234,18 @@ function fetchAndRenderCategories() {
     });
 }
 
+async function refreshLanguageDependentContent() {
+  // re-fetch anything that depends on the lang
+  await Promise.allSettled([
+    fetchAndRenderTrendingTrip(true), // pass noCache
+    fetchAndRenderCategories(),
+  ]);
+}
+window.refreshLangData = refreshLanguageDependentContent;
+
 function afterIncludesLoaded() {
   const savedLang = localStorage.getItem("lang") || "en";
   setLanguage(savedLang);
-
-  const select = document.getElementById("languageSelect");
-  if (select) {
-    select.addEventListener("change", () => {
-      setLanguage(select.value);
-    });
-  }
 
   fetchAndRenderCategories(); // ✅ call once here
   fetchAndRenderTrendingTrip();
