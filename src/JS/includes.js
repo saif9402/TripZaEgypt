@@ -62,90 +62,6 @@ function checkAuthAndIncludeHeader() {
     });
 }
 
-function fetchAndRenderTrending() {
-  const langCode = localStorage.getItem("lang") || "en";
-  const langId = langCode === "deu" ? 1 : 2;
-
-  const url = `/api/Trip/GetAllTrips?IsTopRated=true&languageId=${langId}&pageNumber=1&pageSize=10`;
-
-  const section = document
-    .querySelector("section [data-i18n='trend.name']")
-    ?.closest("section");
-
-  // Helper: paint one trip into the section
-  function renderTrendingTrip(trip) {
-    const imgEl = document.getElementById("trip-image");
-    const titleEl = document.getElementById("trip-title");
-    const ratingEl = document.getElementById("rating");
-    const reviewsEl = document.getElementById("reviews");
-    const locationEl = document.getElementById("location");
-    const descEl = document.getElementById("description");
-    const bookLinkEl = document.getElementById("book-link");
-
-    const image = trip.mainImageURL || "img/trip-fallback.jpg";
-    if (imgEl) imgEl.setAttribute("href", image);
-    if (titleEl) titleEl.textContent = trip.name ?? "Top Rated Trip";
-    if (ratingEl) ratingEl.textContent = (trip.rating ?? 0).toFixed(1);
-    if (reviewsEl) reviewsEl.textContent = `${trip.reviews ?? 0} reviews`;
-    if (locationEl) locationEl.textContent = trip.category ?? "—";
-    if (descEl) {
-      // List API doesn’t return a description; keep a short generic line
-      descEl.textContent = "Hand‑picked, highly rated by travelers like you.";
-    }
-    if (bookLinkEl) bookLinkEl.href = `/pages/trip-details.html?id=${trip.id}`;
-  }
-
-  // Helper: optional preloader so image swaps feel snappier
-  function preloadImages(list) {
-    list.forEach((t) => {
-      const src = t.mainImageURL;
-      if (src) {
-        const img = new Image();
-        img.src = src;
-      }
-    });
-  }
-
-  fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      const items = json?.data?.data || [];
-      if (!items.length) {
-        if (section) section.style.display = "none";
-        return;
-      }
-      if (section) section.style.display = "";
-
-      preloadImages(items);
-
-      // initial render
-      let i = 0;
-      renderTrendingTrip(items[i]);
-
-      // auto-rotate every 2s
-      let timer = setInterval(() => {
-        i = (i + 1) % items.length;
-        renderTrendingTrip(items[i]);
-      }, 2000);
-
-      // nice touch: pause on hover (optional)
-      if (section) {
-        section.addEventListener("mouseenter", () => clearInterval(timer));
-        section.addEventListener("mouseleave", () => {
-          clearInterval(timer);
-          timer = setInterval(() => {
-            i = (i + 1) % items.length;
-            renderTrendingTrip(items[i]);
-          }, 2000);
-        });
-      }
-    })
-    .catch((err) => {
-      console.error("Failed to load trending trips:", err);
-      if (section) section.style.display = "none";
-    });
-}
-
 window.addEventListener("DOMContentLoaded", () => {
   checkAuthAndIncludeHeader();
   includeHTML(
@@ -154,6 +70,73 @@ window.addEventListener("DOMContentLoaded", () => {
     checkAllIncludesLoaded
   );
 });
+
+// --- Trending Now (Top Rated) ---
+async function fetchAndRenderTrendingTrip() {
+  const langCode = localStorage.getItem("lang") || "en";
+  const langId = langCode === "deu" ? 1 : 2;
+
+  const params = new URLSearchParams({
+    IsTopRated: true,
+    LanguageId: langId,
+  });
+
+  try {
+    const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`);
+    const json = await res.json();
+
+    const list = json?.data?.data || [];
+    if (!json?.succeeded || !list.length) return;
+
+    // pick the best rated (just in case the API doesn't sort)
+    const top = list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
+
+    // helpers
+    const setText = (sel, txt) => {
+      const el = document.querySelector(sel);
+      if (el) el.textContent = txt;
+    };
+
+    // Title, rating, reviews
+    setText("#trip-title", top.name);
+    setText("#rating", (top.rating ?? 0).toFixed(1));
+    setText("#reviews", `${top.reviews} review${top.reviews === 1 ? "" : "s"}`);
+
+    // Image (blob <image> inside the SVG)
+    const img = document.querySelector("#trip-image");
+    const imgUrl = top.mainImageURL
+      ? top.mainImageURL.startsWith("http")
+        ? top.mainImageURL
+        : `${top.mainImageURL.startsWith("/") ? "" : "/"}${top.mainImageURL}`
+      : "img/trending.png";
+    if (img) img.setAttribute("href", imgUrl);
+
+    // Little description line (since API doesn’t return activities)
+    setText(
+      "#activities",
+      [
+        `Category: ${top.category}`,
+        `Duration: ${top.duration} min`,
+        top.isAvailable ? "Available now" : "Currently unavailable",
+      ].join(" • ")
+    );
+
+    // Book link -> details page
+    const link = document.querySelector("#book-link");
+    if (link) link.href = `/pages/trip-details.html?id=${top.id}`;
+
+    // Optional: stars (add id="stars" to that span in your HTML if you want dynamic stars)
+    const starsEl = document.querySelector("#stars");
+    if (starsEl) {
+      const r = Math.max(0, Math.min(5, Number(top.rating) || 0));
+      const full = Math.floor(r);
+      const empty = 5 - full;
+      starsEl.textContent = "★".repeat(full) + "☆".repeat(empty);
+    }
+  } catch (e) {
+    console.error("Failed to load trending trip:", e);
+  }
+}
 
 function fetchAndRenderCategories() {
   const langCode = localStorage.getItem("lang") || "en";
@@ -226,7 +209,7 @@ function afterIncludesLoaded() {
   }
 
   fetchAndRenderCategories(); // ✅ call once here
-  fetchAndRenderTrending();
+  fetchAndRenderTrendingTrip();
 
   if (typeof bindPageTransitions === "function") {
     bindPageTransitions();
