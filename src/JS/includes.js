@@ -78,7 +78,7 @@ async function fetchAndRenderTrendingTrip() {
 
   const params = new URLSearchParams({
     IsTopRated: true,
-    LanguageId: langId,
+    TranslationLanguageId: langId,
   });
 
   try {
@@ -90,6 +90,24 @@ async function fetchAndRenderTrendingTrip() {
 
     // pick the best rated (just in case the API doesn't sort)
     const top = list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
+
+    // Price
+    const priceEl = document.querySelector("#price");
+    if (priceEl && top.price != null) {
+      priceEl.textContent = formatPrice(top.price, "$", "en-EG") + " / person";
+    }
+
+    function formatPrice(value, currency = "EGP", locale = "en-EG") {
+      try {
+        return new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency,
+          maximumFractionDigits: 0,
+        }).format(value);
+      } catch {
+        return `${value} ${currency}`;
+      }
+    }
 
     // helpers
     const setText = (sel, txt) => {
@@ -115,10 +133,10 @@ async function fetchAndRenderTrendingTrip() {
     setText(
       "#activities",
       [
-        `Category: ${top.category}`,
-        `Duration: ${top.duration} min`,
+        `${top.category}`,
+        `${top.duration} min`,
         top.isAvailable ? "Available now" : "Currently unavailable",
-      ].join(" • ")
+      ].join("\n")
     );
 
     // Book link -> details page
