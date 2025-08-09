@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://tourguidehurghda.runasp.net/api/:path*"
+      "destination": "https://localhost:7134/api/:path*"
     }
   ]
 }
