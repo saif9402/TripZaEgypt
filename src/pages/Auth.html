@@ -91,12 +91,12 @@
         if (result.succeeded && result.data && result.data.accessToken) {
           localStorage.setItem("accessToken", result.data.accessToken);
 
-          if(result.code==200)
+          if(result.statusCode==200)
           {
             window.location.href = "../index.html";
 
           }
-          else if(result.code==201)
+          else if(result.statusCode==201)
           {
             window.location.href = "profile.html";
           }
