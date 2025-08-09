@@ -91,8 +91,16 @@
         if (result.succeeded && result.data && result.data.accessToken) {
           localStorage.setItem("accessToken", result.data.accessToken);
 
-          // ✅ 
-          window.location.href = "../index.html";
+          if(result.code==200)
+          {
+            window.location.href = "../index.html";
+
+          }
+          else if(result.code==201)
+          {
+            window.location.href = "profile.html";
+          }
+         
         } else {
           console.error("Exchange failed:", result.message);
         }
