@@ -1,4 +1,6 @@
 // Create and append the transition overlay
+console.log(localStorage.getItem('test'));
+
 const transitionEl = document.createElement("div");
 transitionEl.className = "page-transition";
 document.body.appendChild(transitionEl);

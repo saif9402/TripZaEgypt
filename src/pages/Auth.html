@@ -90,7 +90,7 @@
         const result = await response.json();
         if (result.succeeded && result.data && result.data.accessToken) {
           localStorage.setItem("accessToken", result.data.accessToken);
-          console.debug(result);
+          localStorage.setItem("test", result);
 
           if(result.statusCode==200)
           {
