@@ -92,12 +92,12 @@
           localStorage.setItem("accessToken", result.data.accessToken);
           localStorage.setItem("test", result.statusCode);
 
-          if(result.statusCode==200)
+          if(result.statusCode==201)
           {
             window.location.href = "../index.html";
 
           }
-          else if(result.statusCode==201)
+          else if(result.statusCode==200)
           {
             window.location.href = "profile.html";
           }
