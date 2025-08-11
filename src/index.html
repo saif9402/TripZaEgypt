@@ -135,6 +135,7 @@
 
     <!-- Most Booked Trip Section -->
     <section
+      id="trending-section"
       class="relative h-[600px] w-full overflow-hidden text-white mt-7 mb-3"
     >
       <!-- 🔵 Blurred Background Image -->
@@ -151,87 +152,7 @@
       </div>
 
       <!-- 🌟 Foreground Content -->
-      <div
-        class="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10 px-6 py-16 h-full"
-      >
-        <!-- 🎨 Blob-Shaped Trip Image -->
-        <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
-          <svg
-            viewBox="0 0 200 200"
-            class="absolute w-full h-full"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <!-- The blob shape -->
-              <clipPath id="blobClipTrending" clipPathUnits="userSpaceOnUse">
-                <path
-                  d="M49.7,-63.3C63.6,-56.7,74.2,-42.6,76.5,-27.6C78.8,-12.6,72.7,3.2,65.3,16.4C57.9,29.6,49.1,40.3,38.3,50.1C27.4,60,13.7,68.9,-2.5,72.2C-18.8,75.5,-37.6,73.3,-50.4,62.6C-63.2,51.9,-70.1,32.8,-71.8,14.8C-73.4,-3.2,-69.9,-20.1,-61.5,-34.2C-53.1,-48.3,-39.9,-59.5,-25.2,-66.6C-10.5,-73.6,5.6,-76.5,20.6,-72.3C35.6,-68.2,49.7,-56.3,49.7,-63.3Z"
-                  transform="translate(100 100)"
-                />
-              </clipPath>
-            </defs>
-
-            <!-- Your image, clipped to the blob -->
-            <image
-              id="trip-image"
-              x="0"
-              y="0"
-              width="200"
-              height="200"
-              preserveAspectRatio="xMidYMid slice"
-              clip-path="url(#blobClipTrending)"
-              href="https://via.placeholder.com/800"
-            />
-          </svg>
-        </div>
-
-        <!-- 📄 Trip Details -->
-        <div class="flex-1 space-y-4">
-          <span
-            data-i18n="trend.name"
-            class="bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block"
-            >TRENDING NOW</span
-          >
-
-          <a href="#" class="flex">
-            <span id="trip-title" class="text-3xl font-bold text-gray-100 mb-2"
-              >Orange Bay</span
-            >
-          </a>
-
-          <div class="flex items-center text-sm space-x-3 text-gray-100">
-            <span id="price" class="font-semibold text-2xl"></span>
-            <span>|</span>
-            <span class="flex items-center gap-1">
-              <span id="stars" class="text-yellow-400 text-lg">★★★★★</span>
-              <span id="rating" class="font-semibold">4.9</span>
-              (<span id="reviews">300 reviews</span>)
-            </span>
-          </div>
-
-          <p class="text-gray-200 max-w-xl" id="activities"></p>
-
-          <div class="flex items-center gap-4 pt-4">
-            <a
-              data-i18n="trend.button"
-              id="book-link"
-              href="#"
-              class="bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition"
-              >Book Now</a
-            >
-            <button
-              class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center"
-            >
-              🤍
-            </button>
-            <button
-              class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center"
-            >
-              🔗
-            </button>
-          </div>
-        </div>
-      </div>
+      <div id="trending-root" class="relative z-10 h-full"></div>
     </section>
 
     <div class="text-center mb-7 mt-5">
