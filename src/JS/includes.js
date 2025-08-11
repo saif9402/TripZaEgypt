@@ -77,6 +77,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // - Slides in from the right every 3s
 // - Description is generated from "activities" array
 
+// --- Top Rated (Trending) Slider with Next/Prev buttons ---
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
   if (!root) return console.warn("Missing #trending-root");
@@ -110,13 +111,11 @@ async function initTopRatedSlider(noCache = false) {
     return;
   }
 
-  // Sort best first (rating desc, then reviews desc)
   trips.sort(
     (a, b) =>
       (b.rating ?? 0) - (a.rating ?? 0) || (b.reviews ?? 0) - (a.reviews ?? 0)
   );
 
-  // i18n bits shown in the card
   const i18n =
     langCode === "deu"
       ? {
@@ -126,6 +125,8 @@ async function initTopRatedSlider(noCache = false) {
           trending: "JETZT IM TREND",
           book: "Jetzt buchen",
           reviews: "Bewertungen",
+          prev: "Vorheriger",
+          next: "Nächster",
         }
       : {
           mins: "min",
@@ -134,9 +135,10 @@ async function initTopRatedSlider(noCache = false) {
           trending: "TRENDING NOW",
           book: "Book Now",
           reviews: "reviews",
+          prev: "Previous",
+          next: "Next",
         };
 
-  // formatters/helpers
   const formatPrice = (
     value,
     currency = "EGP",
@@ -180,7 +182,6 @@ async function initTopRatedSlider(noCache = false) {
           }[c])
       );
 
-  // Turn activities[] into a nice one-paragraph description
   const activitiesToDescription = (arr, maxChars = 260) => {
     const cleaned = (arr || [])
       .map((t) => t.replace(/^[•\-\s]+/, "").trim())
@@ -190,7 +191,7 @@ async function initTopRatedSlider(noCache = false) {
     return joined.slice(0, maxChars).replace(/\s+\S*$/, "") + "…";
   };
 
-  // --- Build slider viewport with 2 layers we swap/animate ---
+  // Viewport + slides
   const viewport = document.createElement("div");
   viewport.className = "relative max-w-7xl mx-auto h-full";
   root.appendChild(viewport);
@@ -212,7 +213,6 @@ async function initTopRatedSlider(noCache = false) {
   let next = slideB;
 
   const slideHTML = (t) => `
-    <!-- image blob -->
     <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
       <svg viewBox="0 0 200 200" class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -228,7 +228,6 @@ async function initTopRatedSlider(noCache = false) {
       </svg>
     </div>
 
-    <!-- details -->
     <div class="flex-1 space-y-4">
       <span class="bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block">${
         i18n.trending
@@ -254,7 +253,6 @@ async function initTopRatedSlider(noCache = false) {
         </span>
       </div>
 
-      <!-- ✅ activities as a good description -->
       <p class="text-gray-200/95 max-w-xl leading-relaxed">
         ${esc(activitiesToDescription(t.activities))}
       </p>
@@ -281,11 +279,17 @@ async function initTopRatedSlider(noCache = false) {
   renderInto(active, trips[currentIndex]);
   active.style.transform = "translateX(0)";
 
+  const AUTOPLAY_MS = 3000;
+  let timer;
+
+  const start = () => (timer = setInterval(goNext, AUTOPLAY_MS));
+  const stop = () => clearInterval(timer);
+
   const goNext = () => {
+    if (trips.length <= 1) return;
     const nextIndex = (currentIndex + 1) % trips.length;
     renderInto(next, trips[nextIndex]);
 
-    // place incoming on the right, then animate both
     next.style.transform = "translateX(100%)";
     requestAnimationFrame(() => {
       active.style.transform = "translateX(-100%)";
@@ -296,16 +300,76 @@ async function initTopRatedSlider(noCache = false) {
     [active, next] = [next, active];
   };
 
-  // autoplay: change every 3000ms (💡 set to 2000 for 2s)
-  let timer = setInterval(goNext, 3000);
-  viewport.addEventListener("mouseenter", () => clearInterval(timer));
-  viewport.addEventListener(
-    "mouseleave",
-    () => (timer = setInterval(goNext, 3000))
-  );
+  const goPrev = () => {
+    if (trips.length <= 1) return;
+    const prevIndex = (currentIndex - 1 + trips.length) % trips.length;
+    renderInto(next, trips[prevIndex]);
 
-  // expose manual control if you want external buttons later
+    // bring incoming slide from the left
+    next.style.transform = "translateX(-100%)";
+    requestAnimationFrame(() => {
+      active.style.transform = "translateX(100%)";
+      next.style.transform = "translateX(0)";
+    });
+
+    currentIndex = prevIndex;
+    [active, next] = [next, active];
+  };
+
+  // --- Buttons (injected) ---
+  const mkBtn = (side, label, aria) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.setAttribute("aria-label", aria);
+    btn.className =
+      `absolute top-1/2 ${
+        side === "left" ? "left-4" : "right-4"
+      } -translate-y-1/2` +
+      " bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur z-20 focus:outline-none focus:ring-2 focus:ring-white/60";
+    btn.textContent = side === "left" ? "‹" : "›";
+    return btn;
+  };
+
+  const prevBtn = mkBtn("left", i18n.prev, i18n.prev);
+  const nextBtn = mkBtn("right", i18n.next, i18n.next);
+
+  prevBtn.addEventListener("click", () => {
+    stop();
+    goPrev();
+    start();
+  });
+  nextBtn.addEventListener("click", () => {
+    stop();
+    goNext();
+    start();
+  });
+
+  viewport.append(prevBtn, nextBtn);
+
+  // Pause on hover (viewport & buttons are covered)
+  viewport.addEventListener("mouseenter", stop);
+  viewport.addEventListener("mouseleave", start);
+
+  // Keyboard support
+  viewport.tabIndex = 0;
+  viewport.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") {
+      stop();
+      goNext();
+      start();
+    } else if (e.key === "ArrowLeft") {
+      stop();
+      goPrev();
+      start();
+    }
+  });
+
+  // start autoplay if more than one slide
+  if (trips.length > 1) start();
+
+  // Expose manual controls if you want to control from outside
   window.nextTrendingSlide = goNext;
+  window.prevTrendingSlide = goPrev;
 }
 
 // --- Categories are unchanged (kept from your file) ---
