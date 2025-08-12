@@ -168,19 +168,17 @@ async function initTopRatedSlider(noCache = false) {
   };
 
   const esc = (s) =>
-    (s ?? "")
-      .toString()
-      .replace(
-        /[&<>"']/g,
-        (c) =>
-          ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;",
-          }[c])
-      );
+    (s ?? "").toString().replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[c])
+    );
 
   const activitiesToDescription = (arr, maxChars = 260) => {
     const cleaned = (arr || [])
@@ -346,10 +344,6 @@ async function initTopRatedSlider(noCache = false) {
 
   viewport.append(prevBtn, nextBtn);
 
-  // Pause on hover (viewport & buttons are covered)
-  viewport.addEventListener("mouseenter", stop);
-  viewport.addEventListener("mouseleave", start);
-
   // Keyboard support
   viewport.tabIndex = 0;
   viewport.addEventListener("keydown", (e) => {
@@ -371,9 +365,6 @@ async function initTopRatedSlider(noCache = false) {
   window.nextTrendingSlide = goNext;
   window.prevTrendingSlide = goPrev;
 }
-
-// --- Categories are unchanged (kept from your file) ---
-// fetchAndRenderCategories() remains as-is
 
 // ✅ Make lang switch refetch both categories & the trending slider
 async function refreshLanguageDependentContent() {
