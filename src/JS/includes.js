@@ -194,7 +194,7 @@ async function initTopRatedSlider(noCache = false) {
   const makeSlide = () => {
     const div = document.createElement("div");
     div.className =
-      "relative inset-0 flex flex-col md:flex-row justify-center items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
+      "absolute inset-0 flex flex-col md:flex-row justify-center items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
     // Starting off-screen by default; we'll prime it below
     div.style.transform = "translateX(100%)";
     return div;
@@ -483,13 +483,22 @@ function fetchAndRenderCategories() {
         const categoryButtons = document.getElementById("categoryButtons");
         if (categoryButtons) {
           categoryButtons.innerHTML = "";
-          categories.forEach((cat) => {
+          categories.forEach((cat, idx) => {
             const btn = document.createElement("button");
             btn.className =
               "bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition";
             btn.textContent = cat.name;
-            btn.addEventListener("click", () => loadTripsByCategory(cat.id));
+            btn.addEventListener("click", () => {
+              setActiveCategoryButton(btn);
+              loadTripsByCategory(cat.id, { noCache: true });
+            });
             categoryButtons.appendChild(btn);
+
+            // Auto-load the first category once
+            if (idx === 0) {
+              setActiveCategoryButton(btn);
+              loadTripsByCategory(cat.id);
+            }
           });
         }
       } else {
@@ -499,6 +508,258 @@ function fetchAndRenderCategories() {
     .catch((err) => {
       console.error("Error loading categories for header & filter:", err);
     });
+}
+
+// ---------- Helpers for Category Trips ----------
+const _esc = (s) =>
+  (s ?? "").toString().replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c])
+  );
+
+const _safeImg = (u) =>
+  !u
+    ? "https://via.placeholder.com/800x450"
+    : u.startsWith("http")
+    ? u
+    : u.startsWith("/")
+    ? u
+    : `/${u}`;
+
+const _stars = (r) => {
+  const v = Math.max(0, Math.min(5, Number(r) || 0));
+  const full = Math.floor(v);
+  return "★".repeat(full) + "☆".repeat(5 - full);
+};
+
+const _minsToLabel = (mins) => {
+  const m = Number(mins) || 0;
+  const h = Math.floor(m / 60),
+    r = m % 60;
+  if (h && r) return `${h} h ${r} min`;
+  if (h) return `${h} h`;
+  return `${m} min`;
+};
+
+const _activitiesPreview = (arr, max = 220) => {
+  const s = (arr || [])
+    .map((t) => t.replace(/^[•\-\s]+/, "").trim())
+    .filter(Boolean)
+    .join(" • ");
+  return s.length <= max ? s : s.slice(0, max).replace(/\s+\S*$/, "") + "…";
+};
+
+const _formatPrice = (value, currency = "EGP") => {
+  const langCode = localStorage.getItem("lang") || "en";
+  const locale = langCode === "deu" ? "de-DE" : "en-EG";
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value} ${currency}`;
+  }
+};
+
+const _skeletonCards = (n = 4) =>
+  Array.from({ length: n })
+    .map(
+      () => `
+    <div class="animate-pulse bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="w-full h-48 bg-gray-200"></div>
+      <div class="p-4 space-y-3">
+        <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+        <div class="h-6 bg-gray-200 rounded w-1/3"></div>
+      </div>
+    </div>
+  `
+    )
+    .join("");
+
+const _emptyState = `
+  <div class="col-span-full text-center text-gray-500 py-10">
+    No trips found in this category.
+  </div>
+`;
+
+// Build one trip card
+function tripCardHTML(t) {
+  return `
+  <a
+    href="/pages/trip-details.html?id=${t.id ?? ""}"
+    class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden opacity-0 translate-y-3 will-change-transform"
+    data-animate="card"
+  >
+    <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
+    t.name || "Trip Image"
+  )}" class="w-full h-48 object-cover" />
+    <div class="p-4">
+      <h2 class="text-lg font-semibold text-gray-800 line-clamp-2">${_esc(
+        t.name || "Trip"
+      )}</h2>
+      <ul class="mt-2 text-sm text-gray-600 space-y-1">
+        <li class="flex items-center"><span class="mr-2">🕒</span>Duration ${_esc(
+          _minsToLabel(t.duration)
+        )}</li>
+        <li class="flex items-center"><span class="mr-2">🏷️</span>${_esc(
+          t.category || ""
+        )}</li>
+        <li class="flex items-center"><span class="mr-2">✅</span>${
+          t.isAvailable ? "Available" : "Unavailable"
+        }</li>
+      </ul>
+      <div class="mt-4 flex items-center justify-between">
+        <div class="flex items-center text-yellow-500">
+          ${_stars(t.rating)}
+          <span class="text-sm text-gray-500 ml-2">${
+            t.reviews ?? 0
+          } reviews</span>
+        </div>
+        <div class="text-green-600 font-semibold text-lg">
+          ${
+            t.price != null ? _formatPrice(t.price, "EGP") : ""
+          } <span class="text-sm text-gray-500">/person</span>
+        </div>
+      </div>
+    </div>
+  </a>`;
+}
+
+// Update the Featured Destination section with the first trip
+function renderFeatured(trip) {
+  const sec = document.getElementById("featuredSection");
+  const link = document.getElementById("featuredLink");
+  const title = document.getElementById("featuredTitle");
+  const desc = document.getElementById("featuredDesc");
+  const tags = document.getElementById("featuredTags");
+
+  if (sec)
+    sec.style.backgroundImage = `url('${_esc(_safeImg(trip.mainImageURL))}')`;
+  if (link) link.href = `/pages/trip-details.html?id=${trip.id ?? ""}`;
+  if (title) title.textContent = trip.name || "Featured Trip";
+  if (desc)
+    desc.textContent =
+      _activitiesPreview(trip.activities, 200) ||
+      "Explore this experience in Hurghada.";
+
+  if (tags) {
+    const pills = [];
+    if (trip.category)
+      pills.push({
+        c: "bg-blue-100 text-blue-600",
+        icon: "fa-map-marker-alt",
+        label: trip.category,
+      });
+    if (trip.isBestSeller)
+      pills.push({
+        c: "bg-yellow-100 text-yellow-700",
+        icon: "fa-bolt",
+        label: "Best Seller",
+      });
+    pills.push({
+      c: "bg-green-100 text-green-700",
+      icon: "fa-clock",
+      label: _minsToLabel(trip.duration),
+    });
+    pills.push({
+      c: "bg-purple-100 text-purple-600",
+      icon: "fa-star",
+      label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
+    });
+
+    tags.innerHTML = pills
+      .map(
+        (p) => `
+      <span class="${
+        p.c
+      } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+        <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
+      </span>
+    `
+      )
+      .join("");
+  }
+}
+
+// ------- Main: fetch trips for a category and render -------
+async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
+  const langCode = localStorage.getItem("lang") || "en";
+  const langId = langCode === "deu" ? 1 : 2;
+
+  const grid = document.getElementById("categoryTrips");
+  if (!grid) return;
+
+  // skeletons while loading
+  grid.innerHTML = _skeletonCards(4);
+
+  const params = new URLSearchParams({
+    CategoryId: categoryId,
+    TranslationLanguageId: langId,
+    PageSize: 50,
+    PageNumber: 1,
+  });
+  if (noCache) params.append("_ts", Date.now());
+
+  try {
+    const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`, {
+      cache: "no-store",
+    });
+    const json = await res.json();
+    const trips = json?.data?.data ?? [];
+
+    if (!trips.length) {
+      grid.innerHTML = _emptyState;
+      return;
+    }
+
+    // 1) Featured
+    renderFeatured(trips[0]);
+
+    // 2) Next up to 4 cards
+    const cards = trips.slice(1, 5).map(tripCardHTML).join("");
+    grid.innerHTML = cards || _emptyState;
+
+    // 3) Stagger-in animation
+    requestAnimationFrame(() => {
+      document.querySelectorAll('[data-animate="card"]').forEach((el, i) => {
+        setTimeout(() => {
+          el.style.transition = "opacity .4s ease, transform .4s ease";
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+        }, 60 * i);
+      });
+    });
+  } catch (e) {
+    console.error("Failed to load trips by category:", e);
+    grid.innerHTML = `
+      <div class="col-span-full text-center text-red-500 py-10">
+        Something went wrong loading trips. Please try again.
+      </div>
+    `;
+  }
+}
+
+// Optional: visually mark the active category button
+function setActiveCategoryButton(clickedBtn) {
+  const wrap = document.getElementById("categoryButtons");
+  if (!wrap) return;
+  wrap.querySelectorAll("button").forEach((b) => {
+    b.classList.remove("bg-blue-500", "text-white");
+    b.classList.add("bg-gray-100");
+  });
+  clickedBtn.classList.remove("bg-gray-100");
+  clickedBtn.classList.add("bg-blue-500", "text-white");
 }
 
 let loadedCount = 0;

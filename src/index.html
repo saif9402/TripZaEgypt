@@ -191,207 +191,31 @@
     <div class="px-4 relative flex justify-center">
       <!-- Background Image -->
       <section
+        id="featuredSection"
         class="relative z-0 h-[50vh] bg-cover bg-center w-full max-w-7xl rounded-xl flex items-end justify-center"
-        style="background-image: url('img/most\ popular.png')"
+        style="background-image: url('img/most popular.png')"
       >
         <!-- Floating Info Card -->
         <a
+          id="featuredLink"
           href="pages/trip-details.html"
           class="relative bottom-15 translate-y-1/2 bg-white rounded-2xl shadow-lg p-6 max-w-4xl w-full mx-auto z-10"
         >
           <!-- Title -->
-          <h3 class="text-3xl font-bold text-gray-800 mb-2">Orange Bay</h3>
+          <h3 id="featuredTitle" class="text-3xl font-bold text-gray-800 mb-2">
+            Orange Bay
+          </h3>
           <!-- Description -->
-          <p class="text-gray-600 text-sm mb-4">
+          <p id="featuredDesc" class="text-gray-600 text-sm mb-4">
             Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet
-            sint. Velit officia consequat duis enim velit mollit. Exercitation
-            veniam consequat sunt nostrud amet.
+            sint...
           </p>
           <!-- Tags -->
-          <div class="flex flex-wrap gap-3">
-            <span
-              class="bg-purple-100 text-purple-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
-            >
-              <i class="fas fa-subway text-xs"></i> Public Transportations
-            </span>
-            <span
-              class="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
-            >
-              <i class="fas fa-leaf text-xs"></i> Nature & Adventure
-            </span>
-            <span
-              class="bg-yellow-100 text-yellow-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
-            >
-              <i class="fas fa-taxi text-xs"></i> Private Transportations
-            </span>
-            <span
-              class="bg-red-100 text-red-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
-            >
-              <i class="fas fa-briefcase text-xs"></i> Business Tours
-            </span>
-            <span
-              class="bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
-            >
-              <i class="fas fa-map-marker-alt text-xs"></i> Local Visit
-            </span>
+          <div id="featuredTags" class="flex flex-wrap gap-3">
+            <!-- Tags will be injected -->
           </div>
         </a>
       </section>
-    </div>
-
-    <div class="relative mt-24 md:mt-16 lg:mt-12 px-4 scrollbar-hide">
-      <div
-        class="relative bottom grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 m-7 mt-24 md:mt-16 lg:mt-14"
-      >
-        <!-- Place cards here -->
-
-        <!-- Card Template Start -->
-        <a
-          href="#"
-          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <img
-            src="https://via.placeholder.com/400x200"
-            alt="Trip Image"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-800">
-              Westminster to Greenwich River Thames
-            </h2>
-            <ul class="mt-2 text-sm text-gray-600 space-y-1">
-              <li class="flex items-center">
-                <span class="mr-2">🕒</span>Duration 2 hours
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">🚐</span>Transport Facility
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-              </li>
-            </ul>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center text-yellow-500">
-                ★★★★☆
-                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-              </div>
-              <div class="text-green-600 font-semibold text-lg">
-                $35.00 <span class="text-sm text-gray-500">/person</span>
-              </div>
-            </div>
-          </div>
-        </a>
-        <!-- Card Template End -->
-
-        <!-- Duplicate and update content accordingly -->
-        <a
-          href="#"
-          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <img
-            src="https://via.placeholder.com/400x200"
-            alt="Trip Image"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-800">
-              Vintage Double Decker Bus Tour & Thames
-            </h2>
-            <ul class="mt-2 text-sm text-gray-600 space-y-1">
-              <li class="flex items-center">
-                <span class="mr-2">🕒</span>Duration 2 hours
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">🚐</span>Transport Facility
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-              </li>
-            </ul>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center text-yellow-500">
-                ★★★★☆
-                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-              </div>
-              <div class="text-green-600 font-semibold text-lg">
-                $35.00 <span class="text-sm text-gray-500">/person</span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a
-          href="#"
-          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <img
-            src="https://via.placeholder.com/400x200"
-            alt="Trip Image"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-800">
-              Magic of London Tour with Afternoon Tea at
-            </h2>
-            <ul class="mt-2 text-sm text-gray-600 space-y-1">
-              <li class="flex items-center">
-                <span class="mr-2">🕒</span>Duration 2 hours
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">🚐</span>Transport Facility
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-              </li>
-            </ul>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center text-yellow-500">
-                ★★★★☆
-                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-              </div>
-              <div class="text-green-600 font-semibold text-lg">
-                $35.00 <span class="text-sm text-gray-500">/person</span>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a
-          href="#"
-          class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <img
-            src="https://via.placeholder.com/400x200"
-            alt="Trip Image"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-800">
-              Magic of London Tour with Afternoon Tea at
-            </h2>
-            <ul class="mt-2 text-sm text-gray-600 space-y-1">
-              <li class="flex items-center">
-                <span class="mr-2">🕒</span>Duration 2 hours
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">🚐</span>Transport Facility
-              </li>
-              <li class="flex items-center">
-                <span class="mr-2">👨‍👩‍👧‍👦</span>Family Plan
-              </li>
-            </ul>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center text-yellow-500">
-                ★★★★☆
-                <span class="text-sm text-gray-500 ml-2">584 reviews</span>
-              </div>
-              <div class="text-green-600 font-semibold text-lg">
-                $35.00 <span class="text-sm text-gray-500">/person</span>
-              </div>
-            </div>
-          </div>
-        </a>
-      </div>
     </div>
 
     <div class="text-center mt-7 mb-7">
