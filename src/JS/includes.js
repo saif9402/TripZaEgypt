@@ -598,8 +598,8 @@ function tripCardHTML(t) {
   return `
   <a
     href="/pages/trip-details.html?id=${t.id ?? ""}"
-    class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden opacity-0 translate-y-3 will-change-transform"
-    data-animate="card"
+    class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+     data-animate="card"
   >
     <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
     t.name || "Trip Image"
