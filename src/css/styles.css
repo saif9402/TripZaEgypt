@@ -109,3 +109,103 @@
     display: none !important;
   }
 }
+
+/* ---------- Trending slider mobile polish ---------- */
+#trending-section .trending-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); /* better contrast on busy bg */
+}
+
+#trending-section .trending-title {
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  display: -webkit-box; /* clamp to 2 lines */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#trending-section .trending-desc {
+  opacity: 0.95;
+  line-height: 1.45;
+  display: -webkit-box; /* clamp to 3 lines */
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#trending-section .meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap; /* allow breaking under price */
+}
+
+#trending-section .trending-cta {
+  border-radius: 9999px;
+}
+
+#trending-section .blob img,
+#trending-section .blob svg {
+  border-radius: 9999px;
+}
+
+/* --- small phones --- */
+@media (max-width: 480px) {
+  #trending-section .trending-wrap {
+    padding: 1rem 1rem;
+    gap: 0.75rem;
+  }
+  #trending-section .blob {
+    width: 120px;
+    height: 120px;
+  }
+  #trending-section .trending-pill {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+  }
+  #trending-section .trending-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.1rem;
+  }
+  #trending-section .trending-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  #trending-section .trending-rating {
+    font-size: 0.9rem;
+  }
+  #trending-section .meta-sep {
+    display: none;
+  } /* hide the pipe on mobile */
+  #trending-section .trending-desc {
+    font-size: 0.92rem;
+    max-width: 30ch;
+  }
+  #trending-section .trending-actions {
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+  }
+  #trending-section .trending-cta {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+  #trending-section .trending-actions button {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* --- extra tiny devices --- */
+@media (max-width: 360px) {
+  #trending-section .trending-title {
+    font-size: 1.35rem;
+  }
+  #trending-section .trending-price {
+    font-size: 1rem;
+  }
+  #trending-section .trending-desc {
+    font-size: 0.88rem;
+    max-width: 26ch;
+  }
+}

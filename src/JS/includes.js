@@ -213,7 +213,7 @@ async function initTopRatedSlider(noCache = false) {
   const slideHTML = (t) => {
     const clipId = uid();
     return `
-    <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
+    <div class="blob relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
       <svg viewBox="0 0 200 200" class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="${clipId}" clipPathUnits="userSpaceOnUse">
@@ -228,42 +228,42 @@ async function initTopRatedSlider(noCache = false) {
       </svg>
     </div>
 
-    <div class="flex-1 space-y-4">
-      <span class="bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block">${
-        i18n.trending
-      }</span>
+    <div class="trending-text flex-1 space-y-3 md:space-y-4 trending-wrap">
+      <span class="trending-pill bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block">
+        ${i18n.trending}
+      </span>
 
       <a href="/pages/trip-details.html?id=${t.id || ""}" class="flex">
-        <span class="text-3xl font-bold text-gray-100 mb-2">${esc(
-          t.name || "Top-rated trip"
-        )}</span>
+        <span class="trending-title text-3xl md:text-4xl font-bold text-gray-100 mb-2">
+          ${esc(t.name || "Top-rated trip")}
+        </span>
       </a>
 
-      <div class="flex items-center text-sm space-x-3 text-gray-100">
-        <span class="font-semibold text-2xl">${
-          t.price != null ? formatPrice(t.price, "EGP") + " / person" : ""
+      <div class="meta text-gray-100">
+        <span class="trending-price text-2xl">${
+          t.price != null ? formatPrice(t.price, "EGP") + "&nbsp;/ person" : ""
         }</span>
-        <span>|</span>
-        <span class="flex items-center gap-1">
+        <span class="meta-sep">|</span>
+        <span class="trending-rating inline-flex items-center gap-1">
           <span class="text-yellow-400 text-lg">${stars(t.rating)}</span>
           <span class="font-semibold">${(Number(t.rating) || 0).toFixed(
             1
           )}</span>
-          (<span>${t.reviews ?? 0} ${i18n.reviews}</span>)
+          <span class="opacity-90">(${t.reviews ?? 0} ${i18n.reviews})</span>
         </span>
       </div>
 
-      <p class="text-gray-200/95 max-w-xl leading-relaxed">
+      <p class="trending-desc text-gray-200/95 max-w-xl leading-relaxed">
         ${esc(activitiesToDescription(t.activities))}
       </p>
 
-      <div class="flex items-center gap-4 pt-4">
+      <div class="trending-actions flex items-center gap-3 md:gap-4 pt-2 md:pt-4">
         <a href="/pages/trip-details.html?id=${t.id || ""}"
-           class="bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-6 py-3 rounded-full shadow-lg transition">
+           class="trending-cta bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-6 py-3 shadow-lg transition">
            ${i18n.book}
         </a>
-        <button class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🤍</button>
-        <button class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🔗</button>
+        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🤍</button>
+        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🔗</button>
       </div>
     </div>
   `;
