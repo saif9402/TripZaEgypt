@@ -737,7 +737,7 @@ const _emptyState = `
 function tripCardHTML(t) {
   return `
   <a href="/pages/trip-details.html?id=${t.id ?? ""}" 
-      class="trip-card transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+      class=" transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
 
   data-animate="card">
     <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
