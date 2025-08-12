@@ -102,3 +102,10 @@
   color: rgba(0, 0, 0, 0.5); /* Tailwind black/50 */
   pointer-events: none;
 }
+
+/* Hide slider arrows on small screens */
+@media (max-width: 640px) {
+  .trending-nav {
+    display: none !important;
+  }
+}

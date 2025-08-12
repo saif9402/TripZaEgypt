@@ -398,6 +398,9 @@ async function initTopRatedSlider(noCache = false) {
   const prevBtn = mkBtn("left", i18n.prev, i18n.prev);
   const nextBtn = mkBtn("right", i18n.next, i18n.next);
 
+  // add a stable class so we can target via CSS
+  prevBtn.classList.add("trending-nav");
+  nextBtn.classList.add("trending-nav");
   prevBtn.addEventListener("click", () => {
     stop();
     goPrev();
@@ -410,6 +413,127 @@ async function initTopRatedSlider(noCache = false) {
   });
 
   viewport.append(prevBtn, nextBtn);
+
+  // ---- Touch swipe for mobile ----
+  (function enableSwipe() {
+    let startX = 0,
+      startY = 0,
+      startT = 0,
+      isDown = false,
+      lockedToHorizontal = false;
+    const THRESHOLD = 40; // min px to consider a swipe
+    const MAX_TIME = 700; // max ms for a "quick" swipe
+
+    const onDown = (x, y) => {
+      isDown = true;
+      lockedToHorizontal = false;
+      startX = x;
+      startY = y;
+      startT = Date.now();
+      // pause autoplay while finger is down
+      stop();
+    };
+
+    const onMove = (x, y, evt) => {
+      if (!isDown) return;
+      const dx = x - startX;
+      const dy = y - startY;
+
+      // Decide if gesture is horizontal; if yes, prevent vertical scroll during gesture
+      if (!lockedToHorizontal) {
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+          lockedToHorizontal = Math.abs(dx) > Math.abs(dy);
+        }
+      }
+      if (lockedToHorizontal) {
+        evt && evt.preventDefault && evt.preventDefault(); // keep vertical page from scrolling while swiping
+      }
+    };
+
+    const onUp = (x, y) => {
+      if (!isDown) return;
+      const dx = x - startX;
+      const dy = y - startY;
+      const dt = Date.now() - startT;
+
+      if (
+        Math.abs(dx) > Math.abs(dy) &&
+        Math.abs(dx) > THRESHOLD &&
+        dt < MAX_TIME
+      ) {
+        // left swipe -> next, right swipe -> prev
+        if (dx < 0) {
+          goNext();
+        } else {
+          goPrev();
+        }
+      }
+      isDown = false;
+      // resume autoplay
+      if (trips.length > 1) start();
+    };
+
+    // Prefer Pointer Events
+    viewport.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.pointerType === "touch") onDown(e.clientX, e.clientY);
+      },
+      { passive: true }
+    );
+
+    viewport.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType === "touch") onMove(e.clientX, e.clientY, e);
+      },
+      { passive: false }
+    );
+
+    viewport.addEventListener(
+      "pointerup",
+      (e) => {
+        if (e.pointerType === "touch") onUp(e.clientX, e.clientY);
+      },
+      { passive: true }
+    );
+
+    viewport.addEventListener(
+      "pointercancel",
+      () => {
+        isDown = false;
+      },
+      { passive: true }
+    );
+
+    // Fallback for older iOS/browsers without proper Pointer Events
+    viewport.addEventListener(
+      "touchstart",
+      (e) => {
+        const t = e.touches[0];
+        if (t) onDown(t.clientX, t.clientY);
+      },
+      { passive: true }
+    );
+
+    viewport.addEventListener(
+      "touchmove",
+      (e) => {
+        const t = e.touches[0];
+        if (t) onMove(t.clientX, t.clientY, e);
+      },
+      { passive: false }
+    );
+
+    viewport.addEventListener(
+      "touchend",
+      (e) => {
+        const t = e.changedTouches[0];
+        if (t) onUp(t.clientX, t.clientY);
+      },
+      { passive: true }
+    );
+  })();
 
   // Keyboard support
   viewport.tabIndex = 0;
@@ -424,6 +548,9 @@ async function initTopRatedSlider(noCache = false) {
       start();
     }
   });
+
+  // Helps browser know we will handle horizontal gestures; vertical scroll stays native
+  viewport.style.touchAction = "pan-y";
 
   // start autoplay if more than one slide
   if (trips.length > 1) start();
