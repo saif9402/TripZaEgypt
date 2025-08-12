@@ -71,12 +71,6 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-// --- Trending Now (Top Rated) ---
-// --- Top Rated (Trending) Slider ---
-// Builds a slider that pulls: /api/Trip/GetAllTrips?IsTopRated=true&TranslationLanguageId=<1|2>
-// - Slides in from the right every 3s
-// - Description is generated from "activities" array
-
 // --- Top Rated (Trending) Slider with Next/Prev buttons ---
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
@@ -197,7 +191,7 @@ async function initTopRatedSlider(noCache = false) {
   const makeSlide = () => {
     const div = document.createElement("div");
     div.className =
-      "absolute inset-0 flex flex-col md:flex-row items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
+      "absolute inset-0 flex flex-col md:flex-row justify-center items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
     div.style.transform = "translateX(100%)";
     return div;
   };
