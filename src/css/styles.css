@@ -219,13 +219,13 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* Hover lift only on devices that actually have hover (desktops) */
+/* Hover lift only on devices that actually have hover (desktops)
 @media (hover: hover) and (pointer: fine) {
   .trip-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
   }
-}
+} */
 
 .trip-card__img {
   width: 100%;
