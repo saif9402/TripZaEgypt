@@ -736,40 +736,38 @@ const _emptyState = `
 // Build one trip card
 function tripCardHTML(t) {
   return `
-  <a
-    href="/pages/trip-details.html?id=${t.id ?? ""}"
-    class="transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-     data-animate="card"
-  >
+  <a href="/pages/trip-details.html?id=${t.id ?? ""}" 
+      class="trip-card transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
+
+  data-animate="card">
     <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
     t.name || "Trip Image"
-  )}" class="w-full h-48 object-cover" />
-    <div class="p-4">
-      <h2 class="text-lg font-semibold text-gray-800 line-clamp-2">${_esc(
-        t.name || "Trip"
-      )}</h2>
-      <ul class="mt-2 text-sm text-gray-600 space-y-1">
-        <li class="flex items-center"><span class="mr-2">🕒</span>Duration ${_esc(
+  )}" class="trip-card__img" />
+    <div class="trip-card__body">
+      <h2 class="trip-card__title">${_esc(t.name || "Trip")}</h2>
+
+      <div class="trip-card__meta">
+        <div class="trip-card__row"><span class="i">🕒</span><span>${_esc(
           _minsToLabel(t.duration)
-        )}</li>
-        <li class="flex items-center"><span class="mr-2">🏷️</span>${_esc(
+        )}</span></div>
+        <div class="trip-card__row"><span class="i">🏷️</span><span>${_esc(
           t.category || ""
-        )}</li>
-        <li class="flex items-center"><span class="mr-2">✅</span>${
-          t.isAvailable ? "Available" : "Unavailable"
-        }</li>
-      </ul>
-      <div class="mt-4 flex items-center justify-between">
-        <div class="flex items-center text-yellow-500">
-          ${_stars(t.rating)}
-          <span class="text-sm text-gray-500 ml-2">${
-            t.reviews ?? 0
-          } reviews</span>
+        )}</span></div>
+        <div class="trip-card__row"><span class="i">${
+          t.isAvailable ? "✅" : "⛔"
+        }</span><span>${
+    t.isAvailable ? "Available" : "Unavailable"
+  }</span></div>
+      </div>
+
+      <div class="trip-card__footer">
+        <div>
+          <span class="trip-card__ratingStars">${_stars(t.rating)}</span>
+          <span class="trip-card__reviews">${t.reviews ?? 0} reviews</span>
         </div>
-        <div class="text-green-600 font-semibold text-lg">
-          ${
-            t.price != null ? _formatPrice(t.price, "EGP") : ""
-          } <span class="text-sm text-gray-500">/person</span>
+        <div class="trip-card__price">
+          ${t.price != null ? _formatPrice(t.price, "EGP") : ""}
+          <span class="trip-card__per">/person</span>
         </div>
       </div>
     </div>
