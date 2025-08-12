@@ -75,6 +75,9 @@ window.addEventListener("DOMContentLoaded", () => {
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
   if (!root) return console.warn("Missing #trending-root");
+
+  // prevent duplicate timers/handlers if re-initialized (e.g., after language change)
+  if (root.__cleanup) root.__cleanup();
   root.innerHTML = "";
 
   const langCode = localStorage.getItem("lang") || "en";
@@ -192,6 +195,7 @@ async function initTopRatedSlider(noCache = false) {
     const div = document.createElement("div");
     div.className =
       "absolute inset-0 flex flex-col md:flex-row justify-center items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
+    // Starting off-screen by default; we'll prime it below
     div.style.transform = "translateX(100%)";
     return div;
   };
@@ -204,19 +208,23 @@ async function initTopRatedSlider(noCache = false) {
   let active = slideA;
   let next = slideB;
 
-  const slideHTML = (t) => `
+  const uid = () => "blobClipTrending_" + Math.random().toString(36).slice(2);
+
+  const slideHTML = (t) => {
+    const clipId = uid();
+    return `
     <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
       <svg viewBox="0 0 200 200" class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="blobClipTrending" clipPathUnits="userSpaceOnUse">
+          <clipPath id="${clipId}" clipPathUnits="userSpaceOnUse">
             <path
               d="M49.7,-63.3C63.6,-56.7,74.2,-42.6,76.5,-27.6C78.8,-12.6,72.7,3.2,65.3,16.4C57.9,29.6,49.1,40.3,38.3,50.1C27.4,60,13.7,68.9,-2.5,72.2C-18.8,75.5,-37.6,73.3,-50.4,62.6C-63.2,51.9,-70.1,32.8,-71.8,14.8C-73.4,-3.2,-69.9,-20.1,-61.5,-34.2C-53.1,-48.3,-39.9,-59.5,-25.2,-66.6C-10.5,-73.6,5.6,-76.5,20.6,-72.3C35.6,-68.2,49.7,-56.3,49.7,-63.3Z"
               transform="translate(100 100)"/>
           </clipPath>
         </defs>
-        <image x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid slice" clip-path="url(#blobClipTrending)" href="${esc(
-          safeImgUrl(t.mainImageURL)
-        )}" />
+        <image x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" href="${esc(
+      safeImgUrl(t.mainImageURL)
+    )}" />
       </svg>
     </div>
 
@@ -259,6 +267,7 @@ async function initTopRatedSlider(noCache = false) {
       </div>
     </div>
   `;
+  };
 
   const renderInto = (el, trip) => {
     el.innerHTML = `
@@ -269,27 +278,72 @@ async function initTopRatedSlider(noCache = false) {
 
   // initial render
   renderInto(active, trips[currentIndex]);
-  active.style.transform = "translateX(0)";
+
+  // --- PRIME INITIAL STATE so first transition animates correctly ---
+  const disableTransition = (el) => (el.style.transition = "none");
+  const enableTransition = (el) => (el.style.transition = "");
+
+  disableTransition(slideA);
+  disableTransition(slideB);
+
+  active.style.transform = "translateX(0)"; // on screen
+  next.style.transform = "translateX(100%)"; // off right
+
+  // layering
+  active.style.zIndex = "1";
+  next.style.zIndex = "0";
+
+  // force reflow to commit starting transforms without animating
+  void active.offsetWidth;
+
+  enableTransition(slideA);
+  enableTransition(slideB);
 
   const AUTOPLAY_MS = 3000;
-  let timer;
+  let timer = null;
 
-  const start = () => (timer = setInterval(goNext, AUTOPLAY_MS));
-  const stop = () => clearInterval(timer);
+  const start = () => {
+    stop();
+    timer = setInterval(goNext, AUTOPLAY_MS);
+  };
+  const stop = () => {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  };
+
+  // expose a cleanup to callers (e.g., before re-init)
+  root.__cleanup = () => {
+    stop();
+    // optional: remove global handles
+    window.nextTrendingSlide = undefined;
+    window.prevTrendingSlide = undefined;
+  };
 
   const goNext = () => {
     if (trips.length <= 1) return;
     const nextIndex = (currentIndex + 1) % trips.length;
     renderInto(next, trips[nextIndex]);
 
+    // position incoming to the right and bring it on top
     next.style.transform = "translateX(100%)";
+    next.style.zIndex = "2";
+    active.style.zIndex = "1";
+
+    // Double rAF to ensure styles are committed before animating
     requestAnimationFrame(() => {
-      active.style.transform = "translateX(-100%)";
-      next.style.transform = "translateX(0)";
+      requestAnimationFrame(() => {
+        active.style.transform = "translateX(-100%)";
+        next.style.transform = "translateX(0)";
+      });
     });
 
     currentIndex = nextIndex;
     [active, next] = [next, active];
+
+    // the one that became "next" goes under
+    next.style.zIndex = "0";
   };
 
   const goPrev = () => {
@@ -297,15 +351,21 @@ async function initTopRatedSlider(noCache = false) {
     const prevIndex = (currentIndex - 1 + trips.length) % trips.length;
     renderInto(next, trips[prevIndex]);
 
-    // bring incoming slide from the left
+    // position incoming to the left and bring it on top
     next.style.transform = "translateX(-100%)";
+    next.style.zIndex = "2";
+    active.style.zIndex = "1";
+
     requestAnimationFrame(() => {
-      active.style.transform = "translateX(100%)";
-      next.style.transform = "translateX(0)";
+      requestAnimationFrame(() => {
+        active.style.transform = "translateX(100%)";
+        next.style.transform = "translateX(0)";
+      });
     });
 
     currentIndex = prevIndex;
     [active, next] = [next, active];
+    next.style.zIndex = "0";
   };
 
   // --- Buttons (injected) ---
@@ -355,7 +415,7 @@ async function initTopRatedSlider(noCache = false) {
   // start autoplay if more than one slide
   if (trips.length > 1) start();
 
-  // Expose manual controls if you want to control from outside
+  // Expose manual controls
   window.nextTrendingSlide = goNext;
   window.prevTrendingSlide = goPrev;
 }
