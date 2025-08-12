@@ -589,7 +589,7 @@ const _skeletonCards = (n = 4) =>
 
 const _emptyState = `
   <div class="col-span-full text-center text-gray-500 py-10">
-    No trips found in this category.
+    No other trips found in this category.
   </div>
 `;
 
