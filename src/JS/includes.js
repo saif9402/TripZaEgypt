@@ -373,11 +373,24 @@ async function initTopRatedSlider(noCache = false) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.setAttribute("aria-label", aria);
-    btn.className =
-      `absolute top-1/2 ${
-        side === "left" ? "left-4" : "right-4"
-      } -translate-y-1/2` +
-      " bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur z-20 focus:outline-none focus:ring-2 focus:ring-white/60";
+
+    // Mobile: bottom corners. ≥sm: vertically centered left/right.
+    btn.className = [
+      "absolute",
+      "z-20",
+      "bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur",
+      "focus:outline-none focus:ring-2 focus:ring-white/60",
+
+      // mobile (default)
+      "bottom-3",
+      side === "left" ? "left-3" : "right-3",
+
+      // ≥sm screens
+      "sm:bottom-auto",
+      side === "left" ? "sm:left-4" : "sm:right-4",
+      "sm:top-1/2 sm:-translate-y-1/2",
+    ].join(" ");
+
     btn.textContent = side === "left" ? "‹" : "›";
     return btn;
   };
