@@ -729,17 +729,6 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     // 2) Next up to 4 cards
     const cards = trips.slice(1, 5).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
-
-    // 3) Stagger-in animation
-    requestAnimationFrame(() => {
-      document.querySelectorAll('[data-animate="card"]').forEach((el, i) => {
-        setTimeout(() => {
-          el.style.transition = "opacity .4s ease, transform .4s ease";
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
-        }, 60 * i);
-      });
-    });
   } catch (e) {
     console.error("Failed to load trips by category:", e);
     grid.innerHTML = `
