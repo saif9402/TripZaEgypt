@@ -286,8 +286,8 @@ async function initTopRatedSlider(noCache = false) {
   disableTransition(slideA);
   disableTransition(slideB);
 
-  // active.style.transform = "translateX(0)"; // on screen
-  // next.style.transform = "translateX(100%)"; // off right
+  active.style.transform = "translateX(0)"; // on screen
+  next.style.transform = "translateX(-100%)"; // off right
 
   // layering
   active.style.zIndex = "1";
