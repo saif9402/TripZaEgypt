@@ -111,7 +111,19 @@
         </aside>
 
         <!-- Trips List -->
-        ...
+        <section class="w-full lg:w-3/4">
+          <!-- top toolbar -->
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h1 class="text-xl font-semibold">Trips</h1>
+            <div id="resultsSummary" class="text-sm text-gray-500"></div>
+          </div>
+
+          <!-- list -->
+          <div id="tripsContainer" class="space-y-4"></div>
+
+          <!-- pagination -->
+          <nav id="pagination" class="mt-6 flex justify-center"></nav>
+        </section>
       </div>
     </div>
 
@@ -119,5 +131,6 @@
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
+    <script src="../JS/trips-list.js"></script>
   </body>
 </html>
