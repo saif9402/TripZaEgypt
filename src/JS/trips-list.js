@@ -91,7 +91,7 @@
   // One row that mimics your screenshot layout (responsive)
   const rowHTML = (t) => `
     <a href="/pages/trip-details.html?id=${t.id}" 
-       class="block bg-white rounded-lg shadow hover:shadow-lg hover:scale-90 transition overflow-hidden">
+       class="block bg-white rounded-lg shadow hover:shadow-lg hover:scale-90 transform transition duration-300 overflow-hidden">
       <div class="flex flex-col sm:flex-row">
         <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}" 
              class="w-full sm:w-56 h-44 object-cover">
