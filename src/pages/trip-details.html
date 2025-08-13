@@ -27,51 +27,21 @@
     <section class="max-w-7xl mx-auto px-4 py-20">
       <div class="flex flex-col md:flex-row gap-8">
         <div class="md:w-2/3">
-          <h1 class="text-3xl font-bold mb-2">
+          <h1 id="tripTitle" class="text-3xl font-bold mb-2">
             Vintage Double Decker Bus Tour & Thames River Cruise
           </h1>
           <div class="text-sm text-gray-500 mb-4">
-            Sightseeing | <span class="text-yellow-500">★★★★☆</span> (854
-            reviews)
+            <span id="tripCategory" class="text-gray-500"></span>
+            <span id="tripRatingStars" class="text-yellow-500"></span>
+            <span id="tripRatingText" class="text-gray-500"></span>
           </div>
           <img
-            src="https://source.unsplash.com/800x400/?mountains"
+            id="tripMainImage"
+            src=""
             alt="Main Image"
             class="rounded-lg w-full mb-4"
           />
-
-          <div class="grid grid-cols-6 gap-2 mb-6">
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?mountains"
-            />
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?river"
-            />
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?forest"
-            />
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?tour"
-            />
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?city"
-            />
-            <img
-              alt="img"
-              class="rounded-md w-full h-20 object-cover"
-              src="https://source.unsplash.com/100x100/?sunset"
-            />
-          </div>
+          <div id="tripGallery" class="grid grid-cols-6 gap-2 mb-6"></div>
 
           <!-- Enhanced Feature Details -->
           <div
@@ -114,7 +84,7 @@
             <div class="flex items-start gap-4">
               <i class="fas fa-clock text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Duration 3.5 Hours</h4>
+                <h4 id="tripDurationLabel" class="font-semibold">Duration</h4>
                 <p class="text-sm text-gray-600">
                   Check availability to see starting times.
                 </p>
@@ -136,8 +106,8 @@
             <div class="flex items-start gap-4">
               <i class="fas fa-user-tie text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Live Tour Guide In English</h4>
-                <p class="text-sm text-gray-600">English</p>
+                <h4 class="font-semibold">Live Tour Guide</h4>
+                <p id="tripLanguages" class="text-sm text-gray-600">—</p>
               </div>
             </div>
           </div>
@@ -145,22 +115,16 @@
           <!-- Description -->
           <div class="mb-6">
             <h2 class="text-xl font-semibold mb-2">Description</h2>
-            <p class="text-gray-600">
-              Explore the historic sights of London in style aboard a classic
-              double-decker bus. Discover landmarks such as Big Ben, the London
-              Eye, and cruise the Thames River. Your expert guide provides rich
-              historical insight and travel tips.
-            </p>
+            <p id="tripDescription" class="text-gray-600"></p>
           </div>
 
           <!-- Activity & Inclusions -->
           <div class="mb-6">
             <h2 class="text-xl font-semibold mb-2">Activity</h2>
-            <ul class="list-disc ml-6 text-gray-700 space-y-1">
-              <li>Tour on vintage double-decker</li>
-              <li>River Thames cruise</li>
-              <li>Changing of the Guard</li>
-            </ul>
+            <ul
+              id="tripActivities"
+              class="list-disc ml-6 text-gray-700 space-y-1"
+            ></ul>
           </div>
 
           <div class="mb-6">
@@ -170,35 +134,19 @@
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <h4 class="font-semibold mb-1">Included</h4>
-                <ul class="list-disc ml-5 text-gray-700 space-y-1">
-                  <li>Bus tour</li>
-                  <li>River cruise</li>
-                  <li>Professional guide</li>
-                  <li>Gratuities</li>
-                </ul>
+                <ul
+                  id="tripIncluded"
+                  class="list-disc ml-5 text-gray-700 space-y-1"
+                ></ul>
               </div>
               <div>
                 <h4 class="font-semibold mb-1">Not Included</h4>
-                <ul class="list-disc ml-5 text-gray-700 space-y-1">
-                  <li>Meals</li>
-                  <li>Personal expenses</li>
-                </ul>
+                <ul
+                  id="tripExcluded"
+                  class="list-disc ml-5 text-gray-700 space-y-1"
+                ></ul>
               </div>
             </div>
-          </div>
-
-          <!-- Map (Placeholder) -->
-          <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-2">Meeting Point</h2>
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d243647.85866317328!2d-0.28170619999999996!3d51.5285582!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8a00a7dbd0fd1%3A0x49e6e9b1479f2676!2sLondon!5e0!3m2!1sen!2suk!4v1618338701413!5m2!1sen!2suk"
-              width="100%"
-              height="300"
-              style="border: 0"
-              allowfullscreen=""
-              loading="lazy"
-              class="rounded-lg"
-            ></iframe>
           </div>
 
           <section class="max-w-7xl mx-auto px-4 py-12">
@@ -266,7 +214,11 @@
 
             <!-- Date Selection -->
             <label class="block text-sm font-medium mb-1">Date</label>
-            <input type="date" class="w-full border px-3 py-2 rounded mb-4" />
+            <input
+              id="tripDateInput"
+              type="date"
+              class="w-full border px-3 py-2 rounded mb-4"
+            />
 
             <!-- Number of Adults -->
             <label class="block text-sm font-medium mb-1">Adults</label>
@@ -292,8 +244,9 @@
             </p>
 
             <!-- Price and Booking -->
-            <div class="text-2xl font-bold mb-2">$78.90</div>
+            <div id="tripPrice" class="text-2xl font-bold mb-2">$78.90</div>
             <button
+              id="bookBtn"
               class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded"
             >
               Confirm Booking
@@ -311,5 +264,6 @@
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
+    <script src="../JS/trip-details.js"></script>
   </body>
 </html>
