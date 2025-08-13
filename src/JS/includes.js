@@ -286,8 +286,8 @@ async function initTopRatedSlider(noCache = false) {
   disableTransition(slideA);
   disableTransition(slideB);
 
-  active.style.transform = "translateX(0)"; // on screen
-  next.style.transform = "translateX(100%)"; // off right
+  // active.style.transform = "translateX(0)"; // on screen
+  // next.style.transform = "translateX(100%)"; // off right
 
   // layering
   active.style.zIndex = "1";
@@ -327,9 +327,9 @@ async function initTopRatedSlider(noCache = false) {
     renderInto(next, trips[nextIndex]);
 
     // position incoming to the right and bring it on top
-    // next.style.transform = "translateX(100%)";
-    // next.style.zIndex = "2";
-    // active.style.zIndex = "1";
+    next.style.transform = "translateX(100%)";
+    next.style.zIndex = "2";
+    active.style.zIndex = "1";
 
     // Double rAF to ensure styles are committed before animating
     requestAnimationFrame(() => {
