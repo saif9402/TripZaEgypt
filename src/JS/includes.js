@@ -86,6 +86,7 @@ async function initTopRatedSlider(noCache = false) {
   const params = new URLSearchParams({
     IsTopRated: true,
     TranslationLanguageId: langId,
+    Sort: "rand",
   });
   if (noCache) params.append("_ts", Date.now());
 
