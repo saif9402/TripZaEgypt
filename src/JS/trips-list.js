@@ -130,9 +130,7 @@
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-clock"></i> ${minutesToLabel(t.duration)}
             </span>
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-bus"></i> Transport
-            </span>
+            
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-people-group"></i> Family Plan
             </span>
