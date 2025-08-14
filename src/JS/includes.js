@@ -561,21 +561,26 @@ async function initTopRatedSlider(noCache = false) {
 }
 
 // ✅ Make lang switch refetch both categories & the trending slider
-async function refreshLanguageDependentContent() {
+async function refreshLanguageDependentContent(noCache = false) {
   await Promise.allSettled([
-    initTopRatedSlider(true),
-    fetchAndRenderCategories(),
+    initTopRatedSlider(true), // force refresh
+    fetchAndRenderCategories(), // repopulate header menus + category buttons
   ]);
+
+  // ✅ If you're on the trip details page, re-fetch that too
+  window.refreshTripDetailsLang?.();
 }
 window.refreshLangData = refreshLanguageDependentContent;
 
-// ✅ After header/footer are included, run once
 function afterIncludesLoaded() {
   const savedLang = localStorage.getItem("lang") || "en";
-  setLanguage(savedLang);
 
-  fetchAndRenderCategories();
-  initTopRatedSlider(); // ← replaced old fetchAndRenderTrendingTrip()
+  if (typeof setLanguage === "function") {
+    setLanguage(savedLang);
+  }
+
+  // ✅ Now (re)build menus, sliders, and (if present) trip details
+  refreshLanguageDependentContent();
 
   if (typeof bindPageTransitions === "function") {
     bindPageTransitions();
