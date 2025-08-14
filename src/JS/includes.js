@@ -432,7 +432,6 @@ async function initTopRatedSlider(noCache = false) {
       startY = y;
       startT = Date.now();
       // pause autoplay while finger is down
-      stop();
     };
 
     const onMove = (x, y, evt) => {
