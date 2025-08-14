@@ -1,24 +1,63 @@
-/* Trips List (10 per page) with real pagination */
 (() => {
+  "use strict";
+
+  // ----------- Config / DOM -----------
   const PAGE_SIZE = 10;
 
-  // DOM
   const listEl = document.getElementById("tripsContainer");
   const pagerEl = document.getElementById("pagination");
   const summaryEl = document.getElementById("resultsSummary");
-  if (!listEl || !pagerEl) return;
+  if (!listEl || !pagerEl) {
+    console.warn("[trips-list] Missing #tripsContainer or #pagination");
+    return;
+  }
 
-  // State
+  // Create sort select if page forgot to include it
+  let sortSelect = document.getElementById("sortSelect");
+  if (!sortSelect) {
+    const toolbar =
+      summaryEl?.parentElement || document.querySelector(".mb-4, .toolbar");
+    if (toolbar) {
+      const wrap = document.createElement("div");
+      wrap.className = "flex items-center gap-2";
+      const lbl = document.createElement("label");
+      lbl.id = "sortLabel";
+      lbl.className = "text-sm text-gray-600";
+      lbl.setAttribute("for", "sortSelect");
+      lbl.textContent = "Sort by";
+      sortSelect = document.createElement("select");
+      sortSelect.id = "sortSelect";
+      sortSelect.className =
+        "border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500";
+      wrap.appendChild(lbl);
+      wrap.appendChild(sortSelect);
+      toolbar.appendChild(wrap);
+    }
+  }
+
+  // ----------- State -----------
   let currentPage = 1;
   let totalPages = 1;
   let totalCount = 0;
 
-  // Helpers
+  // ----------- Helpers -----------
   const getLangId = () =>
     (localStorage.getItem("lang") || "en") === "deu" ? 1 : 2;
 
   const getCategoryIdFromQS = () =>
     new URLSearchParams(location.search).get("categoryId");
+
+  const getSortFromQS = () =>
+    new URLSearchParams(location.search).get("sort") || "";
+
+  const setSortInQS = (value) => {
+    const url = new URL(location.href);
+    if (value) url.searchParams.set("sort", value);
+    else url.searchParams.delete("sort");
+    history.replaceState(null, "", url);
+  };
+
+  let currentSort = getSortFromQS(); // "price:asc" | "rating:desc" | "bestseller" | ""
 
   const esc = (s) =>
     (s ?? "").toString().replace(
@@ -88,10 +127,9 @@
       )
       .join("");
 
-  // One row that mimics your screenshot layout (responsive)
   const rowHTML = (t) => `
     <a href="/pages/trip-details.html?id=${t.id}" 
-       class="block bg-white rounded-lg shadow hover:shadow-lg hover:scale-105 transform transition duration-300 overflow-hidden">
+       class="block bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
       <div class="flex flex-col sm:flex-row">
         <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}" 
              class="w-full sm:w-56 h-44 object-cover">
@@ -130,7 +168,9 @@
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-clock"></i> ${minutesToLabel(t.duration)}
             </span>
-            
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-bus"></i> Transport
+            </span>
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-people-group"></i> Family Plan
             </span>
@@ -153,9 +193,63 @@
     </a>
   `;
 
-  // Fetch + render
+  const sortLabels = () => {
+    const lang = localStorage.getItem("lang") || "en";
+    if (lang === "deu") {
+      return {
+        title: "Sortieren nach",
+        recommended: "Empfohlen",
+        bestseller: "Bestseller zuerst",
+        priceLow: "Preis: aufsteigend",
+        priceHigh: "Preis: absteigend",
+        ratingHigh: "Bewertung: absteigend",
+        ratingLow: "Bewertung: aufsteigend",
+      };
+    }
+    return {
+      title: "Sort by",
+      recommended: "Recommended",
+      bestseller: "Best seller",
+      priceLow: "Price: low to high",
+      priceHigh: "Price: high to low",
+      ratingHigh: "Rating: high to low",
+      ratingLow: "Rating: low to high",
+    };
+  };
+
+  // ----------- Sort UI -----------
+  function initSortUI() {
+    const sel = document.getElementById("sortSelect");
+    const lbl = document.getElementById("sortLabel");
+    if (!sel) return;
+
+    const t = sortLabels();
+    if (lbl) lbl.textContent = t.title;
+
+    sel.innerHTML = `
+      <option value="">${t.recommended}</option>
+      <option value="bestseller">${t.bestseller}</option>
+      <option value="price:asc">${t.priceLow}</option>
+      <option value="price:desc">${t.priceHigh}</option>
+      <option value="rating:desc">${t.ratingHigh}</option>
+      <option value="rating:asc">${t.ratingLow}</option>
+    `;
+
+    // reflect current URL state
+    currentSort = getSortFromQS();
+    sel.value = currentSort;
+
+    sel.onchange = () => {
+      currentSort = sel.value;
+      setSortInQS(currentSort);
+      load(1);
+    };
+  }
+
+  // ----------- Fetch + Render -----------
   async function load(page = 1) {
     currentPage = page;
+
     listEl.innerHTML = skeletons(6);
     pagerEl.innerHTML = "";
 
@@ -168,6 +262,9 @@
     const cat = getCategoryIdFromQS();
     if (cat) qs.append("CategoryId", cat);
 
+    const sort = getSortFromQS();
+    if (sort) qs.append("Sort", sort); // API expects array[string]; appending once is fine.
+
     try {
       const res = await fetch(`/api/Trip/GetAllTrips?${qs.toString()}`, {
         cache: "no-store",
@@ -177,12 +274,19 @@
       const payload = json?.data;
       const items = payload?.data ?? [];
       totalCount = Number(payload?.count ?? 0);
-      totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-      summaryEl.textContent =
-        totalCount > 0
-          ? `${totalCount} trips • page ${currentPage} of ${totalPages}`
-          : "No trips";
+      // If backend returns incorrect count, fall back to length (defensive)
+      const effectiveCount =
+        totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
+
+      totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
+
+      if (summaryEl) {
+        summaryEl.textContent =
+          effectiveCount > 0
+            ? `${effectiveCount} trips • page ${currentPage} of ${totalPages}`
+            : "No trips";
+      }
 
       if (!items.length) {
         listEl.innerHTML =
@@ -199,7 +303,7 @@
     }
   }
 
-  // Pagination UI
+  // ----------- Pagination -----------
   function renderPagination() {
     const mkBtn = (label, page, { active = false, disabled = false } = {}) => `
       <button data-page="${page}" ${
@@ -253,17 +357,23 @@
     }
   });
 
-  // Initial load
-  document.addEventListener("DOMContentLoaded", () => load(1));
+  // ----------- Public hook (used by sidebar categories) -----------
+  window.reloadTripsPage = (page = 1) => load(page);
 
-  // Optional: if you call window.refreshLangData elsewhere after a language switch,
-  // reload this list in the new language too.
+  // ----------- Init -----------
+  document.addEventListener("DOMContentLoaded", () => {
+    initSortUI();
+    load(1);
+  });
+
+  // Re-init on language change (ties into your existing refresh hook)
   const oldRefresh = window.refreshLangData;
   window.refreshLangData = async function () {
     try {
       if (typeof oldRefresh === "function") await oldRefresh();
     } finally {
-      load(1); // reload first page in the new language
+      initSortUI(); // update labels
+      load(1); // reload data in the new language
     }
   };
 })();

@@ -84,7 +84,23 @@
           <!-- top toolbar -->
           <div class="flex items-center justify-between gap-3 mb-4">
             <h1 class="text-xl font-semibold">Trips</h1>
-            <div id="resultsSummary" class="text-sm text-gray-500"></div>
+
+            <div class="flex items-center gap-3">
+              <div
+                id="resultsSummary"
+                class="text-sm text-gray-500 hidden sm:block"
+              ></div>
+
+              <label for="sortSelect" class="text-sm text-gray-600"
+                >Sort by</label
+              >
+              <select
+                id="sortSelect"
+                class="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <!-- options filled by JS (i18n) -->
+              </select>
+            </div>
           </div>
 
           <!-- list -->
