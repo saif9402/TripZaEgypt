@@ -1,3 +1,5 @@
+// ../JS/translation.js
+
 const translations = {
   en: {
     "web.title": "Tour Guide",
@@ -29,7 +31,8 @@ const translations = {
       "Browse our Best Seller Trips in Hurghada — from thrilling desert safaris to relaxing Red Sea escapes",
     "trend.btn": "Explore All the Trips",
     "gallery.title": "From The Gallery",
-    "gallery.sybtitle":
+    // ← fixed key
+    "gallery.subtitle":
       "Moments captured. Memories made. Discover Hurghada through our lens.",
     "footer.lang": "Language",
     "footer.company": "Company",
@@ -38,7 +41,7 @@ const translations = {
     "footer.careers": "Careers",
     "footer.help": "Help",
     "footer.contactUs": "Contact Us",
-    "footer,faqs": "FAQs",
+    "footer.faqs": "FAQs", // ← fixed key
     "footer.terms": "Terms",
     "footer.follow": "Follow Us",
 
@@ -78,11 +81,16 @@ const translations = {
     "search.guests": "Gäste",
     "search.guests.placeholder": "Gäste",
     "search.date": "Datum",
+
     "trips.sectionTitle": "Beliebte Reisen entdecken",
     "trips.sectionDesc":
       "Durchstöbern Sie unsere Top-Erlebnisse in Hurghada – von aufregenden Wüstensafaris bis zu entspannenden Ausflügen am Roten Meer.",
     "trend.name": "Jetzt im Trend",
     "trend.button": "Jetzt buchen",
+    "trend.sectionTitle": "Entdecken Sie einige unserer Trend-Reisen",
+    "trend.sectionDesc":
+      "Durchstöbern Sie unsere Bestseller in Hurghada – von aufregenden Wüstensafaris bis zu entspannenden Ausflügen am Roten Meer",
+    "trend.btn": "Alle Reisen entdecken",
     "gallery.title": "Aus der Galerie",
     "gallery.subtitle":
       "Eingefangene Momente. Geschaffene Erinnerungen. Entdecken Sie Hurghada durch unsere Linse.",
@@ -93,9 +101,10 @@ const translations = {
     "footer.careers": "Karriere",
     "footer.help": "Hilfe",
     "footer.contactUs": "Kontakt",
-    "footer,faqs": "FAQs",
+    "footer.faqs": "FAQs", // ← fixed key
     "footer.terms": "Bedingungen",
     "footer.follow": "Folgen Sie uns",
+
     "signin.name": "Anmelden",
     "signin.subtitle":
       "Greifen Sie mit Ihrem Konto auf exklusive Tourerlebnisse zu",
@@ -117,8 +126,15 @@ const translations = {
   },
 };
 
+// track the last language we actually applied to avoid duplicate heavy work
+window.__currentLang = window.__currentLang || null;
+
 function setLanguage(lang) {
-  // Set texts
+  // If nothing changed, update labels only and skip heavy reloads
+  const languageChanged = window.__currentLang !== lang;
+  window.__currentLang = lang;
+
+  // Apply data-i18n text
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (translations[lang] && translations[lang][key]) {
@@ -126,7 +142,7 @@ function setLanguage(lang) {
     }
   });
 
-  // Set placeholders
+  // Apply data-i18n-placeholder
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (translations[lang]?.[key]) {
@@ -134,32 +150,40 @@ function setLanguage(lang) {
     }
   });
 
-  // Update language display buttons
+  // Update UI language labels
   const mobileLangLabel = document.getElementById("mobileLangLabel");
   if (mobileLangLabel) mobileLangLabel.innerText = lang.toUpperCase();
 
   const currentLang = document.getElementById("currentLang");
   if (currentLang) currentLang.innerText = lang.toUpperCase();
 
-  const langBtn = document.getElementById("currentLang");
-  if (langBtn) langBtn.textContent = lang.toUpperCase();
-
-  // Set selected option in dropdown
   const select = document.getElementById("languageSelect");
-  if (select) select.value = lang;
+  if (select && select.value !== lang) select.value = lang;
 
-  // Save lang + refresh categories
-  localStorage.setItem("lang", lang);
-  window.refreshLangData?.(); // ← triggers trending + categories reload
+  // Sync <html lang="..">
+  document.documentElement.setAttribute("lang", lang === "deu" ? "de" : "en");
 
-  // ✅ Only call this ONCE, at the end:
-  fetchAndRenderCategories(); // 👇 new function (moved from includes.js)
+  // Persist only when changed
+  if (languageChanged) {
+    localStorage.setItem("lang", lang);
+    // 🔁 refresh language-dependent data (trending + categories)
+    window.refreshLangData?.();
+    // 🔁 and the trip details page (GetTripById?TranslationLanguageId=…)
+    window.refreshTripDetailsLang?.();
+  }
 }
 
-// Initial load
+// Initial load (idempotent)
 document.addEventListener("DOMContentLoaded", () => {
   const savedLang = localStorage.getItem("lang") || "en";
-  setLanguage(savedLang);
+  // Avoid redundant heavy work if someone else already set it
+  if (window.__currentLang !== savedLang) {
+    setLanguage(savedLang);
+  } else {
+    // still make sure dropdowns/labels reflect the value
+    const select = document.getElementById("languageSelect");
+    if (select && select.value !== savedLang) select.value = savedLang;
+  }
 
   const select = document.getElementById("languageSelect");
   if (select) {
