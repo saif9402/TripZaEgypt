@@ -596,6 +596,7 @@ function fetchAndRenderCategories() {
     .then((data) => {
       if (data.succeeded && data.data?.data) {
         const categories = data.data.data;
+        renderSidebarCategoriesList(categories);
 
         // 1️⃣ Render Header Dropdowns (already existing)
         const desktopDropdown = document.getElementById("tripsDropdown");
@@ -898,4 +899,92 @@ let loadedCount = 0;
 function checkAllIncludesLoaded() {
   loadedCount++;
   if (loadedCount === 2) afterIncludesLoaded(); // header + footer
+}
+
+// --- Sidebar categories (dynamic, i18n) ---
+function i18nSidebar() {
+  const lang = localStorage.getItem("lang") || "en";
+  return lang === "deu"
+    ? { showMore: "Mehr anzeigen", showLess: "Weniger anzeigen" }
+    : { showMore: "Show more", showLess: "Show less" };
+}
+
+function renderSidebarCategoriesList(categories) {
+  const root = document.getElementById("sidebarCategoryList");
+  const toggleBtn = document.getElementById("toggleSidebarCats");
+  if (!root) return;
+
+  const esc = (s) =>
+    (s ?? "").toString().replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[c])
+    );
+
+  // mark current from ?categoryId=
+  const qs = new URLSearchParams(location.search);
+  const selectedId = qs.get("categoryId");
+
+  root.innerHTML = "";
+  categories.forEach((cat, idx) => {
+    const id = `cat_${cat.id}`;
+    const label = document.createElement("label");
+    label.className =
+      "inline-flex items-center gap-2" + (idx >= 7 ? " hidden extra-cat" : "");
+    label.innerHTML = `
+      <input type="checkbox" class="mr-2 sidebar-cat"
+             id="${id}" value="${cat.id}" ${
+      String(selectedId) === String(cat.id) ? "checked" : ""
+    }/>
+      <span>${esc(cat.name)}</span>
+    `;
+    root.appendChild(label);
+  });
+
+  // Show more / less if we have extras
+  const extras = root.querySelectorAll(".extra-cat");
+  if (extras.length) {
+    const t = i18nSidebar();
+    toggleBtn.textContent = t.showMore;
+    toggleBtn.classList.remove("hidden");
+
+    let open = false;
+    toggleBtn.onclick = () => {
+      open = !open;
+      extras.forEach((el) => el.classList.toggle("hidden", !open));
+      toggleBtn.textContent = open ? t.showLess : t.showMore;
+    };
+  } else {
+    toggleBtn.classList.add("hidden");
+  }
+
+  // Single-select behavior -> update query param and refresh trips
+  root.addEventListener("change", (e) => {
+    const cb = e.target.closest(".sidebar-cat");
+    if (!cb) return;
+
+    // allow only one checked
+    root.querySelectorAll(".sidebar-cat").forEach((x) => {
+      if (x !== cb) x.checked = false;
+    });
+
+    const val = cb.checked ? cb.value : "";
+    const url = new URL(location.href);
+    if (val) url.searchParams.set("categoryId", val);
+    else url.searchParams.delete("categoryId");
+    history.replaceState(null, "", url);
+
+    // If your trips list exposes a reload function, call it; else reload page.
+    if (window.reloadTripsPage) {
+      window.reloadTripsPage(1); // (optional) your loader can re-read categoryId from the URL
+    } else {
+      location.reload();
+    }
+  });
 }

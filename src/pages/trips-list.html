@@ -47,29 +47,23 @@
             </div>
           </div>
 
-          <!-- Theme -->
+          <!-- Categories (dynamic) -->
           <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-3">Theme</h2>
-            <div class="flex flex-col space-y-2 text-sm">
-              <label
-                ><input type="checkbox" class="mr-2" />Water activities</label
-              >
-              <label
-                ><input type="checkbox" class="mr-2" />Good for social
-                distancing</label
-              >
-              <label><input type="checkbox" class="mr-2" />Adrenaline</label>
-              <label><input type="checkbox" class="mr-2" />Nature</label>
-              <label><input type="checkbox" class="mr-2" />Hidden gems</label>
-              <label
-                ><input type="checkbox" class="mr-2" />Street art &
-                graffiti</label
-              >
-              <label><input type="checkbox" class="mr-2" />Food</label>
-              <a href="#" class="text-sm text-teal-600 hover:underline mt-2"
-                >Show More Themes</a
-              >
-            </div>
+            <h2 class="font-semibold mb-3" data-i18n="categories_title">
+              Categories
+            </h2>
+
+            <div
+              id="sidebarCategoryList"
+              class="flex flex-col space-y-2 text-sm"
+            ></div>
+
+            <button
+              id="toggleSidebarCats"
+              class="text-sm text-teal-600 hover:underline mt-2 hidden"
+            >
+              Show more
+            </button>
           </div>
 
           <!-- Duration -->
@@ -81,31 +75,6 @@
               <label><input type="checkbox" class="mr-2" />5–7 hours</label>
               <label><input type="checkbox" class="mr-2" />Full day</label>
               <label><input type="checkbox" class="mr-2" />Multi-day</label>
-            </div>
-          </div>
-
-          <!-- Destination -->
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-3">Destination</h2>
-            <div class="flex flex-col space-y-2 text-sm">
-              <label><input type="checkbox" class="mr-2" />Biscayne Bay</label>
-              <label
-                ><input type="checkbox" class="mr-2" />Downtown Miami</label
-              >
-              <label
-                ><input type="checkbox" class="mr-2" />Wynwood Arts
-                District</label
-              >
-              <label><input type="checkbox" class="mr-2" />Port of Miami</label>
-              <label
-                ><input type="checkbox" class="mr-2" />Everglades National
-                Park</label
-              >
-              <label><input type="checkbox" class="mr-2" />Fisher Island</label>
-              <label><input type="checkbox" class="mr-2" />Coconut Grove</label>
-              <a href="#" class="text-sm text-teal-600 hover:underline mt-2"
-                >Show More Destinations</a
-              >
             </div>
           </div>
         </aside>
