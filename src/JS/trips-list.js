@@ -1,3 +1,7 @@
+/* trips-list.js — Trips list with pagination (10/page) + Sort control + i18n
+   Now displays availability from tripDates as date ranges (e.g., Aug 20–21, 2025).
+*/
+
 (() => {
   "use strict";
 
@@ -41,8 +45,9 @@
   let totalCount = 0;
 
   // ----------- Helpers -----------
-  const getLangId = () =>
-    (localStorage.getItem("lang") || "en") === "deu" ? 1 : 2;
+  const getLang = () => localStorage.getItem("lang") || "en";
+  const getLangId = () => (getLang() === "deu" ? 1 : 2);
+  const getLocale = () => (getLang() === "deu" ? "de-DE" : "en-US");
 
   const getCategoryIdFromQS = () =>
     new URLSearchParams(location.search).get("categoryId");
@@ -88,8 +93,7 @@
   };
 
   const formatPrice = (value) => {
-    const lang = localStorage.getItem("lang") || "en";
-    const locale = lang === "deu" ? "de-DE" : "en-EG";
+    const locale = getLang() === "deu" ? "de-DE" : "en-EG";
     try {
       return new Intl.NumberFormat(locale, {
         style: "currency",
@@ -127,6 +131,138 @@
       )
       .join("");
 
+  // ----------- Availability (tripDates) helpers -----------
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  // Robust parse for "8/20/2025" or ISO strings; returns Date | null
+  function parseApiDate(str) {
+    if (!str) return null;
+    const d1 = new Date(str);
+    if (!isNaN(d1.getTime())) return d1;
+
+    // fallback for M/D/YYYY
+    const parts = String(str)
+      .split(/[\/\-\.]/)
+      .map((p) => p.trim());
+    if (parts.length === 3) {
+      let [m, d, y] = parts.map((p) => parseInt(p, 10));
+      if (y < 100) y += 2000;
+      const d2 = new Date(y, (m || 1) - 1, d || 1);
+      if (!isNaN(d2.getTime())) return d2;
+    }
+    return null;
+  }
+
+  function normalizeTripDates(arr) {
+    const dates =
+      (arr || [])
+        .map(parseApiDate)
+        .filter((d) => d && !isNaN(d.getTime()))
+        // Normalize to midnight to make day-diff reliable
+        .map((d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())) || [];
+    // unique + sort
+    const uniq = Array.from(
+      new Map(dates.map((d) => [d.getTime(), d])).values()
+    );
+    uniq.sort((a, b) => a - b);
+    return uniq;
+  }
+
+  function groupConsecutiveRanges(dates) {
+    // dates must be sorted, midnight-normalized
+    if (!dates.length) return [];
+    const ranges = [];
+    let start = dates[0];
+    let prev = dates[0];
+
+    for (let i = 1; i < dates.length; i++) {
+      const cur = dates[i];
+      const diff = (cur - prev) / DAY_MS;
+      if (diff === 1) {
+        // still consecutive
+        prev = cur;
+      } else {
+        // close previous range
+        ranges.push({ start, end: prev });
+        start = cur;
+        prev = cur;
+      }
+    }
+    ranges.push({ start, end: prev });
+    return ranges;
+  }
+
+  function formatDateRange(start, end, locale) {
+    const sameDay =
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate();
+
+    const md = new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+    });
+    const mdy = new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    if (sameDay) return mdy.format(start);
+
+    const sameMonth =
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth();
+    const sameYear = start.getFullYear() === end.getFullYear();
+
+    if (sameMonth) {
+      // Aug 20–21, 2025
+      const left = md
+        .format(start)
+        .replace(/,?\s*\d+$/, String(start.getDate()));
+      const right = String(end.getDate());
+      return `${left}–${right}, ${start.getFullYear()}`;
+    }
+
+    if (sameYear) {
+      // Aug 31 – Sep 2, 2025
+      return `${md.format(start)} – ${md.format(end)}, ${start.getFullYear()}`;
+    }
+
+    // Different years
+    return `${mdy.format(start)} – ${mdy.format(end)}`;
+  }
+
+  function availabilityHTML(trip) {
+    const dates = normalizeTripDates(trip?.tripDates);
+    if (!dates.length) return "";
+
+    const ranges = groupConsecutiveRanges(dates);
+    const locale = getLocale();
+    const shown = ranges
+      .slice(0, 2)
+      .map((r) => formatDateRange(r.start, r.end, locale));
+    const extra = Math.max(0, ranges.length - 2);
+
+    const t =
+      getLang() === "deu"
+        ? { available: "Verfügbar", more: "weitere" }
+        : { available: "Available", more: "more" };
+
+    return `
+      <span class="flex items-center gap-2">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span class="truncate">
+          <span class="font-medium">${t.available}:</span>
+          ${esc(shown.join(" • "))}${
+      extra ? ` <span class="text-gray-500">+${extra} ${t.more}</span>` : ""
+    }
+        </span>
+      </span>
+    `;
+  }
+
+  // ----------- Row template -----------
   const rowHTML = (t) => `
     <a href="/pages/trip-details.html?id=${t.id}" 
        class="block bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
@@ -164,11 +300,15 @@
             <span class="text-gray-600">${t.reviews ?? 0} reviews</span>
           </div>
 
+          <!-- Availability line -->
+          <div class="mt-2 text-sm text-gray-700">
+            ${availabilityHTML(t)}
+          </div>
+
           <div class="mt-3 flex items-center gap-6 text-sm text-gray-600">
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-clock"></i> ${minutesToLabel(t.duration)}
             </span>
-            
             <span class="flex items-center gap-2">
               <i class="fa-solid fa-people-group"></i> Family Plan
             </span>
@@ -191,9 +331,9 @@
     </a>
   `;
 
+  // ----------- Sort labels/UI -----------
   const sortLabels = () => {
-    const lang = localStorage.getItem("lang") || "en";
-    if (lang === "deu") {
+    if (getLang() === "deu") {
       return {
         title: "Sortieren nach",
         recommended: "Empfohlen",
@@ -215,7 +355,6 @@
     };
   };
 
-  // ----------- Sort UI -----------
   function initSortUI() {
     const sel = document.getElementById("sortSelect");
     const lbl = document.getElementById("sortLabel");
