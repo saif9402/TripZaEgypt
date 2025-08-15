@@ -1,5 +1,5 @@
-/* trips-list.js — Trips list with pagination (10/page) + Sort control + i18n
-   Now displays availability from tripDates as date ranges (e.g., Aug 20–21, 2025).
+/* trips-list.js — Trips list with pagination + Sort + Search + i18n
+   Adds a toolbar search bar that syncs to ?search=... and calls /api/Trip/GetAllTrips&Search=...
 */
 
 (() => {
@@ -16,12 +16,37 @@
     return;
   }
 
-  // Create sort select if page forgot to include it
-  let sortSelect = document.getElementById("sortSelect");
-  if (!sortSelect) {
+  // Ensure toolbar controls exist (search + sort) if HTML didn't include them
+  function ensureToolbarControls() {
     const toolbar =
       summaryEl?.parentElement || document.querySelector(".mb-4, .toolbar");
-    if (toolbar) {
+    if (!toolbar) return;
+
+    // Search
+    let searchWrap = document.getElementById("tripSearchWrap");
+    let searchInput = document.getElementById("tripSearchInput");
+    let clearBtn = document.getElementById("clearSearchBtn");
+    if (!searchInput) {
+      const wrap = document.createElement("div");
+      wrap.id = "tripSearchWrap";
+      wrap.className = "relative w-full sm:w-80";
+      wrap.innerHTML = `
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input id="tripSearchInput" type="search"
+          class="w-full pl-9 pr-9 py-2 rounded-md border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          placeholder="Search trips" aria-label="Search trips" />
+        <button id="clearSearchBtn" type="button"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          aria-label="Clear search" title="Clear">
+          <i class="fa-solid fa-xmark"></i>
+        </button>`;
+      // put it at the beginning of the right side stack
+      toolbar.insertBefore(wrap, toolbar.firstChild?.nextSibling || null);
+    }
+
+    // Sort (existing behavior)
+    let sortSelect = document.getElementById("sortSelect");
+    if (!sortSelect) {
       const wrap = document.createElement("div");
       wrap.className = "flex items-center gap-2";
       const lbl = document.createElement("label");
@@ -38,6 +63,7 @@
       toolbar.appendChild(wrap);
     }
   }
+  ensureToolbarControls();
 
   // ----------- State -----------
   let currentPage = 1;
@@ -62,7 +88,21 @@
     history.replaceState(null, "", url);
   };
 
-  let currentSort = getSortFromQS(); // "price:asc" | "rating:desc" | "bestseller" | ""
+  // NEW: search term in URL (we keep it lowercase in the URL, map to "Search" for API)
+  const getSearchFromQS = () =>
+    new URLSearchParams(location.search).get("search") || "";
+
+  const setSearchInQS = (value) => {
+    const url = new URL(location.href);
+    if (value) url.searchParams.set("search", value);
+    else url.searchParams.delete("search");
+    // Reset to page 1 when search changes
+    url.searchParams.delete("PageNumber");
+    history.replaceState(null, "", url);
+  };
+
+  let currentSort = getSortFromQS();
+  let currentSearch = getSearchFromQS();
 
   const esc = (s) =>
     (s ?? "").toString().replace(
@@ -131,16 +171,14 @@
       )
       .join("");
 
-  // ----------- Availability (tripDates) helpers -----------
+  // ----------- Availability (tripDates) -----------
   const DAY_MS = 24 * 60 * 60 * 1000;
 
-  // Robust parse for "8/20/2025" or ISO strings; returns Date | null
   function parseApiDate(str) {
     if (!str) return null;
     const d1 = new Date(str);
     if (!isNaN(d1.getTime())) return d1;
 
-    // fallback for M/D/YYYY
     const parts = String(str)
       .split(/[\/\-\.]/)
       .map((p) => p.trim());
@@ -158,9 +196,7 @@
       (arr || [])
         .map(parseApiDate)
         .filter((d) => d && !isNaN(d.getTime()))
-        // Normalize to midnight to make day-diff reliable
         .map((d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())) || [];
-    // unique + sort
     const uniq = Array.from(
       new Map(dates.map((d) => [d.getTime(), d])).values()
     );
@@ -169,7 +205,6 @@
   }
 
   function groupConsecutiveRanges(dates) {
-    // dates must be sorted, midnight-normalized
     if (!dates.length) return [];
     const ranges = [];
     let start = dates[0];
@@ -179,10 +214,8 @@
       const cur = dates[i];
       const diff = (cur - prev) / DAY_MS;
       if (diff === 1) {
-        // still consecutive
         prev = cur;
       } else {
-        // close previous range
         ranges.push({ start, end: prev });
         start = cur;
         prev = cur;
@@ -198,10 +231,6 @@
       start.getMonth() === end.getMonth() &&
       start.getDate() === end.getDate();
 
-    const md = new Intl.DateTimeFormat(locale, {
-      month: "short",
-      day: "numeric",
-    });
     const mdy = new Intl.DateTimeFormat(locale, {
       month: "short",
       day: "numeric",
@@ -209,27 +238,6 @@
     });
 
     if (sameDay) return mdy.format(start);
-
-    // const sameMonth =
-    //   start.getFullYear() === end.getFullYear() &&
-    //   start.getMonth() === end.getMonth();
-    // const sameYear = start.getFullYear() === end.getFullYear();
-
-    // if (sameMonth) {
-    //   // Aug 20–21, 2025
-    //   const left = md
-    //     .format(start)
-    //     .replace(/,?\s*\d+$/, String(start.getDate()));
-    //   const right = String(end.getDate());
-    //   return `${left}–${right}, ${start.getFullYear()}`;
-    // }
-
-    // if (sameYear) {
-    //   // Aug 31 – Sep 2, 2025
-    //   return `${md.format(start)} – ${md.format(end)}, ${start.getFullYear()}`;
-    // }
-
-    // Different years
     return `${mdy.format(start)} & ${mdy.format(end)}`;
   }
 
@@ -300,7 +308,6 @@
             <span class="text-gray-600">${t.reviews ?? 0} reviews</span>
           </div>
 
-          <!-- Availability line -->
           <div class="mt-2 text-sm text-gray-700">
             ${availabilityHTML(t)}
           </div>
@@ -330,7 +337,7 @@
     </a>
   `;
 
-  // ----------- Sort labels/UI -----------
+  // ----------- Labels (i18n) -----------
   const sortLabels = () => {
     if (getLang() === "deu") {
       return {
@@ -354,6 +361,21 @@
     };
   };
 
+  const searchLabels = () => {
+    if (getLang() === "deu") {
+      return {
+        placeholder: "Ausflüge suchen",
+        aria: "Ausflüge suchen",
+        clear: "Löschen",
+      };
+    }
+    return {
+      placeholder: "Search trips",
+      aria: "Search trips",
+      clear: "Clear",
+    };
+  };
+
   function initSortUI() {
     const sel = document.getElementById("sortSelect");
     const lbl = document.getElementById("sortLabel");
@@ -371,7 +393,6 @@
       <option value="rating:asc">${t.ratingLow}</option>
     `;
 
-    // reflect current URL state
     currentSort = getSortFromQS();
     sel.value = currentSort;
 
@@ -380,6 +401,56 @@
       setSortInQS(currentSort);
       load(1);
     };
+  }
+
+  // ----------- Search UI wiring -----------
+  let searchDebounceId = null;
+  function initSearchUI() {
+    const input = document.getElementById("tripSearchInput");
+    const clearBtn = document.getElementById("clearSearchBtn");
+    if (!input) return;
+
+    const t = searchLabels();
+    input.placeholder = t.placeholder;
+    input.setAttribute("aria-label", t.aria);
+    if (clearBtn) clearBtn.title = t.clear;
+
+    // reflect current state
+    currentSearch = getSearchFromQS();
+    input.value = currentSearch;
+    if (clearBtn) clearBtn.classList.toggle("hidden", !input.value);
+
+    input.addEventListener("input", () => {
+      if (clearBtn) clearBtn.classList.toggle("hidden", !input.value);
+      // debounce live search
+      clearTimeout(searchDebounceId);
+      searchDebounceId = setTimeout(() => {
+        currentSearch = input.value.trim();
+        setSearchInQS(currentSearch);
+        load(1);
+      }, 400);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(searchDebounceId);
+        currentSearch = input.value.trim();
+        setSearchInQS(currentSearch);
+        load(1);
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        clearBtn.classList.add("hidden");
+        currentSearch = "";
+        setSearchInQS("");
+        load(1);
+        input.focus();
+      });
+    }
   }
 
   // ----------- Fetch + Render -----------
@@ -399,7 +470,10 @@
     if (cat) qs.append("CategoryId", cat);
 
     const sort = getSortFromQS();
-    if (sort) qs.append("Sort", sort); // API expects array[string]; appending once is fine.
+    if (sort) qs.append("Sort", sort);
+
+    const searchTerm = getSearchFromQS();
+    if (searchTerm) qs.append("Search", searchTerm); // <-- API integration
 
     try {
       const res = await fetch(`/api/Trip/GetAllTrips?${qs.toString()}`, {
@@ -411,22 +485,31 @@
       const items = payload?.data ?? [];
       totalCount = Number(payload?.count ?? 0);
 
-      // If backend returns incorrect count, fall back to length (defensive)
       const effectiveCount =
         totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
 
       totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
 
       if (summaryEl) {
-        summaryEl.textContent =
-          effectiveCount > 0
-            ? `${effectiveCount} trips • page ${currentPage} of ${totalPages}`
-            : "No trips";
+        let text = effectiveCount > 0 ? `${effectiveCount} trips` : "No trips";
+        const srch = getSearchFromQS();
+        if (srch) text += ` • for "${srch}"`;
+        text += ` • page ${currentPage} of ${totalPages}`;
+        summaryEl.textContent = text;
       }
 
       if (!items.length) {
-        listEl.innerHTML =
-          '<div class="bg-white rounded p-10 text-center text-gray-500">No trips found.</div>';
+        const srch = getSearchFromQS();
+        listEl.innerHTML = `
+          <div class="bg-white rounded p-10 text-center text-gray-500">
+            ${
+              srch
+                ? `No trips found for "<span class="font-semibold">${esc(
+                    srch
+                  )}</span>".`
+                : "No trips found."
+            }
+          </div>`;
       } else {
         listEl.innerHTML = items.map(rowHTML).join("");
       }
@@ -493,23 +576,26 @@
     }
   });
 
-  // ----------- Public hook (used by sidebar categories) -----------
+  // ----------- Public hook -----------
   window.reloadTripsPage = (page = 1) => load(page);
 
   // ----------- Init -----------
   document.addEventListener("DOMContentLoaded", () => {
+    ensureToolbarControls();
     initSortUI();
+    initSearchUI();
     load(1);
   });
 
-  // Re-init on language change (ties into your existing refresh hook)
+  // Re-init on language change
   const oldRefresh = window.refreshLangData;
   window.refreshLangData = async function () {
     try {
       if (typeof oldRefresh === "function") await oldRefresh();
     } finally {
-      initSortUI(); // update labels
-      load(1); // reload data in the new language
+      initSortUI();
+      initSearchUI();
+      load(1);
     }
   };
 })();
