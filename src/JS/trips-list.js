@@ -3,7 +3,7 @@
 */
 
 (() => {
-  ("use strict");
+  "use strict";
 
   // ----------- Config / DOM -----------
   const PAGE_SIZE = 10;
@@ -16,48 +16,53 @@
     return;
   }
 
-  // Make ONLY #resultsSummary dynamic (mobile search + sort + count)
+  // Ensure toolbar controls exist (search + sort) if HTML didn't include them
   function ensureToolbarControls() {
-    if (!summaryEl) return;
+    const toolbar =
+      summaryEl?.parentElement || document.querySelector(".mb-4, .toolbar");
+    if (!toolbar) return;
 
-    // show on mobile (override "hidden sm:block")
-    summaryEl.className = "w-full";
+    // Search
+    let searchWrap = document.getElementById("tripSearchWrap");
+    let searchInput = document.getElementById("tripSearchInput");
+    let clearBtn = document.getElementById("clearSearchBtn");
+    if (!searchInput) {
+      const wrap = document.createElement("div");
+      wrap.id = "tripSearchWrap";
+      wrap.className = "relative w-full sm:w-80";
+      wrap.innerHTML = `
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input id="tripSearchInput" type="search"
+          class="w-full pl-9 pr-9 py-2 rounded-md border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          placeholder="Search trips" aria-label="Search trips" />
+        <button id="clearSearchBtn" type="button"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          aria-label="Clear search" title="Clear">
+          <i class="fa-solid fa-xmark"></i>
+        </button>`;
+      // put it at the beginning of the right side stack
+      toolbar.insertBefore(wrap, toolbar.firstChild?.nextSibling || null);
+    }
 
-    if (!summaryEl.dataset.enhanced) {
-      summaryEl.innerHTML = `
-      <!-- Mobile controls (shown on < sm) -->
-      <div class="sm:hidden space-y-2">
-        <!-- Search -->
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-          <input id="tripSearchInput" type="search"
-            class="w-full pl-9 pr-9 py-2 rounded-md border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            placeholder="Search trips" aria-label="Search trips" />
-          <!-- live count -->
-          <span id="tripSearchCount"
-            class="hidden absolute right-9 top-1/2 -translate-y-1/2 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700"></span>
-          <button id="clearSearchBtn" type="button"
-            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label="Clear search" title="Clear">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <!-- Sort (mobile) -->
-        <div class="flex items-center gap-2">
-          <label for="sortSelectMobile" id="sortLabelMobile" class="text-sm text-gray-600">Sort by</label>
-          <select id="sortSelectMobile"
-            class="w-full border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
-        </div>
-      </div>
-
-      <!-- Desktop summary text only (your existing desktop sort stays where it is) -->
-      <span id="summaryTextDesktop" class="hidden sm:inline text-sm text-gray-500"></span>
-    `;
-      summaryEl.dataset.enhanced = "1";
+    // Sort (existing behavior)
+    let sortSelect = document.getElementById("sortSelect");
+    if (!sortSelect) {
+      const wrap = document.createElement("div");
+      wrap.className = "flex items-center gap-2";
+      const lbl = document.createElement("label");
+      lbl.id = "sortLabel";
+      lbl.className = "text-sm text-gray-600";
+      lbl.setAttribute("for", "sortSelect");
+      lbl.textContent = "Sort by";
+      sortSelect = document.createElement("select");
+      sortSelect.id = "sortSelect";
+      sortSelect.className =
+        "border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500";
+      wrap.appendChild(lbl);
+      wrap.appendChild(sortSelect);
+      toolbar.appendChild(wrap);
     }
   }
-
   ensureToolbarControls();
 
   // ----------- State -----------
@@ -387,11 +392,14 @@
   };
 
   function initSortUI() {
-    const fill = (sel, lblEl) => {
-      if (!sel) return;
-      const t = sortLabels();
-      if (lblEl) lblEl.textContent = t.title;
-      sel.innerHTML = `
+    const sel = document.getElementById("sortSelect");
+    const lbl = document.getElementById("sortLabel");
+    if (!sel) return;
+
+    const t = sortLabels();
+    if (lbl) lbl.textContent = t.title;
+
+    sel.innerHTML = `
       <option value="">${t.recommended}</option>
       <option value="bestseller">${t.bestseller}</option>
       <option value="price:asc">${t.priceLow}</option>
@@ -399,27 +407,15 @@
       <option value="rating:desc">${t.ratingHigh}</option>
       <option value="rating:asc">${t.ratingLow}</option>
     `;
-      sel.value = currentSort = getSortFromQS();
-    };
 
-    const desktopSel = document.getElementById("sortSelect");
-    const desktopLbl = document.getElementById("sortLabel");
-    const mobileSel = document.getElementById("sortSelectMobile");
-    const mobileLbl = document.getElementById("sortLabelMobile");
+    currentSort = getSortFromQS();
+    sel.value = currentSort;
 
-    fill(desktopSel, desktopLbl);
-    fill(mobileSel, mobileLbl);
-
-    const handleChange = (fromSel) => {
-      currentSort = fromSel.value;
+    sel.onchange = () => {
+      currentSort = sel.value;
       setSortInQS(currentSort);
-      if (desktopSel && fromSel !== desktopSel) desktopSel.value = currentSort;
-      if (mobileSel && fromSel !== mobileSel) mobileSel.value = currentSort;
       load(1);
     };
-
-    if (desktopSel) desktopSel.onchange = () => handleChange(desktopSel);
-    if (mobileSel) mobileSel.onchange = () => handleChange(mobileSel);
   }
 
   // ----------- Search UI wiring -----------
@@ -512,13 +508,11 @@
       totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
 
       if (summaryEl) {
-        const deskText = document.getElementById("summaryTextDesktop");
         let text = effectiveCount > 0 ? `${effectiveCount} trips` : "No trips";
         const srch = getSearchFromQS();
         if (srch) text += ` • for "${srch}"`;
         text += ` • page ${currentPage} of ${totalPages}`;
-        if (deskText) deskText.textContent = text;
-        else summaryEl.textContent = text; // fallback
+        summaryEl.textContent = text;
       }
 
       if (!items.length) {
