@@ -230,7 +230,7 @@
     // }
 
     // Different years
-    return `${mdy.format(start)} – ${mdy.format(end)}`;
+    return `${mdy.format(start)} & ${mdy.format(end)}`;
   }
 
   function availabilityHTML(trip) {
@@ -317,7 +317,6 @@
 
         <div class="px-4 pb-4 sm:p-4 sm:w-56 flex sm:flex-col items-end justify-between">
           <div class="text-right">
-            <div class="text-sm text-gray-500">Starting from</div>
             <div class="text-xl font-bold">
               ${t.price != null ? formatPrice(t.price) : ""}
             </div>
