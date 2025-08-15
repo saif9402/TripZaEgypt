@@ -1725,6 +1725,16 @@
       display: block;
     }
   }
+  .sm\:hidden {
+    @media (width >= 40rem) {
+      display: none;
+    }
+  }
+  .sm\:inline {
+    @media (width >= 40rem) {
+      display: inline;
+    }
+  }
   .sm\:min-h-\[290px\] {
     @media (width >= 40rem) {
       min-height: 290px;
