@@ -31,18 +31,15 @@
       wrap.id = "tripSearchWrap";
       wrap.className = "relative w-full sm:w-80";
       wrap.innerHTML = `
-  <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-  <input id="tripSearchInput" type="search"
-    class="w-full pl-9 pr-9 py-2 rounded-md border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-    placeholder="Search trips" aria-label="Search trips" />
-  <span id="tripSearchCount"
-    class="hidden absolute right-9 top-1/2 -translate-y-1/2 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700"></span>
-  <button id="clearSearchBtn" type="button"
-    class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-    aria-label="Clear search" title="Clear">
-    <i class="fa-solid fa-xmark"></i>
-  </button>`;
-
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input id="tripSearchInput" type="search"
+          class="w-full pl-9 pr-9 py-2 rounded-md border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          placeholder="Search trips" aria-label="Search trips" />
+        <button id="clearSearchBtn" type="button"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          aria-label="Clear search" title="Clear">
+          <i class="fa-solid fa-xmark"></i>
+        </button>`;
       // put it at the beginning of the right side stack
       toolbar.insertBefore(wrap, toolbar.firstChild?.nextSibling || null);
     }
