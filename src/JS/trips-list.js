@@ -1,6 +1,4 @@
-/* trips-list.js — Trips list with pagination + Sort + Search + i18n
-   Adds a toolbar search bar that syncs to ?search=... and calls /api/Trip/GetAllTrips&Search=...
-*/
+/* trips-list.js — Trips list with pagination + Sort + Search + Date filter + i18n */
 
 (() => {
   "use strict";
@@ -23,9 +21,7 @@
     if (!toolbar) return;
 
     // Search
-    let searchWrap = document.getElementById("tripSearchWrap");
     let searchInput = document.getElementById("tripSearchInput");
-    let clearBtn = document.getElementById("clearSearchBtn");
     if (!searchInput) {
       const wrap = document.createElement("div");
       wrap.id = "tripSearchWrap";
@@ -40,11 +36,10 @@
           aria-label="Clear search" title="Clear">
           <i class="fa-solid fa-xmark"></i>
         </button>`;
-      // put it at the beginning of the right side stack
       toolbar.insertBefore(wrap, toolbar.firstChild?.nextSibling || null);
     }
 
-    // Sort (existing behavior)
+    // Sort
     let sortSelect = document.getElementById("sortSelect");
     if (!sortSelect) {
       const wrap = document.createElement("div");
@@ -88,7 +83,7 @@
     history.replaceState(null, "", url);
   };
 
-  // NEW: search term in URL (we keep it lowercase in the URL, map to "Search" for API)
+  // Search term (URL)
   const getSearchFromQS = () =>
     new URLSearchParams(location.search).get("search") || "";
 
@@ -96,7 +91,6 @@
     const url = new URL(location.href);
     if (value) url.searchParams.set("search", value);
     else url.searchParams.delete("search");
-    // Reset to page 1 when search changes
     url.searchParams.delete("PageNumber");
     history.replaceState(null, "", url);
   };
@@ -171,7 +165,7 @@
       )
       .join("");
 
-  // ----------- Availability (tripDates) -----------
+  // ----------- Availability (tripDates shown on cards) -----------
   const DAY_MS = 24 * 60 * 60 * 1000;
 
   function parseApiDate(str) {
@@ -244,7 +238,6 @@
   function availabilityHTML(trip) {
     const dates = normalizeTripDates(trip?.tripDates);
     if (!dates.length) return "";
-
     const ranges = groupConsecutiveRanges(dates);
     const locale = getLocale();
     const shown = ranges
@@ -269,6 +262,7 @@
       </span>
     `;
   }
+
   function setSearchCount(n) {
     const el = document.getElementById("tripSearchCount");
     if (!el) return;
@@ -282,6 +276,110 @@
     } else {
       el.textContent = "";
       el.classList.add("hidden");
+    }
+  }
+
+  // ----------- NEW: Date filter (URL + API) -----------
+  const qs = () => new URLSearchParams(location.search);
+
+  const getStartDateFromQS = () => qs().get("start") || "";
+  const getEndDateFromQS = () => qs().get("end") || "";
+
+  function setDateRangeInQS(startDateStr, endDateStr) {
+    const url = new URL(location.href);
+    if (startDateStr) url.searchParams.set("start", startDateStr);
+    else url.searchParams.delete("start");
+    if (endDateStr) url.searchParams.set("end", endDateStr);
+    else url.searchParams.delete("end");
+    url.searchParams.delete("PageNumber"); // reset pagination on filter change
+    history.replaceState(null, "", url);
+  }
+
+  // Convert YYYY-MM-DD -> ISO 8601 at start/end of day (UTC) e.g. 2025-08-15T00:00:00.000Z
+  function dateOnlyToISO(dateStr, endOfDay = false) {
+    if (!dateStr) return "";
+    const [y, m, d] = dateStr.split("-").map((n) => parseInt(n, 10));
+    if (!y || !m || !d) return "";
+    const utc = endOfDay
+      ? Date.UTC(y, m - 1, d, 23, 59, 59, 999)
+      : Date.UTC(y, m - 1, d, 0, 0, 0, 0);
+    return new Date(utc).toISOString();
+  }
+
+  function prettyDate(dateStr) {
+    try {
+      const [y, m, d] = dateStr.split("-").map((n) => parseInt(n, 10));
+      const dt = new Date(y, m - 1, d);
+      return new Intl.DateTimeFormat(getLocale(), {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(dt);
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function summarizeDateFilter(startStr, endStr) {
+    if (!startStr && !endStr) return "";
+    if (startStr && endStr)
+      return `${prettyDate(startStr)} → ${prettyDate(endStr)}`;
+    if (startStr) return `from ${prettyDate(startStr)}`;
+    return `until ${prettyDate(endStr)}`;
+  }
+
+  function initDateFilterUI() {
+    const startInput = document.getElementById("filterStartDate");
+    const endInput = document.getElementById("filterEndDate");
+    const applyBtn = document.getElementById("applyDateFilter");
+    const clearBtn = document.getElementById("clearDateFilter");
+    const hintEl = document.getElementById("dateFilterHint");
+
+    if (!startInput || !endInput || !applyBtn) return;
+
+    // Pre-fill from URL (yyyy-mm-dd)
+    const startQS = getStartDateFromQS();
+    const endQS = getEndDateFromQS();
+    if (startQS) startInput.value = startQS;
+    if (endQS) endInput.value = endQS;
+
+    if (hintEl) {
+      hintEl.textContent = summarizeDateFilter(startQS, endQS);
+    }
+
+    function apply() {
+      let s = startInput.value || "";
+      let e = endInput.value || "";
+
+      // If both present but reversed, swap them
+      if (s && e && s > e) [s, e] = [e, s];
+
+      setDateRangeInQS(s, e);
+      if (hintEl) hintEl.textContent = summarizeDateFilter(s, e);
+      load(1);
+    }
+
+    applyBtn.onclick = apply;
+
+    // Enter key submits
+    [startInput, endInput].forEach((el) =>
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          apply();
+        }
+      })
+    );
+
+    // Clear
+    if (clearBtn) {
+      clearBtn.onclick = () => {
+        startInput.value = "";
+        endInput.value = "";
+        setDateRangeInQS("", "");
+        if (hintEl) hintEl.textContent = "";
+        load(1);
+      };
     }
   }
 
@@ -430,14 +528,12 @@
     input.setAttribute("aria-label", t.aria);
     if (clearBtn) clearBtn.title = t.clear;
 
-    // reflect current state
     currentSearch = getSearchFromQS();
     input.value = currentSearch;
     if (clearBtn) clearBtn.classList.toggle("hidden", !input.value);
 
     input.addEventListener("input", () => {
       if (clearBtn) clearBtn.classList.toggle("hidden", !input.value);
-      // debounce live search
       clearTimeout(searchDebounceId);
       searchDebounceId = setTimeout(() => {
         currentSearch = input.value.trim();
@@ -475,23 +571,41 @@
     listEl.innerHTML = skeletons(6);
     pagerEl.innerHTML = "";
 
-    const qs = new URLSearchParams({
+    const params = new URLSearchParams({
       PageNumber: page,
       PageSize: PAGE_SIZE,
       TranslationLanguageId: getLangId(),
     });
 
     const cat = getCategoryIdFromQS();
-    if (cat) qs.append("CategoryId", cat);
+    if (cat) params.append("CategoryId", cat);
 
     const sort = getSortFromQS();
-    if (sort) qs.append("Sort", sort);
+    if (sort) params.append("Sort", sort);
 
     const searchTerm = getSearchFromQS();
-    if (searchTerm) qs.append("Search", searchTerm); // <-- API integration
+    if (searchTerm) params.append("Search", searchTerm);
+
+    // NEW: send StartDate / EndDate if present (as ISO 8601, full-day inclusive)
+    const startDateOnly = getStartDateFromQS(); // yyyy-mm-dd
+    const endDateOnly = getEndDateFromQS(); // yyyy-mm-dd
+    let isoStart = "";
+    let isoEnd = "";
+
+    if (startDateOnly) isoStart = dateOnlyToISO(startDateOnly, false);
+    if (endDateOnly) isoEnd = dateOnlyToISO(endDateOnly, true);
+
+    // If both exist but reversed (rare after UI swap), swap again
+    if (isoStart && isoEnd && new Date(isoStart) > new Date(isoEnd)) {
+      const tmp = isoStart;
+      isoStart = isoEnd;
+      isoEnd = tmp;
+    }
+    if (isoStart) params.append("StartDate", isoStart);
+    if (isoEnd) params.append("EndDate", isoEnd);
 
     try {
-      const res = await fetch(`/api/Trip/GetAllTrips?${qs.toString()}`, {
+      const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`, {
         cache: "no-store",
       });
       const json = await res.json();
@@ -502,28 +616,43 @@
 
       const effectiveCount =
         totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
-      // after: const effectiveCount = ...
-      setSearchCount(effectiveCount);
 
+      setSearchCount(effectiveCount);
       totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
 
       if (summaryEl) {
         let text = effectiveCount > 0 ? `${effectiveCount} trips` : "No trips";
         const srch = getSearchFromQS();
         if (srch) text += ` • for "${srch}"`;
+
+        const startQS = getStartDateFromQS();
+        const endQS = getEndDateFromQS();
+        const dateBadge = summarizeDateFilter(startQS, endQS);
+        if (dateBadge) text += ` • ${dateBadge}`;
+
         text += ` • page ${currentPage} of ${totalPages}`;
         summaryEl.textContent = text;
       }
 
       if (!items.length) {
         const srch = getSearchFromQS();
+        const startQS = getStartDateFromQS();
+        const endQS = getEndDateFromQS();
+        const hasDate = startQS || endQS;
+
         listEl.innerHTML = `
           <div class="bg-white rounded p-10 text-center text-gray-500">
             ${
-              srch
-                ? `No trips found for "<span class="font-semibold">${esc(
+              srch || hasDate
+                ? `No trips found${
                     srch
-                  )}</span>".`
+                      ? ` for "<span class="font-semibold">${esc(srch)}</span>"`
+                      : ""
+                  }${
+                    hasDate
+                      ? ` in ${esc(summarizeDateFilter(startQS, endQS))}`
+                      : ""
+                  }.`
                 : "No trips found."
             }
           </div>`;
@@ -535,7 +664,6 @@
     } catch (err) {
       console.error("Failed to load trips:", err);
       setSearchCount(null);
-
       listEl.innerHTML =
         '<div class="bg-white rounded p-10 text-center text-red-500">Something went wrong. Please try again.</div>';
     }
@@ -544,13 +672,12 @@
   // ----------- Pagination -----------
   function renderPagination() {
     const mkBtn = (label, page, { active = false, disabled = false } = {}) => `
-      <button data-page="${page}" ${
-      disabled ? "disabled" : ""
-    } class="min-w-9 h-9 px-3 rounded border text-sm ${
-      active
-        ? "bg-emerald-600 text-white border-emerald-600"
-        : "bg-white hover:bg-gray-50 border-gray-200"
-    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}">
+      <button data-page="${page}" ${disabled ? "disabled" : ""} 
+        class="min-w-9 h-9 px-3 rounded border text-sm ${
+          active
+            ? "bg-emerald-600 text-white border-emerald-600"
+            : "bg-white hover:bg-gray-50 border-gray-200"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}">
         ${label}
       </button>`;
 
@@ -603,6 +730,7 @@
     ensureToolbarControls();
     initSortUI();
     initSearchUI();
+    initDateFilterUI(); // NEW
     load(1);
   });
 
@@ -614,6 +742,7 @@
     } finally {
       initSortUI();
       initSearchUI();
+      initDateFilterUI(); // NEW
       load(1);
     }
   };
