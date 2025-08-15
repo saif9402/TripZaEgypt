@@ -1,4 +1,4 @@
-/* trips-list.js — Trips list with pagination + Sort + Search + Date filter + i18n */
+/* trips-list.js — Trips list with pagination + Sort + Search + Date & Duration filters + i18n */
 
 (() => {
   "use strict";
@@ -70,11 +70,10 @@
   const getLangId = () => (getLang() === "deu" ? 1 : 2);
   const getLocale = () => (getLang() === "deu" ? "de-DE" : "en-US");
 
-  const getCategoryIdFromQS = () =>
-    new URLSearchParams(location.search).get("categoryId");
+  const getQS = () => new URLSearchParams(location.search);
 
-  const getSortFromQS = () =>
-    new URLSearchParams(location.search).get("sort") || "";
+  const getCategoryIdFromQS = () => getQS().get("categoryId");
+  const getSortFromQS = () => getQS().get("sort") || "";
 
   const setSortInQS = (value) => {
     const url = new URL(location.href);
@@ -83,10 +82,8 @@
     history.replaceState(null, "", url);
   };
 
-  // Search term (URL)
-  const getSearchFromQS = () =>
-    new URLSearchParams(location.search).get("search") || "";
-
+  // Search term in URL
+  const getSearchFromQS = () => getQS().get("search") || "";
   const setSearchInQS = (value) => {
     const url = new URL(location.href);
     if (value) url.searchParams.set("search", value);
@@ -165,7 +162,7 @@
       )
       .join("");
 
-  // ----------- Availability (tripDates shown on cards) -----------
+  // ----------- Availability (tripDates rendering) -----------
   const DAY_MS = 24 * 60 * 60 * 1000;
 
   function parseApiDate(str) {
@@ -279,11 +276,9 @@
     }
   }
 
-  // ----------- NEW: Date filter (URL + API) -----------
-  const qs = () => new URLSearchParams(location.search);
-
-  const getStartDateFromQS = () => qs().get("start") || "";
-  const getEndDateFromQS = () => qs().get("end") || "";
+  // ----------- Date filter (URL + API) -----------
+  const getStartDateFromQS = () => getQS().get("start") || "";
+  const getEndDateFromQS = () => getQS().get("end") || "";
 
   function setDateRangeInQS(startDateStr, endDateStr) {
     const url = new URL(location.href);
@@ -291,11 +286,11 @@
     else url.searchParams.delete("start");
     if (endDateStr) url.searchParams.set("end", endDateStr);
     else url.searchParams.delete("end");
-    url.searchParams.delete("PageNumber"); // reset pagination on filter change
+    url.searchParams.delete("PageNumber");
     history.replaceState(null, "", url);
   }
 
-  // Convert YYYY-MM-DD -> ISO 8601 at start/end of day (UTC) e.g. 2025-08-15T00:00:00.000Z
+  // Convert YYYY-MM-DD -> ISO at start/end of day (UTC)
   function dateOnlyToISO(dateStr, endOfDay = false) {
     if (!dateStr) return "";
     const [y, m, d] = dateStr.split("-").map((n) => parseInt(n, 10));
@@ -337,23 +332,17 @@
 
     if (!startInput || !endInput || !applyBtn) return;
 
-    // Pre-fill from URL (yyyy-mm-dd)
     const startQS = getStartDateFromQS();
     const endQS = getEndDateFromQS();
     if (startQS) startInput.value = startQS;
     if (endQS) endInput.value = endQS;
 
-    if (hintEl) {
-      hintEl.textContent = summarizeDateFilter(startQS, endQS);
-    }
+    if (hintEl) hintEl.textContent = summarizeDateFilter(startQS, endQS);
 
     function apply() {
       let s = startInput.value || "";
       let e = endInput.value || "";
-
-      // If both present but reversed, swap them
       if (s && e && s > e) [s, e] = [e, s];
-
       setDateRangeInQS(s, e);
       if (hintEl) hintEl.textContent = summarizeDateFilter(s, e);
       load(1);
@@ -361,7 +350,6 @@
 
     applyBtn.onclick = apply;
 
-    // Enter key submits
     [startInput, endInput].forEach((el) =>
       el.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
@@ -371,12 +359,119 @@
       })
     );
 
-    // Clear
     if (clearBtn) {
       clearBtn.onclick = () => {
         startInput.value = "";
         endInput.value = "";
         setDateRangeInQS("", "");
+        if (hintEl) hintEl.textContent = "";
+        load(1);
+      };
+    }
+  }
+
+  // ----------- Duration filter (URL + API) -----------
+  const getStartDurationFromQS = () => {
+    const v = getQS().get("durStart");
+    return v !== null && v !== "" ? parseInt(v, 10) : "";
+  };
+  const getEndDurationFromQS = () => {
+    const v = getQS().get("durEnd");
+    return v !== null && v !== "" ? parseInt(v, 10) : "";
+  };
+
+  function setDurationInQS(minStr, maxStr) {
+    const url = new URL(location.href);
+    if (minStr !== "" && minStr != null)
+      url.searchParams.set("durStart", String(minStr));
+    else url.searchParams.delete("durStart");
+    if (maxStr !== "" && maxStr != null)
+      url.searchParams.set("durEnd", String(maxStr));
+    else url.searchParams.delete("durEnd");
+    url.searchParams.delete("PageNumber");
+    history.replaceState(null, "", url);
+  }
+
+  function summarizeDuration(min, max) {
+    if (min === "" && max === "") return "";
+    if (min !== "" && max !== "") return `Duration ${min}–${max} min`;
+    if (min !== "") return `Duration ≥ ${min} min`;
+    return `Duration ≤ ${max} min`;
+  }
+
+  function initDurationFilterUI() {
+    const minInput = document.getElementById("filterMinDuration");
+    const maxInput = document.getElementById("filterMaxDuration");
+    const applyBtn = document.getElementById("applyDurationFilter");
+    const clearBtn = document.getElementById("clearDurationFilter");
+    const hintEl = document.getElementById("durationFilterHint");
+    const buckets = Array.from(document.querySelectorAll(".durationBucket"));
+
+    if (!minInput || !maxInput || !applyBtn) return;
+
+    const qsMin = getStartDurationFromQS();
+    const qsMax = getEndDurationFromQS();
+    if (qsMin !== "") minInput.value = Number(qsMin);
+    if (qsMax !== "") maxInput.value = Number(qsMax);
+    if (hintEl) hintEl.textContent = summarizeDuration(qsMin, qsMax);
+
+    function syncInputsFromBuckets() {
+      const selected = buckets.filter((b) => b.checked);
+      if (!selected.length) return;
+      const min = Math.min(...selected.map((b) => parseInt(b.dataset.min, 10)));
+      const max = Math.max(...selected.map((b) => parseInt(b.dataset.max, 10)));
+      minInput.value = min;
+      maxInput.value = max;
+    }
+
+    function syncBucketsFromInputs() {
+      const min = minInput.value === "" ? "" : parseInt(minInput.value, 10);
+      const max = maxInput.value === "" ? "" : parseInt(maxInput.value, 10);
+      buckets.forEach((b) => {
+        const bmin = parseInt(b.dataset.min, 10);
+        const bmax = parseInt(b.dataset.max, 10);
+        const coveredMin = min === "" || min <= bmin;
+        const coveredMax = max === "" || max >= bmax;
+        b.checked = coveredMin && coveredMax && (min !== "" || max !== "");
+      });
+    }
+
+    buckets.forEach((b) => {
+      b.addEventListener("change", () => {
+        if (buckets.some((x) => x.checked)) syncInputsFromBuckets();
+      });
+    });
+
+    minInput.addEventListener("input", syncBucketsFromInputs);
+    maxInput.addEventListener("input", syncBucketsFromInputs);
+
+    function apply() {
+      let min =
+        minInput.value === "" ? "" : Math.max(0, parseInt(minInput.value, 10));
+      let max =
+        maxInput.value === "" ? "" : Math.max(0, parseInt(maxInput.value, 10));
+      if (min !== "" && max !== "" && min > max) [min, max] = [max, min];
+      setDurationInQS(min === "" ? "" : min, max === "" ? "" : max);
+      if (hintEl) hintEl.textContent = summarizeDuration(min, max);
+      load(1);
+    }
+
+    applyBtn.onclick = apply;
+    [minInput, maxInput].forEach((el) =>
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          apply();
+        }
+      })
+    );
+
+    if (clearBtn) {
+      clearBtn.onclick = () => {
+        minInput.value = "";
+        maxInput.value = "";
+        buckets.forEach((b) => (b.checked = false));
+        setDurationInQS("", "");
         if (hintEl) hintEl.textContent = "";
         load(1);
       };
@@ -586,16 +681,13 @@
     const searchTerm = getSearchFromQS();
     if (searchTerm) params.append("Search", searchTerm);
 
-    // NEW: send StartDate / EndDate if present (as ISO 8601, full-day inclusive)
+    // Date range (ISO, full-day inclusive)
     const startDateOnly = getStartDateFromQS(); // yyyy-mm-dd
     const endDateOnly = getEndDateFromQS(); // yyyy-mm-dd
     let isoStart = "";
     let isoEnd = "";
-
     if (startDateOnly) isoStart = dateOnlyToISO(startDateOnly, false);
     if (endDateOnly) isoEnd = dateOnlyToISO(endDateOnly, true);
-
-    // If both exist but reversed (rare after UI swap), swap again
     if (isoStart && isoEnd && new Date(isoStart) > new Date(isoEnd)) {
       const tmp = isoStart;
       isoStart = isoEnd;
@@ -603,6 +695,12 @@
     }
     if (isoStart) params.append("StartDate", isoStart);
     if (isoEnd) params.append("EndDate", isoEnd);
+
+    // Duration range (minutes)
+    const durMin = getStartDurationFromQS();
+    const durMax = getEndDurationFromQS();
+    if (durMin !== "") params.append("StartDuration", String(durMin));
+    if (durMax !== "") params.append("EndDuration", String(durMax));
 
     try {
       const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`, {
@@ -630,6 +728,11 @@
         const dateBadge = summarizeDateFilter(startQS, endQS);
         if (dateBadge) text += ` • ${dateBadge}`;
 
+        const dMin = getStartDurationFromQS();
+        const dMax = getEndDurationFromQS();
+        const durBadge = summarizeDuration(dMin, dMax);
+        if (durBadge) text += ` • ${durBadge}`;
+
         text += ` • page ${currentPage} of ${totalPages}`;
         summaryEl.textContent = text;
       }
@@ -640,10 +743,15 @@
         const endQS = getEndDateFromQS();
         const hasDate = startQS || endQS;
 
+        const dMin = getStartDurationFromQS();
+        const dMax = getEndDurationFromQS();
+        const hasDur = dMin !== "" || dMax !== "";
+        const durText = summarizeDuration(dMin, dMax);
+
         listEl.innerHTML = `
           <div class="bg-white rounded p-10 text-center text-gray-500">
             ${
-              srch || hasDate
+              srch || hasDate || hasDur
                 ? `No trips found${
                     srch
                       ? ` for "<span class="font-semibold">${esc(srch)}</span>"`
@@ -652,7 +760,7 @@
                     hasDate
                       ? ` in ${esc(summarizeDateFilter(startQS, endQS))}`
                       : ""
-                  }.`
+                  }${hasDur ? ` • ${esc(durText)}` : ""}.`
                 : "No trips found."
             }
           </div>`;
@@ -730,7 +838,8 @@
     ensureToolbarControls();
     initSortUI();
     initSearchUI();
-    initDateFilterUI(); // NEW
+    initDateFilterUI();
+    initDurationFilterUI();
     load(1);
   });
 
@@ -742,7 +851,8 @@
     } finally {
       initSortUI();
       initSearchUI();
-      initDateFilterUI(); // NEW
+      initDateFilterUI();
+      initDurationFilterUI();
       load(1);
     }
   };
