@@ -659,12 +659,84 @@
     }
   }
 
+  function updateResultsSummary({ count, page = 1, totalPages = 1 }) {
+    if (!summaryEl) return;
+
+    // i18n bits
+    const isDE = getLang() === "deu";
+    const fmt = (n) => {
+      try {
+        return new Intl.NumberFormat(getLocale()).format(n);
+      } catch {
+        return String(n);
+      }
+    };
+    const words = isDE
+      ? {
+          trip: "Ausflug",
+          trips: "Ausflüge",
+          none: "Keine Ausflüge",
+          for: "für",
+          page: "Seite",
+          of: "von",
+          searching: "Suche…",
+        }
+      : {
+          trip: "trip",
+          trips: "trips",
+          none: "No trips",
+          for: "for",
+          page: "page",
+          of: "of",
+          searching: "Searching…",
+        };
+
+    const srch = getSearchFromQS();
+    const startQS = getStartDateFromQS();
+    const endQS = getEndDateFromQS();
+    const dMin = getStartDurationFromQS();
+    const dMax = getEndDurationFromQS();
+
+    const dateBadge = summarizeDateFilter(startQS, endQS);
+    const durBadge = summarizeDuration(dMin, dMax);
+
+    let text;
+    if (count == null) {
+      text = words.searching;
+    } else if (count === 0) {
+      text = words.none;
+    } else {
+      const noun = isDE
+        ? count === 1
+          ? words.trip
+          : words.trips
+        : count === 1
+        ? words.trip
+        : words.trips;
+      text = `${fmt(count)} ${noun}`;
+    }
+
+    if (srch)
+      text += isDE ? ` • ${words.for} "${srch}"` : ` • ${words.for} "${srch}"`;
+    if (dateBadge) text += ` • ${dateBadge}`;
+    if (durBadge) text += ` • ${durBadge}`;
+    if (count != null)
+      text += ` • ${
+        isDE
+          ? `${words.page} ${page} ${words.of} ${totalPages}`
+          : `${words.page} ${page} ${words.of} ${totalPages}`
+      }`;
+
+    summaryEl.textContent = text;
+  }
+
   // ----------- Fetch + Render -----------
   async function load(page = 1) {
     currentPage = page;
 
     listEl.innerHTML = skeletons(6);
     pagerEl.innerHTML = "";
+    updateResultsSummary({ count: null }); // show “Searching…” while loading
 
     const params = new URLSearchParams({
       PageNumber: page,
@@ -715,7 +787,11 @@
       const effectiveCount =
         totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
 
-      setSearchCount(effectiveCount);
+      updateResultsSummary({
+        count: effectiveCount,
+        page: currentPage,
+        totalPages,
+      });
       totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
 
       if (summaryEl) {
