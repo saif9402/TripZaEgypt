@@ -19,182 +19,188 @@
     ></script>
     <title>Trips List - Tour Guide</title>
   </head>
+  <!-- ... header & head stay the same ... -->
+
   <body class="bg-gray-50 text-gray-800 font-sans">
-    <!-- Header (reuse your responsive header here) -->
     <div id="header-placeholder"></div>
 
     <div class="max-w-7xl mx-auto px-4 py-20">
       <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Sidebar Filter -->
-        <aside class="w-full lg:w-1/4 space-y-6">
-          <!-- Availability -->
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-3">Availability</h2>
-            <div class="flex flex-col space-y-3">
-              <div>
-                <label
-                  class="block text-sm font-medium mb-1"
-                  for="filterStartDate"
-                  >From</label
-                >
-                <input
-                  id="filterStartDate"
-                  type="date"
-                  class="w-full border px-3 py-2 rounded"
-                />
+        <!-- Sidebar Filter (desktop only) -->
+        <aside class="w-full lg:w-1/4 hidden lg:block">
+          <!-- Host where filters live on desktop -->
+          <div id="filtersHostSidebar" class="space-y-6">
+            <!-- Moveable filters START -->
+            <div id="filtersContent" class="space-y-6">
+              <!-- Availability -->
+              <div class="bg-white p-4 rounded shadow">
+                <h2 class="font-semibold mb-3">Availability</h2>
+                <div class="flex flex-col space-y-3">
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="filterStartDate"
+                      >From</label
+                    >
+                    <input
+                      id="filterStartDate"
+                      type="date"
+                      class="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      for="filterEndDate"
+                      >To</label
+                    >
+                    <input
+                      id="filterEndDate"
+                      type="date"
+                      class="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      id="applyDateFilter"
+                      class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded"
+                    >
+                      Check Availability
+                    </button>
+                    <button
+                      id="clearDateFilter"
+                      class="px-3 py-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <p id="dateFilterHint" class="text-xs text-gray-500"></p>
+                </div>
               </div>
-              <div>
-                <label
-                  class="block text-sm font-medium mb-1"
-                  for="filterEndDate"
-                  >To</label
-                >
-                <input
-                  id="filterEndDate"
-                  type="date"
-                  class="w-full border px-3 py-2 rounded"
-                />
-              </div>
-              <div class="flex gap-2">
+
+              <!-- Categories (dynamic) -->
+              <div class="bg-white p-4 rounded shadow">
+                <h2 class="font-semibold mb-3" data-i18n="categories_title">
+                  Categories
+                </h2>
+                <div
+                  id="sidebarCategoryList"
+                  class="flex flex-col space-y-2 text-sm"
+                ></div>
                 <button
-                  id="applyDateFilter"
-                  class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded"
+                  id="toggleSidebarCats"
+                  class="text-sm text-teal-600 hover:underline mt-2 hidden"
                 >
-                  Check Availability
-                </button>
-                <button
-                  id="clearDateFilter"
-                  class="px-3 py-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Clear
+                  Show more
                 </button>
               </div>
-              <p id="dateFilterHint" class="text-xs text-gray-500"></p>
-            </div>
-          </div>
 
-          <!-- Categories (dynamic) -->
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-3" data-i18n="categories_title">
-              Categories
-            </h2>
+              <!-- Duration -->
+              <div class="bg-white p-4 rounded shadow">
+                <h2 class="font-semibold mb-3">Duration</h2>
 
-            <div
-              id="sidebarCategoryList"
-              class="flex flex-col space-y-2 text-sm"
-            ></div>
+                <!-- Buckets -->
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      class="durationBucket"
+                      data-min="0"
+                      data-max="180"
+                    />
+                    0–3 hours
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      class="durationBucket"
+                      data-min="180"
+                      data-max="300"
+                    />
+                    3–5 hours
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      class="durationBucket"
+                      data-min="300"
+                      data-max="420"
+                    />
+                    5–7 hours
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      class="durationBucket"
+                      data-min="420"
+                      data-max="720"
+                    />
+                    Full day
+                  </label>
+                  <label class="inline-flex items-center gap-2 col-span-2">
+                    <input
+                      type="checkbox"
+                      class="durationBucket"
+                      data-min="720"
+                      data-max="100000"
+                    />
+                    Multi-day
+                  </label>
+                </div>
 
-            <button
-              id="toggleSidebarCats"
-              class="text-sm text-teal-600 hover:underline mt-2 hidden"
-            >
-              Show more
-            </button>
-          </div>
+                <!-- Exact range -->
+                <div class="grid grid-cols-2 gap-2 pt-3">
+                  <div>
+                    <label
+                      for="filterMinDuration"
+                      class="block text-sm font-medium mb-1"
+                      >Min (min)</label
+                    >
+                    <input
+                      id="filterMinDuration"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="w-full border px-3 py-2 rounded"
+                      placeholder="e.g. 60"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="filterMaxDuration"
+                      class="block text-sm font-medium mb-1"
+                      >Max (min)</label
+                    >
+                    <input
+                      id="filterMaxDuration"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="w-full border px-3 py-2 rounded"
+                      placeholder="e.g. 360"
+                    />
+                  </div>
+                </div>
 
-          <!-- Duration -->
-          <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-3">Duration</h2>
+                <div class="flex gap-2 pt-2">
+                  <button
+                    id="applyDurationFilter"
+                    class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    id="clearDurationFilter"
+                    class="px-3 py-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  >
+                    Clear
+                  </button>
+                </div>
 
-            <!-- Preset buckets (act as shortcuts that fill the range below) -->
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="durationBucket"
-                  data-min="0"
-                  data-max="180"
-                />
-                0–3 hours
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="durationBucket"
-                  data-min="180"
-                  data-max="300"
-                />
-                3–5 hours
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="durationBucket"
-                  data-min="300"
-                  data-max="420"
-                />
-                5–7 hours
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="durationBucket"
-                  data-min="420"
-                  data-max="720"
-                />
-                Full day
-              </label>
-              <label class="inline-flex items-center gap-2 col-span-2">
-                <input
-                  type="checkbox"
-                  class="durationBucket"
-                  data-min="720"
-                  data-max="100000"
-                />
-                Multi-day
-              </label>
-            </div>
-
-            <!-- Exact range (minutes) -->
-            <div class="grid grid-cols-2 gap-2 pt-3">
-              <div>
-                <label
-                  for="filterMinDuration"
-                  class="block text-sm font-medium mb-1"
-                  >Min (min)</label
-                >
-                <input
-                  id="filterMinDuration"
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="w-full border px-3 py-2 rounded"
-                  placeholder="e.g. 60"
-                />
-              </div>
-              <div>
-                <label
-                  for="filterMaxDuration"
-                  class="block text-sm font-medium mb-1"
-                  >Max (min)</label
-                >
-                <input
-                  id="filterMaxDuration"
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="w-full border px-3 py-2 rounded"
-                  placeholder="e.g. 360"
-                />
+                <p id="durationFilterHint" class="text-xs text-gray-500"></p>
               </div>
             </div>
-
-            <div class="flex gap-2 pt-2">
-              <button
-                id="applyDurationFilter"
-                class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded"
-              >
-                Apply
-              </button>
-              <button
-                id="clearDurationFilter"
-                class="px-3 py-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
-              >
-                Clear
-              </button>
-            </div>
-
-            <p id="durationFilterHint" class="text-xs text-gray-500"></p>
+            <!-- Moveable filters END -->
           </div>
         </aside>
 
@@ -218,6 +224,16 @@
                   aria-label="Search trips"
                 />
               </div>
+
+              <!-- 🔎 Mobile Filters button (visible on <lg) -->
+              <button
+                id="openFiltersBtn"
+                class="lg:hidden inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+                aria-label="Open filters"
+              >
+                <i class="fa-solid fa-sliders"></i>
+                <span>Filters</span>
+              </button>
 
               <!-- Existing summary (desktop) -->
               <div
@@ -248,7 +264,48 @@
       </div>
     </div>
 
+    <!-- Footer -->
     <div id="footer-placeholder"></div>
+
+    <!-- 🧰 Mobile Filters Drawer (moves the SAME filters into here on mobile) -->
+    <div id="filtersModal" class="fixed inset-0 z-50 hidden">
+      <div id="filtersModalOverlay" class="absolute inset-0 bg-black/40"></div>
+
+      <!-- Bottom sheet on mobile, centered dialog on sm+ -->
+      <div
+        class="absolute inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:max-w-xl bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-4 max-h-[85vh] overflow-y-auto"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-lg font-semibold">Filters</h2>
+          <button
+            id="closeFiltersBtn"
+            class="p-2 rounded hover:bg-gray-100"
+            aria-label="Close filters"
+          >
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Host where filters live while modal is open -->
+        <div id="filtersHostModal" class="space-y-6"></div>
+
+        <div class="mt-4 flex gap-2">
+          <button
+            id="filtersApplyBtn"
+            class="flex-1 bg-emerald-600 text-white rounded py-2"
+          >
+            Apply
+          </button>
+          <button
+            id="filtersResetBtn"
+            class="px-4 py-2 rounded border border-gray-200"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>

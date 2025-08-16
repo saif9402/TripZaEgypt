@@ -922,3 +922,67 @@
     }
   };
 })();
+
+// === Mobile Filters Drawer (reuses the SAME filter nodes) ===
+(function () {
+  const modalEl = document.getElementById("filtersModal");
+  const overlayEl = document.getElementById("filtersModalOverlay");
+  const openBtn = document.getElementById("openFiltersBtn");
+  const closeBtn = document.getElementById("closeFiltersBtn");
+  const hostSidebar = document.getElementById("filtersHostSidebar");
+  const hostModal = document.getElementById("filtersHostModal");
+  const filtersContent = document.getElementById("filtersContent");
+  const applyAllBtn = document.getElementById("filtersApplyBtn");
+  const resetAllBtn = document.getElementById("filtersResetBtn");
+
+  if (!modalEl || !openBtn || !hostSidebar || !hostModal || !filtersContent)
+    return;
+
+  function openFilters() {
+    // Move the filters into the modal host
+    if (filtersContent.parentElement !== hostModal) {
+      hostModal.appendChild(filtersContent);
+    }
+    modalEl.classList.remove("hidden");
+    document.body.classList.add("overflow-hidden");
+  }
+
+  function closeFilters() {
+    // Move the filters back to the sidebar host (for desktop / future opens)
+    if (filtersContent.parentElement !== hostSidebar) {
+      hostSidebar.appendChild(filtersContent);
+    }
+    modalEl.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+  }
+
+  openBtn.addEventListener("click", openFilters);
+  closeBtn?.addEventListener("click", closeFilters);
+  overlayEl?.addEventListener("click", closeFilters);
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modalEl.classList.contains("hidden"))
+      closeFilters();
+  });
+
+  // Apply & Reset in drawer: forward to your existing section buttons
+  applyAllBtn?.addEventListener("click", () => {
+    document.getElementById("applyDateFilter")?.click();
+    document.getElementById("applyDurationFilter")?.click();
+    // You can add more apply clicks here if you add more filter sections.
+    closeFilters();
+  });
+
+  resetAllBtn?.addEventListener("click", () => {
+    document.getElementById("clearDateFilter")?.click();
+    document.getElementById("clearDurationFilter")?.click();
+  });
+
+  // Ensure on resize to desktop we put filters back in the sidebar and hide modal
+  const mq = window.matchMedia("(min-width: 1024px)"); // lg
+  function handleMQ(e) {
+    if (e.matches) {
+      closeFilters();
+    }
+  }
+  mq.addEventListener("change", handleMQ);
+})();
