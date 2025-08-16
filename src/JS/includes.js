@@ -92,7 +92,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // --- Top Rated (Trending) Slider with Next/Prev buttons ---
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
-  if (!root) return console.warn("Missing #trending-root");
+  if (!root) return;
 
   // prevent duplicate timers/handlers if re-initialized (e.g., after language change)
   if (root.__cleanup) root.__cleanup();
@@ -833,9 +833,42 @@ function renderFeatured(trip) {
   const desc = document.getElementById("featuredDesc");
   const tags = document.getElementById("featuredTags");
 
-  if (sec)
-    sec.style.backgroundImage = `url('${_esc(_safeImg(trip.mainImageURL))}')`;
-  if (link) link.href = `/pages/trip-details.html?id=${trip.id ?? ""}`;
+  // --- helper: safe img + relative link base ---
+  const imgUrl = _esc(_safeImg(trip.mainImageURL));
+
+  // If current page URL contains /pages/, use relative "trip-details.html"
+  // Otherwise (home), use "pages/trip-details.html"
+  const onPages = window.location.pathname.includes("/pages/");
+  const detailsBase = onPages ? "trip-details.html" : "pages/trip-details.html";
+
+  const tripId = trip?.id ?? "";
+  const detailsHref =
+    tripId !== ""
+      ? `${detailsBase}?id=${encodeURIComponent(tripId)}`
+      : detailsBase;
+
+  if (sec) sec.style.backgroundImage = `url('${imgUrl}')`;
+  if (link) {
+    link.href = detailsHref; // ✅ always set (relative)
+    link.dataset.featuredId = String(tripId);
+
+    // Fallback: if something strips the query, ensure we add it on click
+    link.addEventListener(
+      "click",
+      (e) => {
+        const id = link.dataset.featuredId;
+        // if we have an id but href doesn't carry it, fix it before navigating
+        if (id && !link.href.includes("id=")) {
+          e.preventDefault();
+          const url = new URL(link.getAttribute("href"), window.location.href);
+          url.searchParams.set("id", id);
+          window.location.href = url.toString();
+        }
+      },
+      { once: true }
+    );
+  }
+
   if (title) title.textContent = trip.name || "Featured Trip";
   if (desc)
     desc.textContent =
@@ -1038,20 +1071,6 @@ function setupHomeSearch() {
   const eEl = document.getElementById("homeEndDate");
   const hint = document.getElementById("homeSearchHint");
   const swapBtn = document.getElementById("homeDateSwapBtn");
-
-  // const swapDates = () => {
-  //   if (!sEl || !eEl) return;
-  //   // swap values
-  //   const t = sEl.value;
-  //   sEl.value = eEl.value;
-  //   eEl.value = t;
-
-  //   // keep EndDate >= StartDate constraint in UI
-  //   if (sEl.value) eEl.min = sEl.value;
-  //   else eEl.removeAttribute("min");
-  // };
-
-  // swapBtn?.addEventListener("click", swapDates);
 
   // Build local ISO-8601 with timezone offset, e.g. 2025-08-16T00:00:00+03:00
   const toLocalISOWithOffset = (yyyy_mm_dd, endOfDay = false) => {
