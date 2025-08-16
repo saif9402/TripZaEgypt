@@ -770,8 +770,29 @@
       const items = payload?.data ?? [];
       totalCount = Number(payload?.count ?? 0);
 
-      const effectiveCount =
-        totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
+      // Detect if any filters are active (search/date/duration/category/sort)
+      const filtersActive = !!(
+        getSearchFromQS() ||
+        getStartDateFromQS() ||
+        getEndDateFromQS() ||
+        getStartDurationFromQS() !== "" ||
+        getEndDurationFromQS() !== "" ||
+        getCategoryIdFromQS() ||
+        getSortFromQS()
+      );
+
+      // Prefer server count only when no filters OR when it looks reasonable
+      const serverCount = Number(payload?.count);
+      let effectiveCount;
+
+      if (filtersActive) {
+        // Backend often doesn't return filtered totals; use what we actually got
+        effectiveCount = items.length;
+      } else {
+        effectiveCount = Number.isFinite(serverCount)
+          ? serverCount
+          : items.length;
+      }
 
       totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
 
