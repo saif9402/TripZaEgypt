@@ -1,3 +1,6 @@
+// includes.js — shared layout + trending + categories
+
+// ------- Utilities to include HTML fragments -------
 function includeHTML(id, file, onDone) {
   // Determine base path depending on current file location
   const currentPath = window.location.pathname;
@@ -13,15 +16,30 @@ function includeHTML(id, file, onDone) {
     .catch((err) => console.error(`Error loading ${file}:`, err));
 }
 
+// Keep this near the top so callbacks always see an initialized counter
+let loadedCount = 0;
+function checkAllIncludesLoaded() {
+  loadedCount++;
+  if (loadedCount === 2) afterIncludesLoaded(); // header + footer
+}
+
+// ------- Auth-aware header include (boot trending ASAP after header) -------
 function checkAuthAndIncludeHeader() {
   const token = localStorage.getItem("accessToken");
+
+  const bootTrendingIfNeeded = () => {
+    // Start trending ASAP (don’t wait for footer). Guard to avoid double-boot.
+    const tr = document.getElementById("trending-root");
+    if (tr && !tr.__cleanup) initTopRatedSlider();
+    checkAllIncludesLoaded();
+  };
 
   if (!token) {
     // Not logged in
     includeHTML(
       "header-placeholder",
       "pages/header.html",
-      checkAllIncludesLoaded
+      bootTrendingIfNeeded
     );
     return;
   }
@@ -41,14 +59,14 @@ function checkAuthAndIncludeHeader() {
         includeHTML(
           "header-placeholder",
           "pages/header-auth.html",
-          checkAllIncludesLoaded
+          bootTrendingIfNeeded
         );
       } else {
         localStorage.removeItem("accessToken");
         includeHTML(
           "header-placeholder",
           "pages/header.html",
-          checkAllIncludesLoaded
+          bootTrendingIfNeeded
         );
       }
     })
@@ -57,7 +75,7 @@ function checkAuthAndIncludeHeader() {
       includeHTML(
         "header-placeholder",
         "pages/header.html",
-        checkAllIncludesLoaded
+        bootTrendingIfNeeded
       );
     });
 }
@@ -288,7 +306,7 @@ async function initTopRatedSlider(noCache = false) {
   disableTransition(slideB);
 
   active.style.transform = "translateX(0)"; // on screen
-  next.style.transform = "translateX(-100%)"; // off right
+  next.style.transform = "translateX(-100%)"; // off to the right (correct)
 
   // layering
   active.style.zIndex = "1";
@@ -300,27 +318,48 @@ async function initTopRatedSlider(noCache = false) {
   enableTransition(slideA);
   enableTransition(slideB);
 
+  // ----- Autoplay: fast first tick, then steady cadence -----
   const AUTOPLAY_MS = 3000;
+  const FIRST_DELAY_MS = 800; // tweak between 500–1200ms as you like
   let timer = null;
+  let startedOnce = false;
 
-  const start = () => {
-    stop();
-    timer = setInterval(goNext, AUTOPLAY_MS);
-  };
   const stop = () => {
     if (timer) {
+      clearTimeout(timer);
       clearInterval(timer);
       timer = null;
     }
   };
 
-  // expose a cleanup to callers (e.g., before re-init)
-  root.__cleanup = () => {
+  const start = () => {
     stop();
-    // optional: remove global handles
-    window.nextTrendingSlide = undefined;
-    window.prevTrendingSlide = undefined;
+    if (!startedOnce) {
+      startedOnce = true;
+      timer = setTimeout(() => {
+        goNext();
+        stop();
+        timer = setInterval(goNext, AUTOPLAY_MS);
+      }, FIRST_DELAY_MS);
+    } else {
+      timer = setInterval(goNext, AUTOPLAY_MS);
+    }
   };
+
+  // simple preloader for slide images
+  const preloadImg = (url) => {
+    try {
+      const i = new Image();
+      i.referrerPolicy = "no-referrer";
+      i.src = url;
+    } catch {}
+  };
+
+  // Preload next slide’s image so first transition is ready
+  if (trips.length > 1) {
+    const n = (currentIndex + 1) % trips.length;
+    preloadImg(safeImgUrl(trips[n].mainImageURL));
+  }
 
   const goNext = () => {
     if (trips.length <= 1) return;
@@ -345,6 +384,10 @@ async function initTopRatedSlider(noCache = false) {
 
     // the one that became "next" goes under
     next.style.zIndex = "0";
+
+    // Preload the image after the one we just moved to
+    const afterIndex = (currentIndex + 1) % trips.length;
+    preloadImg(safeImgUrl(trips[afterIndex].mainImageURL));
   };
 
   const goPrev = () => {
@@ -367,6 +410,10 @@ async function initTopRatedSlider(noCache = false) {
     currentIndex = prevIndex;
     [active, next] = [next, active];
     next.style.zIndex = "0";
+
+    // Preload the image before the one we moved to
+    const beforeIndex = (currentIndex - 1 + trips.length) % trips.length;
+    preloadImg(safeImgUrl(trips[beforeIndex].mainImageURL));
   };
 
   // --- Buttons (injected) ---
@@ -431,7 +478,6 @@ async function initTopRatedSlider(noCache = false) {
       startX = x;
       startY = y;
       startT = Date.now();
-      // pause autoplay while finger is down
     };
 
     const onMove = (x, y, evt) => {
@@ -446,7 +492,7 @@ async function initTopRatedSlider(noCache = false) {
         }
       }
       if (lockedToHorizontal) {
-        evt && evt.preventDefault && evt.preventDefault(); // keep vertical page from scrolling while swiping
+        evt && evt.preventDefault && evt.preventDefault();
       }
     };
 
@@ -469,7 +515,6 @@ async function initTopRatedSlider(noCache = false) {
         }
       }
       isDown = false;
-      // resume autoplay
       if (trips.length > 1) start();
     };
 
@@ -558,6 +603,13 @@ async function initTopRatedSlider(noCache = false) {
   // Expose manual controls
   window.nextTrendingSlide = goNext;
   window.prevTrendingSlide = goPrev;
+
+  // expose a cleanup to callers (e.g., before re-init)
+  root.__cleanup = () => {
+    stop();
+    window.nextTrendingSlide = undefined;
+    window.prevTrendingSlide = undefined;
+  };
 }
 
 // ✅ Make lang switch refetch both categories & the trending slider
@@ -744,8 +796,7 @@ function tripCardHTML(t) {
   return `
   <a href="/pages/trip-details.html?id=${t.id ?? ""}" 
       class=" transform transition duration-300 hover:scale-105 hover:shadow-xl block bg-white rounded-lg shadow-md overflow-hidden"
-
-  data-animate="card">
+      data-animate="card">
     <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
     t.name || "Trip Image"
   )}" class="trip-card__img" />
@@ -893,12 +944,6 @@ function setActiveCategoryButton(clickedBtn) {
   });
   clickedBtn.classList.remove("bg-gray-100");
   clickedBtn.classList.add("bg-blue-500", "text-white");
-}
-
-let loadedCount = 0;
-function checkAllIncludesLoaded() {
-  loadedCount++;
-  if (loadedCount === 2) afterIncludesLoaded(); // header + footer
 }
 
 // --- Sidebar categories (dynamic, i18n) ---
