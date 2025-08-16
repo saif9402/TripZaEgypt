@@ -626,17 +626,11 @@ window.refreshLangData = refreshLanguageDependentContent;
 
 function afterIncludesLoaded() {
   const savedLang = localStorage.getItem("lang") || "en";
+  if (typeof setLanguage === "function") setLanguage(savedLang);
 
-  if (typeof setLanguage === "function") {
-    setLanguage(savedLang);
-  }
-
-  // ✅ Now (re)build menus, sliders, and (if present) trip details
-  refreshLanguageDependentContent();
-
-  if (typeof bindPageTransitions === "function") {
-    bindPageTransitions();
-  }
+  refreshLanguageDependentContent(); // your existing boot
+  setupHomeSearch(); // 🔸 add/keep this line
+  if (typeof bindPageTransitions === "function") bindPageTransitions();
 }
 
 function fetchAndRenderCategories() {
@@ -1031,5 +1025,94 @@ function renderSidebarCategoriesList(categories) {
     } else {
       location.reload();
     }
+  });
+}
+
+// --- Home search wiring (ISO 8601 with timezone offset) ---
+function setupHomeSearch() {
+  const form = document.getElementById("homeSearchForm");
+  if (!form) return; // only runs on the home page
+
+  const qEl = document.getElementById("homeSearchInput");
+  const sEl = document.getElementById("homeStartDate");
+  const eEl = document.getElementById("homeEndDate");
+  const hint = document.getElementById("homeSearchHint");
+  const swapBtn = document.getElementById("homeDateSwapBtn");
+
+  const swapDates = () => {
+    if (!sEl || !eEl) return;
+    // swap values
+    const t = sEl.value;
+    sEl.value = eEl.value;
+    eEl.value = t;
+
+    // keep EndDate >= StartDate constraint in UI
+    if (sEl.value) eEl.min = sEl.value;
+    else eEl.removeAttribute("min");
+  };
+
+  swapBtn?.addEventListener("click", swapDates);
+
+  // Build local ISO-8601 with timezone offset, e.g. 2025-08-16T00:00:00+03:00
+  const toLocalISOWithOffset = (yyyy_mm_dd, endOfDay = false) => {
+    if (!yyyy_mm_dd) return "";
+    const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
+
+    // Local time (handles DST automatically for Africa/Cairo)
+    const dt = endOfDay
+      ? new Date(y, m - 1, d, 23, 59, 59, 999)
+      : new Date(y, m - 1, d, 0, 0, 0, 0);
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const year = dt.getFullYear();
+    const month = pad2(dt.getMonth() + 1);
+    const day = pad2(dt.getDate());
+    const hh = pad2(dt.getHours());
+    const mm = pad2(dt.getMinutes());
+    const ss = pad2(dt.getSeconds());
+
+    const offsetMin = -dt.getTimezoneOffset(); // e.g. +180 for UTC+3
+    const sign = offsetMin >= 0 ? "+" : "-";
+    const offH = pad2(Math.trunc(Math.abs(offsetMin) / 60));
+    const offM = pad2(Math.abs(offsetMin) % 60);
+
+    return `${year}-${month}-${day}T${hh}:${mm}:${ss}${sign}${offH}:${offM}`;
+  };
+
+  // Keep EndDate >= StartDate in UI
+  const syncMin = () => {
+    if (sEl && eEl) {
+      if (sEl.value) eEl.min = sEl.value;
+      else eEl.removeAttribute("min");
+    }
+  };
+  sEl?.addEventListener("change", syncMin);
+  syncMin();
+
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+
+    const q = (qEl?.value || "").trim();
+    let sd = sEl?.value || "";
+    let ed = eEl?.value || "";
+
+    // If only one date provided, treat it as a single day
+    if (sd && !ed) ed = sd;
+    if (ed && !sd) sd = ed;
+
+    // Swap if reversed
+    if (sd && ed && sd > ed) [sd, ed] = [ed, sd];
+
+    const params = new URLSearchParams();
+    if (q) params.set("Search", q);
+    if (sd) params.set("StartDate", toLocalISOWithOffset(sd, false));
+    if (ed) params.set("EndDate", toLocalISOWithOffset(ed, true));
+
+    hint.textContent = ""; // clear any previous hint or errors
+
+    const url = `/pages/trips-list.html${
+      params.toString() ? "?" + params : ""
+    }`;
+    window.location.href = url;
   });
 }

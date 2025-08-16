@@ -58,64 +58,73 @@
       </section>
     </div>
 
-    <div class="relative bottom inset-x-0 z-10 px-4 flex justify-center mt-3">
+    <!-- Modern Home Search (Search + StartDate + EndDate) -->
+    <form id="homeSearchForm" class="px-4 mt-3 flex justify-center">
       <div
-        class="w-full max-w-4xl shadow-lg rounded-2xl p-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4"
+        class="w-full max-w-5xl rounded-2xl shadow-xl ring-1 ring-black/5 bg-white/80 backdrop-blur flex flex-col md:flex-row items-stretch md:items-center overflow-hidden focus-within:ring-2 focus-within:ring-yellow-400 transition"
       >
-        <!-- Trips -->
-        <div class="flex flex-col flex-1 min-w-[150px]">
-          <div
-            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-          >
-            <i class="fas fa-map-marker-alt"></i>
-            <span data-i18n="search.trips">Trips</span>
-          </div>
+        <!-- Query -->
+        <label class="flex-1 flex items-center gap-3 px-4 py-3">
+          <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
           <input
-            type="text"
-            placeholder="Search A Trip"
-            class="px-4 py-2 border rounded w-full italic"
+            id="homeSearchInput"
+            type="search"
+            class="w-full bg-transparent outline-none placeholder-gray-400"
+            placeholder="Search a trip"
             data-i18n-placeholder="search.trip.placeholder"
+            aria-label="Search trips"
           />
-        </div>
+        </label>
 
-        <!-- Guests -->
-        <div class="flex flex-col flex-1 min-w-[150px]">
-          <div
-            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-          >
-            <i class="fas fa-user-friends"></i>
-            <span data-i18n="search.guests">Guests</span>
-          </div>
+        <div
+          class="hidden md:block h-px md:h-8 md:w-px bg-gray-200 md:mx-1"
+        ></div>
+
+        <!-- Start date -->
+        <label class="flex-1 flex items-center gap-3 px-4 py-3">
+          <i class="fa-solid fa-calendar-day text-gray-400"></i>
           <input
-            type="text"
-            placeholder="Guests"
-            class="px-4 py-2 border rounded w-full italic"
-            data-i18n-placeholder="search.guests.placeholder"
+            id="homeStartDate"
+            placeholder="Start Date"
+            type="date"
+            class="w-full bg-transparent outline-none placeholder-gray-400"
+            aria-label="Start date"
           />
+        </label>
+
+        <div
+          id="homeDateSwapBtn"
+          class="mx-2 my-1 md:my-0 inline-flex items-center justify-center rounded-lg bg-white/70 hover:bg-white w-9 h-9 md:w-10 md:h-10 transition rotate-90 md:rotate-0"
+          aria-label="Swap start and end dates"
+        >
+          <i class="fa-solid fa-arrow-right text-gray-500"></i>
         </div>
 
-        <!-- Date -->
-        <div class="flex flex-col flex-1 min-w-[150px]">
-          <div
-            class="flex items-center gap-2 text-teal-600 font-semibold text-sm mb-0.5"
-          >
-            <i class="fas fa-calendar-alt"></i>
-            <span data-i18n="search.date">Date</span>
-          </div>
-          <input type="date" class="px-4 py-2 border rounded w-full italic" />
-        </div>
+        <!-- End date -->
+        <label class="flex-1 flex items-center gap-3 px-4 py-3">
+          <i class="fa-solid fa-calendar-check text-gray-400"></i>
+          <input
+            id="homeEndDate"
+            type="date"
+            class="w-full bg-transparent outline-none placeholder-gray-400"
+            aria-label="End date"
+          />
+        </label>
 
-        <!-- Search Button -->
-        <div class="flex items-end w-full sm:w-auto">
-          <button
-            data-i18n="search.label"
-            class="bg-yellow-400 px-6 py-2 rounded-3xl font-semibold shadow-md w-full sm:w-auto"
-          >
-            Search
-          </button>
-        </div>
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="md:ml-auto m-2 md:m-2 bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-5 py-3 rounded-xl transition focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          data-i18n="search.label"
+        >
+          Search
+        </button>
       </div>
-    </div>
+    </form>
+    <p
+      id="homeSearchHint"
+      class="text-center text-xs text-gray-500 mt-2 px-4"
+    ></p>
 
     <!-- Trending Trips Title Section -->
     <div

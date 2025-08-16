@@ -320,5 +320,33 @@
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
     <script src="../JS/trips-list.js"></script>
+    <script>
+      // Prefill toolbar + date filters from ?Search & ?StartDate & ?EndDate
+      (function () {
+        const qs = new URLSearchParams(location.search);
+        const q = qs.get("Search") || qs.get("search") || "";
+        const sd = qs.get("StartDate");
+        const ed = qs.get("EndDate");
+
+        // 'YYYY-MM-DD' from an ISO string like '2025-08-16T23:59:59+03:00'
+        const toDateInput = (s) => (s && s.length >= 10 ? s.slice(0, 10) : "");
+
+        window.addEventListener("DOMContentLoaded", () => {
+          const searchEl = document.getElementById("tripSearchInput");
+          const sEl = document.getElementById("filterStartDate");
+          const eEl = document.getElementById("filterEndDate");
+
+          if (searchEl && q) {
+            searchEl.value = q;
+            searchEl.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          if (sEl && sd) sEl.value = toDateInput(sd);
+          if (eEl && ed) eEl.value = toDateInput(ed);
+
+          // If you use an "Apply" button for dates, trigger it; otherwise your loader may already read URL params
+          document.getElementById("applyDateFilter")?.click();
+        });
+      })();
+    </script>
   </body>
 </html>
