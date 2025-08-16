@@ -1039,19 +1039,19 @@ function setupHomeSearch() {
   const hint = document.getElementById("homeSearchHint");
   const swapBtn = document.getElementById("homeDateSwapBtn");
 
-  const swapDates = () => {
-    if (!sEl || !eEl) return;
-    // swap values
-    const t = sEl.value;
-    sEl.value = eEl.value;
-    eEl.value = t;
+  // const swapDates = () => {
+  //   if (!sEl || !eEl) return;
+  //   // swap values
+  //   const t = sEl.value;
+  //   sEl.value = eEl.value;
+  //   eEl.value = t;
 
-    // keep EndDate >= StartDate constraint in UI
-    if (sEl.value) eEl.min = sEl.value;
-    else eEl.removeAttribute("min");
-  };
+  //   // keep EndDate >= StartDate constraint in UI
+  //   if (sEl.value) eEl.min = sEl.value;
+  //   else eEl.removeAttribute("min");
+  // };
 
-  swapBtn?.addEventListener("click", swapDates);
+  // swapBtn?.addEventListener("click", swapDates);
 
   // Build local ISO-8601 with timezone offset, e.g. 2025-08-16T00:00:00+03:00
   const toLocalISOWithOffset = (yyyy_mm_dd, endOfDay = false) => {
