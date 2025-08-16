@@ -212,7 +212,7 @@
 
             <div class="flex items-center gap-3 w-full sm:w-auto">
               <!-- Search -->
-              <div class="relative w-full sm:w-80">
+              <div class="relative w-full">
                 <i
                   class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
                 ></i>
@@ -228,11 +228,11 @@
               <!-- 🔎 Mobile Filters button (visible on <lg) -->
               <button
                 id="openFiltersBtn"
-                class="lg:hidden inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50"
+                class="lg:hidden inline-flex items-center rounded-md border border-gray-200 bg-white p-2 text-sm hover:bg-gray-50"
                 aria-label="Open filters"
               >
                 <i class="fa-solid fa-sliders"></i>
-                <span>Filters</span>
+                <span class="sr-only">Filters</span>
               </button>
 
               <!-- Existing summary (desktop) -->
@@ -241,17 +241,21 @@
                 class="text-sm text-gray-500 hidden sm:block"
               ></div>
 
-              <!-- Existing sort -->
-              <label
-                for="sortSelect"
-                id="sortLabel"
-                class="text-sm text-gray-600"
-                >Sort by</label
-              >
-              <select
-                id="sortSelect"
-                class="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              ></select>
+              <!-- NEW: hide on mobile, show on lg+ -->
+              <div id="sortHostToolbar" class="hidden lg:block">
+                <div id="sortControls" class="flex items-center gap-2">
+                  <label
+                    for="sortSelect"
+                    id="sortLabel"
+                    class="text-sm text-gray-600"
+                    >Sort by</label
+                  >
+                  <select
+                    id="sortSelect"
+                    class="border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  ></select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -284,6 +288,12 @@
           >
             <i class="fa-solid fa-xmark text-xl"></i>
           </button>
+        </div>
+
+        <!-- In the filters modal content -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+          <h3 class="font-semibold mb-3">Sort</h3>
+          <div id="sortHostModal"></div>
         </div>
 
         <!-- Host where filters live while modal is open -->

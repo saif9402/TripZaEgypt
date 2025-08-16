@@ -923,35 +923,57 @@
   };
 })();
 
-// === Mobile Filters Drawer (reuses the SAME filter nodes) ===
+// === Mobile Filters Drawer: also move Sort controls ===
 (function () {
   const modalEl = document.getElementById("filtersModal");
   const overlayEl = document.getElementById("filtersModalOverlay");
   const openBtn = document.getElementById("openFiltersBtn");
   const closeBtn = document.getElementById("closeFiltersBtn");
+
   const hostSidebar = document.getElementById("filtersHostSidebar");
   const hostModal = document.getElementById("filtersHostModal");
   const filtersContent = document.getElementById("filtersContent");
+
+  // NEW: sort hosts + controls
+  const sortHostToolbar = document.getElementById("sortHostToolbar");
+  const sortHostModal = document.getElementById("sortHostModal");
+  const sortControls = document.getElementById("sortControls");
+
   const applyAllBtn = document.getElementById("filtersApplyBtn");
   const resetAllBtn = document.getElementById("filtersResetBtn");
 
-  if (!modalEl || !openBtn || !hostSidebar || !hostModal || !filtersContent)
+  if (
+    !modalEl ||
+    !openBtn ||
+    !hostSidebar ||
+    !hostModal ||
+    !filtersContent ||
+    !sortControls
+  )
     return;
 
   function openFilters() {
-    // Move the filters into the modal host
-    if (filtersContent.parentElement !== hostModal) {
+    // Move filters into modal
+    if (filtersContent.parentElement !== hostModal)
       hostModal.appendChild(filtersContent);
-    }
+    // Move sort into modal
+    if (sortControls.parentElement !== sortHostModal)
+      sortHostModal.appendChild(sortControls);
+
     modalEl.classList.remove("hidden");
     document.body.classList.add("overflow-hidden");
   }
 
   function closeFilters() {
-    // Move the filters back to the sidebar host (for desktop / future opens)
-    if (filtersContent.parentElement !== hostSidebar) {
+    // Return filters to sidebar
+    if (filtersContent.parentElement !== hostSidebar)
       hostSidebar.appendChild(filtersContent);
+    // Return sort to toolbar (desktop spot)
+    if (sortControls.parentElement !== sortHostToolbar) {
+      // Ensure wrapper exists even if hidden on mobile
+      sortHostToolbar.appendChild(sortControls);
     }
+
     modalEl.classList.add("hidden");
     document.body.classList.remove("overflow-hidden");
   }
@@ -964,25 +986,30 @@
       closeFilters();
   });
 
-  // Apply & Reset in drawer: forward to your existing section buttons
+  // Apply & Reset in drawer
   applyAllBtn?.addEventListener("click", () => {
+    // apply existing sections
     document.getElementById("applyDateFilter")?.click();
     document.getElementById("applyDurationFilter")?.click();
-    // You can add more apply clicks here if you add more filter sections.
+    // if user changed sort, the onchange handler you already have will fire automatically
     closeFilters();
   });
 
   resetAllBtn?.addEventListener("click", () => {
     document.getElementById("clearDateFilter")?.click();
     document.getElementById("clearDurationFilter")?.click();
+
+    // Reset sort to default (Recommended) and trigger change
+    const sel = document.getElementById("sortSelect");
+    if (sel) {
+      sel.value = "";
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   });
 
-  // Ensure on resize to desktop we put filters back in the sidebar and hide modal
-  const mq = window.matchMedia("(min-width: 1024px)"); // lg
-  function handleMQ(e) {
-    if (e.matches) {
-      closeFilters();
-    }
-  }
-  mq.addEventListener("change", handleMQ);
+  // If user resizes to desktop, put everything back and close
+  const mq = window.matchMedia("(min-width: 1024px)");
+  mq.addEventListener("change", (e) => {
+    if (e.matches) closeFilters();
+  });
 })();
