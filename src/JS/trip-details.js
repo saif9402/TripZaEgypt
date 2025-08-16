@@ -17,7 +17,7 @@
     );
 
   const safeImg = (u) => {
-    if (!u) return "https://via.placeholder.com/800x450?text=No+Image";
+    if (!u) return "https://via.placeholder.com/1200x800?text=No+Image";
     if (u.startsWith("http")) return u;
     return u.startsWith("/") ? u : `/${u}`;
   };
@@ -34,7 +34,7 @@
   const stars = (r) => {
     const v = Math.max(0, Math.min(5, Number(r) || 0));
     const full = Math.floor(v);
-    const half = v - full >= 0.5 ? 1 : 0; // visually still render as full/empty using ★☆, but keep text precise
+    const half = v - full >= 0.5 ? 1 : 0;
     return "★".repeat(full + half) + "☆".repeat(5 - full - half);
   };
 
@@ -53,11 +53,8 @@
   };
 
   const getLangId = () => (localStorage.getItem("lang") === "deu" ? 1 : 2);
-
-  const getTripIdFromUrl = () => {
-    const u = new URL(window.location.href);
-    return u.searchParams.get("id");
-  };
+  const getTripIdFromUrl = () =>
+    new URL(window.location.href).searchParams.get("id");
 
   const setUnavailableUI = (isAvailable) => {
     const btn = $("bookBtn");
@@ -83,7 +80,6 @@
       return;
     }
 
-    // Keep only future (and today) dates in local time
     const now = new Date();
     const future = tripDates
       .map((d) => new Date(d))
@@ -95,7 +91,6 @@
       .sort((a, b) => a - b);
 
     const fmt = (d) => {
-      // Format yyyy-mm-dd in LOCAL time
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
@@ -106,7 +101,6 @@
       dateInput.min = fmt(future[0]);
       dateInput.value = fmt(future[0]);
     } else {
-      // fallback to earliest date if all are past
       const all = tripDates
         .map((d) => new Date(d))
         .filter((d) => !isNaN(d))
@@ -121,44 +115,153 @@
     }
   };
 
+  // ---------- Modal state & helpers ----------
+  let imageList = []; // all URLs in order (main first)
+  let currentIndex = 0; // index in imageList currently shown in modal
+
+  const modal = $("imageModal");
+  const modalImg = $("modalImage");
+  const modalPrevBtn = $("modalPrevBtn");
+  const modalNextBtn = $("modalNextBtn");
+  const modalCloseBtn = $("modalCloseBtn");
+  const modalBackdrop = $("imageModalBackdrop");
+
+  const isModalOpen = () =>
+    modal &&
+    modal.classList.contains("opacity-100") &&
+    !modal.classList.contains("pointer-events-none");
+
+  const openModalAt = (idx = 0) => {
+    if (!modal || !modalImg || !imageList.length) return;
+
+    currentIndex = Math.max(0, Math.min(idx, imageList.length - 1));
+    modalImg.src = safeImg(imageList[currentIndex]);
+
+    // show overlay
+    modal.classList.remove("opacity-0", "pointer-events-none");
+    modal.classList.add("opacity-100", "pointer-events-auto");
+
+    // animate image in
+    requestAnimationFrame(() => {
+      modalImg.classList.remove("opacity-0", "scale-90");
+      modalImg.classList.add("opacity-100", "scale-100");
+    });
+  };
+
+  const closeModal = () => {
+    if (!modal || !modalImg) return;
+
+    // fade out image
+    modalImg.classList.remove("opacity-100", "scale-100");
+    modalImg.classList.add("opacity-0", "scale-90");
+
+    // fade out overlay
+    modal.classList.remove("opacity-100");
+    modal.classList.add("opacity-0");
+    modal.classList.add("pointer-events-none");
+
+    // Update the main image to the last viewed
+    const main = $("tripMainImage");
+    if (main && imageList[currentIndex]) {
+      main.src = safeImg(imageList[currentIndex]);
+    }
+  };
+
+  const transitionImage = (newSrc) => {
+    if (!modalImg) return;
+    modalImg.classList.remove("opacity-100", "scale-100");
+    modalImg.classList.add("opacity-0", "scale-90");
+    setTimeout(() => {
+      modalImg.src = safeImg(newSrc);
+      modalImg.classList.remove("opacity-0", "scale-90");
+      modalImg.classList.add("opacity-100", "scale-100");
+    }, 150);
+  };
+
+  const showNext = () => {
+    if (!imageList.length) return;
+    currentIndex = (currentIndex + 1) % imageList.length;
+    transitionImage(imageList[currentIndex]);
+  };
+
+  const showPrev = () => {
+    if (!imageList.length) return;
+    currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
+    transitionImage(imageList[currentIndex]);
+  };
+
+  // Keyboard controls
+  document.addEventListener("keydown", (e) => {
+    if (!isModalOpen()) return;
+    if (e.key === "ArrowRight") showNext();
+    else if (e.key === "ArrowLeft") showPrev();
+    else if (e.key === "Escape") closeModal();
+  });
+
+  // Buttons & backdrop
+  modalPrevBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showPrev();
+  });
+  modalNextBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showNext();
+  });
+  modalCloseBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeModal();
+  });
+  modalBackdrop?.addEventListener("click", closeModal);
+
+  // ---------- Rendering ----------
   const renderGallery = (urls) => {
     const main = $("tripMainImage");
     const gal = $("tripGallery");
-    if (main) main.src = safeImg(urls[0]);
-    if (!gal) return;
 
-    gal.innerHTML = urls
-      .slice(0, 6)
+    // normalize & store
+    imageList = (urls && urls.length ? urls : [""]).map(safeImg);
+
+    // main image
+    if (main) {
+      main.src = imageList[0];
+      main.addEventListener("click", () => openModalAt(currentIndex));
+    }
+
+    // thumbnails
+    if (!gal) return;
+    gal.innerHTML = imageList
       .map(
-        (u) => `
+        (u, idx) => `
         <img
-          alt="img"
-          class="rounded-md w-full h-20 object-cover cursor-pointer ring-0 hover:ring-2 hover:ring-yellow-400"
-          src="${esc(safeImg(u))}"
-          data-src="${esc(safeImg(u))}"
+          alt="Thumbnail ${idx + 1}"
+          class="rounded-md w-full h-24 sm:h-28 object-cover cursor-pointer ring-0 hover:ring-2 hover:ring-yellow-400 transition"
+          src="${esc(u)}"
+          data-index="${idx}"
         />`
       )
       .join("");
 
     gal.querySelectorAll("img").forEach((thumb) => {
-      thumb.addEventListener("click", () => {
-        if (main) main.src = thumb.dataset.src;
+      thumb.addEventListener("click", (e) => {
+        const idx = Number(thumb.getAttribute("data-index")) || 0;
+        currentIndex = idx;
+        openModalAt(idx);
       });
     });
   };
 
   const renderTrip = (t) => {
     // Title
-    if ($("tripTitle")) $("tripTitle").textContent = t.name || "Trip";
+    $("tripTitle") && ($("tripTitle").textContent = t.name || "Trip");
 
-    // Rating
+    // Category + Rating
     const ratingVal = Number(t.rating) || 0;
-    if ($("tripRatingStars"))
-      $("tripRatingStars").textContent = stars(ratingVal);
-    if ($("tripRatingText"))
-      $("tripRatingText").textContent = ratingVal
+    $("tripRatingStars") &&
+      ($("tripRatingStars").textContent = stars(ratingVal));
+    $("tripRatingText") &&
+      ($("tripRatingText").textContent = ratingVal
         ? `(${ratingVal.toFixed(1)})`
-        : "";
+        : "");
 
     // Images (main + gallery)
     const galleryUrls = [];
@@ -169,10 +272,10 @@
     renderGallery(galleryUrls.length ? galleryUrls : [""]);
 
     // Duration
-    if ($("tripDurationLabel"))
-      $("tripDurationLabel").textContent = `Duration ${minsToLabel(
+    $("tripDurationLabel") &&
+      ($("tripDurationLabel").textContent = `Duration ${minsToLabel(
         t.duration
-      )}`;
+      )}`);
 
     // Languages
     if ($("tripLanguages")) {
@@ -181,8 +284,8 @@
     }
 
     // Description
-    if ($("tripDescription"))
-      $("tripDescription").textContent = t.description || "";
+    $("tripDescription") &&
+      ($("tripDescription").textContent = t.description || "");
 
     // Activities
     if ($("tripActivities")) {
@@ -204,9 +307,9 @@
     }
 
     // Price
-    if ($("tripPrice"))
-      $("tripPrice").innerHTML =
-        t.price != null ? `${formatPrice(t.price, "EGP")}` : "";
+    $("tripPrice") &&
+      ($("tripPrice").innerHTML =
+        t.price != null ? `${formatPrice(t.price, "EGP")}` : "");
 
     // Availability + dates
     setUnavailableUI(!!t.isAvailable);
@@ -229,9 +332,7 @@
     try {
       const res = await fetch(
         `/api/Trip/GetTripById/${encodeURIComponent(id)}?` + params.toString(),
-        {
-          cache: "no-store",
-        }
+        { cache: "no-store" }
       );
       const json = await res.json();
 
@@ -242,11 +343,12 @@
       renderTrip(t);
     } catch (err) {
       console.error("Trip load error:", err);
-      if ($("tripTitle")) $("tripTitle").textContent = "Trip not available";
-      if ($("tripDescription"))
-        $("tripDescription").textContent =
-          "We couldn't load this trip right now. Please try again later.";
+      $("tripTitle") && ($("tripTitle").textContent = "Trip not available");
+      $("tripDescription") &&
+        ($("tripDescription").textContent =
+          "We couldn't load this trip right now. Please try again later.");
       setUnavailableUI(false);
+      renderGallery([""]); // still render gallery with placeholder so modal works
     }
   }
 
@@ -255,8 +357,4 @@
 
   // Initial load
   window.addEventListener("DOMContentLoaded", () => loadTrip());
-
-  // Optional: if your language toggle already calls window.refreshLangData(),
-  // add this one-liner inside it so details re-render too:
-  //   window.refreshTripDetailsLang?.();
 })();
