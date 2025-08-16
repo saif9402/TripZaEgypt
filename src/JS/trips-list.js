@@ -662,7 +662,6 @@
   function updateResultsSummary({ count, page = 1, totalPages = 1 }) {
     if (!summaryEl) return;
 
-    // i18n bits
     const isDE = getLang() === "deu";
     const fmt = (n) => {
       try {
@@ -692,40 +691,27 @@
         };
 
     const srch = getSearchFromQS();
-    const startQS = getStartDateFromQS();
-    const endQS = getEndDateFromQS();
+    const start = getStartDateFromQS();
+    const end = getEndDateFromQS();
     const dMin = getStartDurationFromQS();
     const dMax = getEndDurationFromQS();
 
-    const dateBadge = summarizeDateFilter(startQS, endQS);
+    const dateBadge = summarizeDateFilter(start, end);
     const durBadge = summarizeDuration(dMin, dMax);
 
     let text;
-    if (count == null) {
-      text = words.searching;
-    } else if (count === 0) {
-      text = words.none;
-    } else {
-      const noun = isDE
-        ? count === 1
-          ? words.trip
-          : words.trips
-        : count === 1
-        ? words.trip
-        : words.trips;
+    if (count == null) text = words.searching;
+    else if (count === 0) text = words.none;
+    else {
+      const noun = count === 1 ? words.trip : words.trips;
       text = `${fmt(count)} ${noun}`;
     }
 
-    if (srch)
-      text += isDE ? ` • ${words.for} "${srch}"` : ` • ${words.for} "${srch}"`;
+    if (srch) text += ` • ${words.for} "${srch}"`;
     if (dateBadge) text += ` • ${dateBadge}`;
     if (durBadge) text += ` • ${durBadge}`;
     if (count != null)
-      text += ` • ${
-        isDE
-          ? `${words.page} ${page} ${words.of} ${totalPages}`
-          : `${words.page} ${page} ${words.of} ${totalPages}`
-      }`;
+      text += ` • ${words.page} ${page} ${words.of} ${totalPages}`;
 
     summaryEl.textContent = text;
   }
@@ -787,31 +773,13 @@
       const effectiveCount =
         totalCount > 0 ? totalCount : (page - 1) * PAGE_SIZE + items.length;
 
+      totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
+
       updateResultsSummary({
         count: effectiveCount,
         page: currentPage,
         totalPages,
       });
-      totalPages = Math.max(1, Math.ceil(effectiveCount / PAGE_SIZE));
-
-      if (summaryEl) {
-        let text = effectiveCount > 0 ? `${effectiveCount} trips` : "No trips";
-        const srch = getSearchFromQS();
-        if (srch) text += ` • for "${srch}"`;
-
-        const startQS = getStartDateFromQS();
-        const endQS = getEndDateFromQS();
-        const dateBadge = summarizeDateFilter(startQS, endQS);
-        if (dateBadge) text += ` • ${dateBadge}`;
-
-        const dMin = getStartDurationFromQS();
-        const dMax = getEndDurationFromQS();
-        const durBadge = summarizeDuration(dMin, dMax);
-        if (durBadge) text += ` • ${durBadge}`;
-
-        text += ` • page ${currentPage} of ${totalPages}`;
-        summaryEl.textContent = text;
-      }
 
       if (!items.length) {
         const srch = getSearchFromQS();
