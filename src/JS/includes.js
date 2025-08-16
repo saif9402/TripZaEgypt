@@ -833,48 +833,60 @@ function renderFeatured(trip) {
   const desc = document.getElementById("featuredDesc");
   const tags = document.getElementById("featuredTags");
 
-  // --- helper: safe img + relative link base ---
+  if (!trip) return;
+
+  // --- image ---
   const imgUrl = _esc(_safeImg(trip.mainImageURL));
-
-  // If current page URL contains /pages/, use relative "trip-details.html"
-  // Otherwise (home), use "pages/trip-details.html"
-  const onPages = window.location.pathname.includes("/pages/");
-  const detailsBase = onPages ? "trip-details.html" : "pages/trip-details.html";
-
-  const tripId = trip?.id ?? "";
-  const detailsHref =
-    tripId !== ""
-      ? `${detailsBase}?id=${encodeURIComponent(tripId)}`
-      : detailsBase;
-
   if (sec) sec.style.backgroundImage = `url('${imgUrl}')`;
-  if (link) {
-    link.href = detailsHref; // ✅ always set (relative)
-    link.dataset.featuredId = String(tripId);
 
-    // Fallback: if something strips the query, ensure we add it on click
+  // --- robust details URL (works on / and on /pages/) ---
+  const onPages = window.location.pathname.includes("/pages/");
+  const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
+  const detailsURL = new URL(baseHref, window.location.href);
+  detailsURL.searchParams.set("id", String(trip.id ?? "")); // e.g. ?id=34
+
+  // Write href + dataset for debugging
+  if (link) {
+    link.href = detailsURL.pathname + detailsURL.search; // keep site-subfolder safe
+    link.dataset.featuredId = String(trip.id ?? "");
+    link.classList.add("cursor-pointer", "z-20");
+
+    // Fallback: if some script mutates href later, ensure id is there on click
     link.addEventListener(
       "click",
       (e) => {
-        const id = link.dataset.featuredId;
-        // if we have an id but href doesn't carry it, fix it before navigating
-        if (id && !link.href.includes("id=")) {
+        // if somehow href lost the id, re-apply and go
+        if (!link.href.includes("id=")) {
           e.preventDefault();
-          const url = new URL(link.getAttribute("href"), window.location.href);
-          url.searchParams.set("id", id);
-          window.location.href = url.toString();
+          window.location.href = detailsURL.pathname + detailsURL.search;
         }
       },
       { once: true }
     );
   }
 
+  // Also make the whole section clickable (nice UX + extra safety)
+  if (sec) {
+    sec.style.cursor = "pointer";
+    // prevent double navigation if user actually clicks the <a>
+    sec.addEventListener("click", (ev) => {
+      const target = ev.target;
+      if (target && target.closest && target.closest("#featuredLink")) return;
+      if (link && link.href) {
+        window.location.href = link.href;
+      }
+    });
+  }
+
+  // --- text bits ---
   if (title) title.textContent = trip.name || "Featured Trip";
-  if (desc)
+  if (desc) {
     desc.textContent =
       _activitiesPreview(trip.activities, 200) ||
       "Explore this experience in Hurghada.";
+  }
 
+  // --- tags ---
   if (tags) {
     const pills = [];
     if (trip.category)
@@ -903,15 +915,17 @@ function renderFeatured(trip) {
     tags.innerHTML = pills
       .map(
         (p) => `
-      <span class="${
-        p.c
-      } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-        <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
-      </span>
-    `
+        <span class="${
+          p.c
+        } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+          <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
+        </span>`
       )
       .join("");
   }
+
+  // Debug (optional): check what href we ended up with
+  // console.debug("[featured] href:", link?.href, "id:", link?.dataset.featuredId);
 }
 
 // ------- Main: fetch trips for a category and render -------
