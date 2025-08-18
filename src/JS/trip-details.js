@@ -1,5 +1,4 @@
 // ../JS/trip-details.js
-
 (function () {
   const $ = (id) => document.getElementById(id);
 
@@ -70,12 +69,54 @@
     }
   };
 
-  // ---------------- Auth helpers (GetToken -> accessToken) ----------------
+  // ---------------- Toasts (Tailwind) ----------------
+  function ensureToastRoot() {
+    let root = document.getElementById("toast-root");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "toast-root";
+      root.className =
+        "fixed z-[70] top-4 right-4 w-[92vw] max-w-sm space-y-3 pointer-events-none";
+      document.body.appendChild(root);
+    }
+    return root;
+  }
+  function toast(type, title, message, ms = 4200) {
+    const root = ensureToastRoot();
+    const wrap = document.createElement("div");
+    wrap.className =
+      "pointer-events-auto rounded-xl shadow-lg border overflow-hidden bg-white";
+    const color =
+      type === "success"
+        ? "bg-green-600"
+        : type === "error"
+        ? "bg-red-600"
+        : type === "warning"
+        ? "bg-yellow-500"
+        : "bg-blue-600";
+    wrap.innerHTML = `
+      <div class="${color} text-white px-4 py-2 text-sm font-semibold">${esc(
+      title || ""
+    )}</div>
+      <div class="px-4 py-3 text-sm text-gray-700">${esc(message || "")}</div>
+    `;
+    root.appendChild(wrap);
+    const timer = setTimeout(() => {
+      wrap.style.opacity = "0";
+      wrap.style.transform = "translateY(-6px)";
+      setTimeout(() => wrap.remove(), 200);
+    }, ms);
+    // click to dismiss
+    wrap.addEventListener("click", () => {
+      clearTimeout(timer);
+      wrap.remove();
+    });
+  }
 
-  const LOGIN_URL = "sign-in.html"; // adjust if different
+  // ---------------- Auth helpers (GetToken -> accessToken) ----------------
+  const LOGIN_URL = "sign-in.html"; // change if different
 
   const parseMaybeTextJSON = async (res) => {
-    // API often returns text/plain containing JSON. Handle both.
     const ct = (res.headers.get("content-type") || "").toLowerCase();
     if (ct.includes("application/json")) return res.json();
     const text = await res.text();
@@ -86,41 +127,54 @@
     }
   };
 
+  function redirectToLogin() {
+    const returnUrl = encodeURIComponent(
+      location.pathname + location.search + location.hash
+    );
+    location.href = `${LOGIN_URL}?returnUrl=${returnUrl}`;
+  }
+
   async function getFreshAccessToken() {
     const res = await fetch("/api/Auth/GetToken", {
       method: "POST",
       credentials: "include",
-      headers: {
-        Accept: "application/json, text/plain",
-      },
+      headers: { Accept: "application/json, text/plain" },
     });
 
-    if (!res.ok)
-      throw Object.assign(new Error("Auth token refresh failed"), {
-        status: res.status,
-      });
+    if (!res.ok) {
+      const err = new Error("Auth token refresh failed");
+      err.status = res.status;
+      throw err;
+    }
 
     const data = await parseMaybeTextJSON(res);
     if (data?.succeeded && data?.data?.accessToken) {
-      // Optional: cache so your header include can show the auth header next page load
       try {
         localStorage.setItem("accessToken", data.data.accessToken);
       } catch {}
       window.currentUser = data.data;
       return data.data.accessToken;
     }
-
-    const msg = data?.message || "You must be logged in to book.";
-    const err = new Error(msg);
+    const err = new Error(data?.message || "Not authenticated");
     err.code = "AUTH";
     throw err;
   }
 
+  async function ensureLoggedInOrRedirect() {
+    try {
+      await getFreshAccessToken();
+      return true;
+    } catch (e) {
+      // Soft message then redirect
+      toast("info", "Sign in required", "Please sign in to continue.");
+      redirectToLogin();
+      return false;
+    }
+  }
+
   async function addBooking({ tripId, tripDateISO, adults, children }) {
-    // 1) Always refresh access token right before booking
     const token = await getFreshAccessToken();
 
-    // 2) Call AddBooking with Authorization: Bearer <token>
     const res = await fetch("/api/Booking/AddBooking", {
       method: "POST",
       credentials: "include",
@@ -132,14 +186,13 @@
       body: JSON.stringify({
         adults: Number(adults) || 0,
         children: Number(children) || 0,
-        tripDate: String(tripDateISO), // ISO date-time string
+        tripDate: String(tripDateISO),
         tripId: Number(tripId),
       }),
     });
 
     const payload = await parseMaybeTextJSON(res);
 
-    // consider both HTTP status and any {succeeded:false}
     if (!res.ok || payload?.succeeded === false) {
       const msg =
         payload?.message ||
@@ -155,12 +208,11 @@
   }
 
   // ---------------- Availability (dates + times) ----------------
-
   const fmtDateKey = (d) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${dd}`; // local date key
+    return `${y}-${m}-${dd}`;
   };
 
   const timeLabel = (d) => {
@@ -208,10 +260,8 @@
 
     const now = new Date();
     let options = availability.timesByDay[dayKey] || [];
-
-    if (dayKey === fmtDateKey(now)) {
+    if (dayKey === fmtDateKey(now))
       options = options.filter((o) => o.date > now);
-    }
 
     if (!options.length) {
       sel.innerHTML = `<option value="">No times available</option>`;
@@ -255,10 +305,7 @@
         disableMobile: true,
         onChange: (selectedDates) => {
           const d = selectedDates && selectedDates[0];
-          if (d) {
-            const key = fmtDateKey(d);
-            syncTimeOptions(key);
-          }
+          if (d) syncTimeOptions(fmtDateKey(d));
         },
       });
 
@@ -284,7 +331,6 @@
   };
 
   // ---------------- Image modal ----------------
-
   let imageList = [];
   let currentIndex = 0;
 
@@ -406,8 +452,7 @@
   };
 
   // ---------------- Render trip ----------------
-
-  let currentTrip = null; // <-- store the loaded trip for pricing
+  let currentTrip = null;
 
   const renderTrip = (t) => {
     currentTrip = t || {};
@@ -465,12 +510,10 @@
 
     setUnavailableUI(!!t.isAvailable);
 
-    // Date/time availability
     setupAvailability(t.tripDates || []);
   };
 
   // ---------------- Load trip ----------------
-
   async function loadTrip({ noCache = false } = {}) {
     const id = getTripIdFromUrl();
     if (!id) {
@@ -494,8 +537,7 @@
       if (!json?.succeeded)
         throw new Error(json?.message || "Failed to fetch trip");
 
-      const t = json.data || {};
-      renderTrip(t);
+      renderTrip(json.data || {});
     } catch (err) {
       console.error("Trip load error:", err);
       $("tripTitle") && ($("tripTitle").textContent = "Trip not available");
@@ -504,15 +546,13 @@
           "We couldn't load this trip right now. Please try again later.");
       setUnavailableUI(false);
       renderGallery([""]);
-      setupAvailability([]); // disable date/time
+      setupAvailability([]);
     }
   }
 
-  // Expose for language switchers
   window.refreshTripDetailsLang = () => loadTrip({ noCache: true });
 
   // ---------------- Booking Confirmation Modal ----------------
-
   const bModal = $("bookingModal");
   const bBackdrop = $("bookingBackdrop");
   const bClose = $("bookingCloseBtn");
@@ -546,9 +586,8 @@
   bClose?.addEventListener("click", closeBookingModal);
   bEdit?.addEventListener("click", closeBookingModal);
 
-  // ---------------- Booking button -> open modal with summary ----------------
-
-  $("bookBtn")?.addEventListener("click", () => {
+  // ---------------- Booking button -> validate + check auth + open modal ----------------
+  $("bookBtn")?.addEventListener("click", async () => {
     const dateVal =
       (datePickerInstance?.selectedDates?.[0] &&
         fmtDateKey(datePickerInstance.selectedDates[0])) ||
@@ -560,15 +599,22 @@
     const childCount = Math.max(0, parseInt($("childCount")?.value || "0", 10));
 
     if (!dateVal || !timeISO) {
-      alert("Please choose an available date and time.");
+      toast(
+        "warning",
+        "Select date & time",
+        "Please choose an available date and time."
+      );
       return;
     }
+
+    // Require login before opening the confirmation modal
+    const logged = await ensureLoggedInOrRedirect();
+    if (!logged) return;
 
     const perAdult = Number(currentTrip?.price) || 0;
     const perChild = perAdult * 0.5;
     const total = perAdult * adultCount + perChild * childCount;
 
-    // Fill modal fields
     bmTripName && (bmTripName.textContent = currentTrip?.name || "Trip");
     bmDate && (bmDate.textContent = dateVal);
 
@@ -585,7 +631,6 @@
     bmPriceChild && (bmPriceChild.textContent = formatPrice(perChild, "EGP"));
     bmTotal && (bmTotal.textContent = formatPrice(total, "EGP"));
 
-    // Store details on the confirm button for later use
     bConfirm.dataset.payload = JSON.stringify({
       tripId: getTripIdFromUrl(),
       tripName: currentTrip?.name || "",
@@ -602,7 +647,6 @@
   });
 
   // ---------------- Confirm -> call API (GetToken -> AddBooking) ----------------
-
   bConfirm?.addEventListener("click", async () => {
     if (!bConfirm) return;
 
@@ -610,49 +654,49 @@
     try {
       payload = JSON.parse(bConfirm.dataset.payload || "{}");
     } catch {
-      alert("Missing booking details.");
+      toast("error", "Missing details", "Please review your booking details.");
       return;
     }
 
-    // lock UI while sending
     const originalText = bConfirm.textContent;
     bConfirm.disabled = true;
     bConfirm.textContent = "Booking…";
 
     try {
-      const result = await addBooking({
+      await addBooking({
         tripId: payload.tripId,
-        tripDateISO: payload.timeISO, // server expects a date-time string
+        tripDateISO: payload.timeISO,
         adults: payload.adults,
         children: payload.children,
       });
 
       closeBookingModal();
 
-      // Success message (adjust to your server's shape if needed)
-      alert(
-        `Thank you! Your booking has been placed.\n\nTrip: ${
-          payload.tripName
-        }\nDate: ${payload.date}\nTime: ${
-          new Date(payload.timeISO).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }) || ""
-        }\nTotal: ${formatPrice(payload.total, "EGP")}`
+      const timeTxt =
+        new Date(payload.timeISO).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }) || "";
+      toast(
+        "success",
+        "Booking confirmed",
+        `Trip: ${payload.tripName} • ${
+          payload.date
+        } ${timeTxt}\nTotal: ${formatPrice(payload.total, "EGP")}`
       );
-
-      // You can also redirect to a confirmation page here if you have one.
-      // window.location.href = `/pages/booking-success.html?id=${result?.data?.id ?? ""}`;
+      // Optional redirect:
+      // window.location.href = `/pages/booking-success.html`;
     } catch (e) {
       console.error("Booking error:", e);
-      if (e.code === "AUTH" || e.status === 401 || e.status === 403) {
-        alert("Please log in to complete your booking.");
-        // Optional redirect:
-        // window.location.href = LOGIN_URL;
-      } else {
-        alert(
-          e.message || "Something went wrong while confirming your booking."
+      if (e?.status === 401 || e?.status === 403 || e?.code === "AUTH") {
+        toast(
+          "info",
+          "Sign in required",
+          "Please sign in to complete your booking."
         );
+        redirectToLogin();
+      } else {
+        toast("error", "Booking failed", e.message || "Please try again.");
       }
     } finally {
       bConfirm.disabled = false;
@@ -661,6 +705,5 @@
   });
 
   // ---------------- Init ----------------
-
   window.addEventListener("DOMContentLoaded", () => loadTrip());
 })();
