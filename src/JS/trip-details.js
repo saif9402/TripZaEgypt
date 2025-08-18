@@ -94,7 +94,6 @@
     const timesByDay = {};
     const days = [];
 
-    // Parse, keep only future-or-today slots, sort
     const slots = dateStrings
       .map((s) => ({ raw: s, d: new Date(s) }))
       .filter(({ d }) => !isNaN(d) && d >= todayStart)
@@ -109,7 +108,6 @@
       timesByDay[key].push({ label: timeLabel(d), value: raw, date: d });
     }
 
-    // sort each day's times ascending (already sorted, but keep it explicit)
     for (const k of days) {
       timesByDay[k].sort((a, b) => a.date - b.date);
     }
@@ -127,7 +125,6 @@
     const now = new Date();
     let options = availability.timesByDay[dayKey] || [];
 
-    // If today, hide past times
     if (dayKey === fmtDateKey(now)) {
       options = options.filter((o) => o.date > now);
     }
@@ -150,7 +147,6 @@
 
     availability = buildAvailability(tripDates);
 
-    // No future slots
     if (!availability.days.length) {
       try {
         datePickerInstance?.destroy?.();
@@ -163,7 +159,6 @@
       return;
     }
 
-    // Try to use Flatpickr if loaded
     if (window.flatpickr) {
       try {
         datePickerInstance?.destroy?.();
@@ -171,9 +166,9 @@
       datePickerInstance = flatpickr(dateInput, {
         dateFormat: "Y-m-d",
         minDate: availability.days[0],
-        enable: availability.days, // only these days are clickable
+        enable: availability.days,
         defaultDate: availability.days[0],
-        disableMobile: true, // always use the custom picker on mobile
+        disableMobile: true,
         onChange: (selectedDates) => {
           const d = selectedDates && selectedDates[0];
           if (d) {
@@ -183,11 +178,8 @@
         },
       });
 
-      // Initialize time list for the first available day
       syncTimeOptions(availability.days[0]);
     } else {
-      // Fallback without Flatpickr:
-      // show a simple YYYY-MM-DD value and guard invalid picks
       dateInput.type = "date";
       dateInput.min = availability.days[0];
       dateInput.value = availability.days[0];
@@ -196,7 +188,6 @@
       dateInput.addEventListener("change", () => {
         const val = dateInput.value;
         if (!availability.days.includes(val)) {
-          // snap back to first allowed day
           dateInput.value = availability.days[0];
           syncTimeOptions(availability.days[0]);
         } else {
@@ -208,10 +199,10 @@
     }
   };
 
-  // ---------------- Image modal (unchanged) ----------------
+  // ---------------- Image modal ----------------
 
-  let imageList = []; // all URLs in order (main first)
-  let currentIndex = 0; // modal index
+  let imageList = [];
+  let currentIndex = 0;
 
   const modal = $("imageModal");
   const modalImg = $("modalImage");
@@ -332,7 +323,11 @@
 
   // ---------------- Render trip ----------------
 
+  let currentTrip = null; // <-- store the loaded trip for pricing
+
   const renderTrip = (t) => {
+    currentTrip = t || {};
+
     $("tripTitle") && ($("tripTitle").textContent = t.name || "Trip");
 
     const ratingVal = Number(t.rating) || 0;
@@ -386,7 +381,7 @@
 
     setUnavailableUI(!!t.isAvailable);
 
-    // NEW: hook up date + time availability from t.tripDates
+    // Date/time availability
     setupAvailability(t.tripDates || []);
   };
 
@@ -432,7 +427,42 @@
   // Expose for language switchers
   window.refreshTripDetailsLang = () => loadTrip({ noCache: true });
 
-  // ---------------- Booking button (uses chosen exact slot) ----------------
+  // ---------------- Booking Confirmation Modal ----------------
+
+  const bModal = $("bookingModal");
+  const bBackdrop = $("bookingBackdrop");
+  const bClose = $("bookingCloseBtn");
+  const bEdit = $("bookingEditBtn");
+  const bConfirm = $("bookingConfirmBtn");
+
+  const bmTripName = $("bmTripName");
+  const bmDate = $("bmDate");
+  const bmTime = $("bmTime");
+  const bmAdults = $("bmAdults");
+  const bmChildren = $("bmChildren");
+  const bmPriceAdult = $("bmPriceAdult");
+  const bmPriceChild = $("bmPriceChild");
+  const bmTotal = $("bmTotal");
+
+  const openBookingModal = () => {
+    if (!bModal) return;
+    bModal.classList.remove("opacity-0", "pointer-events-none");
+    bModal.classList.add("opacity-100", "pointer-events-auto");
+    bModal.setAttribute("aria-hidden", "false");
+  };
+
+  const closeBookingModal = () => {
+    if (!bModal) return;
+    bModal.classList.remove("opacity-100");
+    bModal.classList.add("opacity-0", "pointer-events-none");
+    bModal.setAttribute("aria-hidden", "true");
+  };
+
+  bBackdrop?.addEventListener("click", closeBookingModal);
+  bClose?.addEventListener("click", closeBookingModal);
+  bEdit?.addEventListener("click", closeBookingModal);
+
+  // ---------------- Booking button -> open modal with summary ----------------
 
   $("bookBtn")?.addEventListener("click", () => {
     const dateVal =
@@ -441,21 +471,79 @@
       $("tripDateInput")?.value ||
       "";
 
-    const timeVal = $("tripTimeSelect")?.value || ""; // this is the full ISO from API
+    const timeISO = $("tripTimeSelect")?.value || "";
+    const adultCount = Math.max(1, parseInt($("adultCount")?.value || "1", 10));
+    const childCount = Math.max(0, parseInt($("childCount")?.value || "0", 10));
 
-    if (!dateVal || !timeVal) {
+    if (!dateVal || !timeISO) {
       alert("Please choose an available date and time.");
       return;
     }
 
-    // At this point, `timeVal` is an exact available datetime (from your API).
-    // You can send it to your booking endpoint as the selected slot.
-    console.log("Selected slot:", { dateVal, timeISO: timeVal });
-    alert(
-      `Selected slot:\nDate: ${dateVal}\nTime: ${new Date(
-        timeVal
-      ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-    );
+    const perAdult = Number(currentTrip?.price) || 0;
+    const perChild = perAdult * 0.5;
+    const total = perAdult * adultCount + perChild * childCount;
+
+    // Fill modal fields
+    bmTripName && (bmTripName.textContent = currentTrip?.name || "Trip");
+    bmDate && (bmDate.textContent = dateVal);
+
+    const t = new Date(timeISO);
+    const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
+    bmTime &&
+      (bmTime.textContent = isNaN(t)
+        ? ""
+        : t.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }));
+
+    bmAdults && (bmAdults.textContent = String(adultCount));
+    bmChildren && (bmChildren.textContent = String(childCount));
+    bmPriceAdult && (bmPriceAdult.textContent = formatPrice(perAdult, "EGP"));
+    bmPriceChild && (bmPriceChild.textContent = formatPrice(perChild, "EGP"));
+    bmTotal && (bmTotal.textContent = formatPrice(total, "EGP"));
+
+    // Store details on the confirm button for later use
+    bConfirm.dataset.payload = JSON.stringify({
+      tripId: getTripIdFromUrl(),
+      tripName: currentTrip?.name || "",
+      date: dateVal,
+      timeISO,
+      adults: adultCount,
+      children: childCount,
+      perAdult,
+      perChild,
+      total,
+    });
+
+    openBookingModal();
+  });
+
+  // Handle confirm (you can replace with your booking API call)
+  bConfirm?.addEventListener("click", () => {
+    try {
+      const payload = JSON.parse(bConfirm.dataset.payload || "{}");
+
+      // TODO: Integrate with your booking API here.
+      // Example:
+      // await fetch('/api/Booking/Create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+
+      console.log("Booking confirmed:", payload);
+
+      // Simple feedback to the user:
+      closeBookingModal();
+      alert(
+        `Thank you! Your booking is confirmed.\n\nTrip: ${
+          payload.tripName
+        }\nDate: ${payload.date}\nTime: ${
+          new Date(payload.timeISO).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }) || ""
+        }\nTotal: ${formatPrice(payload.total, "EGP")}`
+      );
+    } catch (e) {
+      console.error("Booking confirm error:", e);
+      alert("Something went wrong while confirming your booking.");
+    }
   });
 
   // ---------------- Init ----------------
