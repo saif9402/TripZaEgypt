@@ -31,17 +31,14 @@
 
     <!-- Trip Header -->
     <section class="max-w-7xl mx-auto px-4 py-20">
-      <!-- Grid on desktop, single column on mobile -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-        <!-- LEFT: Main trip content (NO related tours inside this block) -->
-        <div class="md:col-span-2">
+      <div class="flex flex-col md:flex-row gap-8">
+        <div class="md:w-2/3">
           <h1 id="tripTitle" class="text-3xl font-bold mb-2"></h1>
           <div class="text-sm text-gray-500 mb-4">
             <span id="tripCategory" class="text-gray-500"></span>
             <span id="tripRatingStars" class="text-yellow-500"></span>
             <span id="tripRatingText" class="text-gray-500"></span>
           </div>
-
           <img
             id="tripMainImage"
             src=""
@@ -65,6 +62,7 @@
                 </p>
               </div>
             </div>
+
             <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-shield-virus text-green-600 text-xl mt-1"></i>
@@ -75,6 +73,7 @@
                 </p>
               </div>
             </div>
+
             <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-mobile-alt text-green-600 text-xl mt-1"></i>
@@ -85,6 +84,7 @@
                 </p>
               </div>
             </div>
+
             <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-clock text-green-600 text-xl mt-1"></i>
@@ -95,6 +95,7 @@
                 </p>
               </div>
             </div>
+
             <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-bolt text-green-600 text-xl mt-1"></i>
@@ -105,6 +106,7 @@
                 </p>
               </div>
             </div>
+
             <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-user-tie text-green-600 text-xl mt-1"></i>
@@ -151,73 +153,8 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- RIGHT: Booking (sticky on desktop only) -->
-        <aside class="md:col-span-1">
-          <div class="bg-white p-6 rounded-lg shadow-md md:sticky md:top-24">
-            <h3 class="font-bold text-lg mb-4">Booking</h3>
-
-            <!-- Date -->
-            <label class="block text-sm font-medium mb-1">Date</label>
-            <input
-              id="tripDateInput"
-              type="text"
-              class="w-full border px-3 py-2 rounded mb-4"
-            />
-
-            <!-- Time (from previous step) -->
-            <label class="block text-sm font-medium mb-1">Time</label>
-            <select
-              id="tripTimeSelect"
-              class="w-full border px-3 py-2 rounded mb-4"
-              disabled
-            >
-              <option value="">Select time</option>
-            </select>
-
-            <!-- Adults -->
-            <label class="block text-sm font-medium mb-1">Adults</label>
-            <input
-              type="number"
-              min="1"
-              value="2"
-              class="w-full border px-3 py-2 rounded mb-4"
-              placeholder="Number of adults"
-            />
-
-            <!-- Children -->
-            <label class="block text-sm font-medium mb-1">Children</label>
-            <input
-              type="number"
-              min="0"
-              value="0"
-              class="w-full border px-3 py-2 rounded"
-              placeholder="Number of children"
-            />
-            <p class="text-xs text-gray-500 mb-4">
-              Children are charged at <strong>50% of the adult price</strong>.
-            </p>
-
-            <!-- Price & Actions -->
-            <div id="tripPrice" class="text-2xl font-bold mb-2">$78.90</div>
-            <button
-              id="bookBtn"
-              class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded"
-            >
-              Confirm Booking
-            </button>
-            <button class="w-full mt-2 text-sm text-gray-500">
-              ❤️ Save to Wishlist
-            </button>
-          </div>
-        </aside>
-
-        <!-- RELATED TOURS: 
-         On mobile this comes after booking.
-         On desktop it spans under the main content (left 2 columns). -->
-        <div class="md:col-span-2">
-          <section class="px-0 py-12">
+          <section class="max-w-7xl mx-auto px-4 py-12">
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl font-semibold">Related Tours In Today</h2>
               <div class="flex space-x-2">
@@ -268,9 +205,71 @@
                   </div>
                 </div>
               </div>
-              <!-- Repeat cards dynamically as needed -->
+
+              <!-- Repeat the above .bg-white block 3 more times and change content accordingly -->
+              <!-- Tip: Put dynamic generation in JS or a template loop if needed -->
             </div>
           </section>
+        </div>
+        <!-- Booking Sidebar -->
+        <div class="md:w-1/3">
+          <div class="bg-white p-4 rounded-lg shadow-md sticky top-24">
+            <h3 class="font-bold text-lg mb-3">Booking</h3>
+
+            <!-- Date Selection -->
+            <label class="block text-sm font-medium mb-1">Date</label>
+            <input
+              id="tripDateInput"
+              type="text"
+              class="w-full border px-3 py-2 rounded mb-3"
+            />
+
+            <!-- Time Selection (new) -->
+            <label class="block text-sm font-medium mb-1">Time</label>
+            <select
+              title="Select Time"
+              id="tripTimeSelect"
+              class="w-full border px-3 py-2 rounded mb-3"
+              disabled
+            >
+              <option value="">Select time</option>
+            </select>
+
+            <!-- Number of Adults -->
+            <label class="block text-sm font-medium mb-1">Adults</label>
+            <input
+              type="number"
+              min="1"
+              value="2"
+              class="w-full border px-3 py-2 rounded mb-3"
+              placeholder="Number of adults"
+            />
+
+            <!-- Number of Children -->
+            <label class="block text-sm font-medium mb-1">Children</label>
+            <input
+              type="number"
+              min="0"
+              value="0"
+              class="w-full border px-3 py-2 rounded"
+              placeholder="Number of children"
+            />
+            <p class="text-xs text-gray-500 mb-4">
+              Children are charged at <strong>50% of the adult price</strong>.
+            </p>
+
+            <!-- Price and Booking -->
+            <div id="tripPrice" class="text-2xl font-bold mb-2">$78.90</div>
+            <button
+              id="bookBtn"
+              class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded"
+            >
+              Confirm Booking
+            </button>
+            <button class="w-full mt-2 text-sm text-gray-500">
+              ❤️ Save to Wishlist
+            </button>
+          </div>
         </div>
       </div>
     </section>
