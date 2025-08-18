@@ -70,6 +70,90 @@
     }
   };
 
+  // ---------------- Auth helpers (GetToken -> accessToken) ----------------
+
+  const LOGIN_URL = "sign-in.html"; // adjust if different
+
+  const parseMaybeTextJSON = async (res) => {
+    // API often returns text/plain containing JSON. Handle both.
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")) return res.json();
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { raw: text };
+    }
+  };
+
+  async function getFreshAccessToken() {
+    const res = await fetch("/api/Auth/GetToken", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json, text/plain",
+      },
+    });
+
+    if (!res.ok)
+      throw Object.assign(new Error("Auth token refresh failed"), {
+        status: res.status,
+      });
+
+    const data = await parseMaybeTextJSON(res);
+    if (data?.succeeded && data?.data?.accessToken) {
+      // Optional: cache so your header include can show the auth header next page load
+      try {
+        localStorage.setItem("accessToken", data.data.accessToken);
+      } catch {}
+      window.currentUser = data.data;
+      return data.data.accessToken;
+    }
+
+    const msg = data?.message || "You must be logged in to book.";
+    const err = new Error(msg);
+    err.code = "AUTH";
+    throw err;
+  }
+
+  async function addBooking({ tripId, tripDateISO, adults, children }) {
+    // 1) Always refresh access token right before booking
+    const token = await getFreshAccessToken();
+
+    // 2) Call AddBooking with Authorization: Bearer <token>
+    const res = await fetch("/api/Booking/AddBooking", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json, text/plain",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        adults: Number(adults) || 0,
+        children: Number(children) || 0,
+        tripDate: String(tripDateISO), // ISO date-time string
+        tripId: Number(tripId),
+      }),
+    });
+
+    const payload = await parseMaybeTextJSON(res);
+
+    // consider both HTTP status and any {succeeded:false}
+    if (!res.ok || payload?.succeeded === false) {
+      const msg =
+        payload?.message ||
+        (Array.isArray(payload?.errors) && payload.errors[0]) ||
+        `Booking failed (${res.status})`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.details = payload;
+      throw err;
+    }
+
+    return payload;
+  }
+
   // ---------------- Availability (dates + times) ----------------
 
   const fmtDateKey = (d) => {
@@ -517,21 +601,37 @@
     openBookingModal();
   });
 
-  // Handle confirm (you can replace with your booking API call)
-  bConfirm?.addEventListener("click", () => {
+  // ---------------- Confirm -> call API (GetToken -> AddBooking) ----------------
+
+  bConfirm?.addEventListener("click", async () => {
+    if (!bConfirm) return;
+
+    let payload;
     try {
-      const payload = JSON.parse(bConfirm.dataset.payload || "{}");
+      payload = JSON.parse(bConfirm.dataset.payload || "{}");
+    } catch {
+      alert("Missing booking details.");
+      return;
+    }
 
-      // TODO: Integrate with your booking API here.
-      // Example:
-      // await fetch('/api/Booking/Create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    // lock UI while sending
+    const originalText = bConfirm.textContent;
+    bConfirm.disabled = true;
+    bConfirm.textContent = "Booking…";
 
-      console.log("Booking confirmed:", payload);
+    try {
+      const result = await addBooking({
+        tripId: payload.tripId,
+        tripDateISO: payload.timeISO, // server expects a date-time string
+        adults: payload.adults,
+        children: payload.children,
+      });
 
-      // Simple feedback to the user:
       closeBookingModal();
+
+      // Success message (adjust to your server's shape if needed)
       alert(
-        `Thank you! Your booking is confirmed.\n\nTrip: ${
+        `Thank you! Your booking has been placed.\n\nTrip: ${
           payload.tripName
         }\nDate: ${payload.date}\nTime: ${
           new Date(payload.timeISO).toLocaleTimeString([], {
@@ -540,9 +640,23 @@
           }) || ""
         }\nTotal: ${formatPrice(payload.total, "EGP")}`
       );
+
+      // You can also redirect to a confirmation page here if you have one.
+      // window.location.href = `/pages/booking-success.html?id=${result?.data?.id ?? ""}`;
     } catch (e) {
-      console.error("Booking confirm error:", e);
-      alert("Something went wrong while confirming your booking.");
+      console.error("Booking error:", e);
+      if (e.code === "AUTH" || e.status === 401 || e.status === 403) {
+        alert("Please log in to complete your booking.");
+        // Optional redirect:
+        // window.location.href = LOGIN_URL;
+      } else {
+        alert(
+          e.message || "Something went wrong while confirming your booking."
+        );
+      }
+    } finally {
+      bConfirm.disabled = false;
+      bConfirm.textContent = originalText;
     }
   });
 
