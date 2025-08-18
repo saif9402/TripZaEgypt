@@ -6,6 +6,12 @@
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
     <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <link
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
     />
@@ -214,9 +220,20 @@
             <label class="block text-sm font-medium mb-1">Date</label>
             <input
               id="tripDateInput"
-              type="date"
+              type="text"
               class="w-full border px-3 py-2 rounded mb-4"
             />
+
+            <!-- Time Selection (new) -->
+            <label class="block text-sm font-medium mb-1">Time</label>
+            <select
+              title="Select Time"
+              id="tripTimeSelect"
+              class="w-full border px-3 py-2 rounded mb-4"
+              disabled
+            >
+              <option value="">Select time</option>
+            </select>
 
             <!-- Number of Adults -->
             <label class="block text-sm font-medium mb-1">Adults</label>
