@@ -89,7 +89,6 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-// --- Top Rated (Trending) Slider with Next/Prev buttons ---
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
   if (!root) return;
@@ -104,7 +103,7 @@ async function initTopRatedSlider(noCache = false) {
   const params = new URLSearchParams({
     IsTopRated: true,
     TranslationLanguageId: langId,
-    Sort: "rand",
+    Sort: "rand", // ⬅️ ask the API for random
   });
   if (noCache) params.append("_ts", Date.now());
 
@@ -127,10 +126,8 @@ async function initTopRatedSlider(noCache = false) {
     return;
   }
 
-  trips.sort(
-    (a, b) =>
-      (b.rating ?? 0) - (a.rating ?? 0) || (b.reviews ?? 0) - (a.reviews ?? 0)
-  );
+  // ✅ Force randomness even if backend ignores Sort=rand
+  _shuffleInPlace(trips);
 
   const i18n =
     langCode === "deu"
@@ -214,7 +211,6 @@ async function initTopRatedSlider(noCache = false) {
     const div = document.createElement("div");
     div.className =
       "absolute inset-0 flex flex-col md:flex-row justify-center items-center gap-10 px-6 py-16 transition-transform duration-700 ease-out will-change-transform";
-    // Starting off-screen by default; we'll prime it below
     div.style.transform = "translateX(100%)";
     return div;
   };
@@ -298,29 +294,27 @@ async function initTopRatedSlider(noCache = false) {
   // initial render
   renderInto(active, trips[currentIndex]);
 
-  // --- PRIME INITIAL STATE so first transition animates correctly ---
+  // PRIME initial state
   const disableTransition = (el) => (el.style.transition = "none");
   const enableTransition = (el) => (el.style.transition = "");
 
   disableTransition(slideA);
   disableTransition(slideB);
 
-  active.style.transform = "translateX(0)"; // on screen
-  next.style.transform = "translateX(-100%)"; // off to the right (correct)
+  active.style.transform = "translateX(0)";
+  next.style.transform = "translateX(-100%)";
 
-  // layering
   active.style.zIndex = "1";
   next.style.zIndex = "0";
 
-  // force reflow to commit starting transforms without animating
-  void active.offsetWidth;
+  void active.offsetWidth; // reflow
 
   enableTransition(slideA);
   enableTransition(slideB);
 
-  // ----- Autoplay: fast first tick, then steady cadence -----
+  // autoplay
   const AUTOPLAY_MS = 3000;
-  const FIRST_DELAY_MS = 800; // tweak between 500–1200ms as you like
+  const FIRST_DELAY_MS = 800;
   let timer = null;
   let startedOnce = false;
 
@@ -346,7 +340,6 @@ async function initTopRatedSlider(noCache = false) {
     }
   };
 
-  // simple preloader for slide images
   const preloadImg = (url) => {
     try {
       const i = new Image();
@@ -355,7 +348,6 @@ async function initTopRatedSlider(noCache = false) {
     } catch {}
   };
 
-  // Preload next slide’s image so first transition is ready
   if (trips.length > 1) {
     const n = (currentIndex + 1) % trips.length;
     preloadImg(safeImgUrl(trips[n].mainImageURL));
@@ -366,12 +358,10 @@ async function initTopRatedSlider(noCache = false) {
     const nextIndex = (currentIndex + 1) % trips.length;
     renderInto(next, trips[nextIndex]);
 
-    // position incoming to the right and bring it on top
     next.style.transform = "translateX(100%)";
     next.style.zIndex = "2";
     active.style.zIndex = "1";
 
-    // Double rAF to ensure styles are committed before animating
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         active.style.transform = "translateX(-100%)";
@@ -381,11 +371,8 @@ async function initTopRatedSlider(noCache = false) {
 
     currentIndex = nextIndex;
     [active, next] = [next, active];
-
-    // the one that became "next" goes under
     next.style.zIndex = "0";
 
-    // Preload the image after the one we just moved to
     const afterIndex = (currentIndex + 1) % trips.length;
     preloadImg(safeImgUrl(trips[afterIndex].mainImageURL));
   };
@@ -395,7 +382,6 @@ async function initTopRatedSlider(noCache = false) {
     const prevIndex = (currentIndex - 1 + trips.length) % trips.length;
     renderInto(next, trips[prevIndex]);
 
-    // position incoming to the left and bring it on top
     next.style.transform = "translateX(-100%)";
     next.style.zIndex = "2";
     active.style.zIndex = "1";
@@ -411,42 +397,29 @@ async function initTopRatedSlider(noCache = false) {
     [active, next] = [next, active];
     next.style.zIndex = "0";
 
-    // Preload the image before the one we moved to
     const beforeIndex = (currentIndex - 1 + trips.length) % trips.length;
     preloadImg(safeImgUrl(trips[beforeIndex].mainImageURL));
   };
 
-  // --- Buttons (injected) ---
-  const mkBtn = (side, label, aria) => {
+  const mkBtn = (side, aria) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.setAttribute("aria-label", aria);
-
-    // Mobile: bottom corners. ≥sm: vertically centered left/right.
     btn.className = [
-      "absolute",
-      "z-20",
-      "bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur",
+      "absolute z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur",
       "focus:outline-none focus:ring-2 focus:ring-white/60",
-
-      // mobile (default)
       "bottom-3",
       side === "left" ? "left-3" : "right-3",
-
-      // ≥sm screens
       "sm:bottom-auto",
       side === "left" ? "sm:left-4" : "sm:right-4",
       "sm:top-1/2 sm:-translate-y-1/2",
     ].join(" ");
-
     btn.textContent = side === "left" ? "‹" : "›";
     return btn;
   };
 
-  const prevBtn = mkBtn("left", i18n.prev, i18n.prev);
-  const nextBtn = mkBtn("right", i18n.next, i18n.next);
-
-  // add a stable class so we can target via CSS
+  const prevBtn = mkBtn("left", i18n.prev);
+  const nextBtn = mkBtn("right", i18n.next);
   prevBtn.classList.add("trending-nav");
   nextBtn.classList.add("trending-nav");
   prevBtn.addEventListener("click", () => {
@@ -462,16 +435,15 @@ async function initTopRatedSlider(noCache = false) {
 
   viewport.append(prevBtn, nextBtn);
 
-  // ---- Touch swipe for mobile ----
+  // swipe + keyboard (unchanged)
   (function enableSwipe() {
     let startX = 0,
       startY = 0,
       startT = 0,
       isDown = false,
       lockedToHorizontal = false;
-    const THRESHOLD = 40; // min px to consider a swipe
-    const MAX_TIME = 700; // max ms for a "quick" swipe
-
+    const THRESHOLD = 40;
+    const MAX_TIME = 700;
     const onDown = (x, y) => {
       isDown = true;
       lockedToHorizontal = false;
@@ -479,46 +451,34 @@ async function initTopRatedSlider(noCache = false) {
       startY = y;
       startT = Date.now();
     };
-
     const onMove = (x, y, evt) => {
       if (!isDown) return;
       const dx = x - startX;
       const dy = y - startY;
-
-      // Decide if gesture is horizontal; if yes, prevent vertical scroll during gesture
       if (!lockedToHorizontal) {
         if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
           lockedToHorizontal = Math.abs(dx) > Math.abs(dy);
         }
       }
-      if (lockedToHorizontal) {
-        evt && evt.preventDefault && evt.preventDefault();
-      }
+      if (lockedToHorizontal) evt && evt.preventDefault && evt.preventDefault();
     };
-
     const onUp = (x, y) => {
       if (!isDown) return;
       const dx = x - startX;
       const dy = y - startY;
       const dt = Date.now() - startT;
-
       if (
         Math.abs(dx) > Math.abs(dy) &&
         Math.abs(dx) > THRESHOLD &&
         dt < MAX_TIME
       ) {
-        // left swipe -> next, right swipe -> prev
-        if (dx < 0) {
-          goNext();
-        } else {
-          goPrev();
-        }
+        if (dx < 0) goNext();
+        else goPrev();
       }
       isDown = false;
       if (trips.length > 1) start();
     };
 
-    // Prefer Pointer Events
     viewport.addEventListener(
       "pointerdown",
       (e) => {
@@ -526,7 +486,6 @@ async function initTopRatedSlider(noCache = false) {
       },
       { passive: true }
     );
-
     viewport.addEventListener(
       "pointermove",
       (e) => {
@@ -534,7 +493,6 @@ async function initTopRatedSlider(noCache = false) {
       },
       { passive: false }
     );
-
     viewport.addEventListener(
       "pointerup",
       (e) => {
@@ -542,7 +500,6 @@ async function initTopRatedSlider(noCache = false) {
       },
       { passive: true }
     );
-
     viewport.addEventListener(
       "pointercancel",
       () => {
@@ -551,7 +508,6 @@ async function initTopRatedSlider(noCache = false) {
       { passive: true }
     );
 
-    // Fallback for older iOS/browsers without proper Pointer Events
     viewport.addEventListener(
       "touchstart",
       (e) => {
@@ -560,7 +516,6 @@ async function initTopRatedSlider(noCache = false) {
       },
       { passive: true }
     );
-
     viewport.addEventListener(
       "touchmove",
       (e) => {
@@ -569,7 +524,6 @@ async function initTopRatedSlider(noCache = false) {
       },
       { passive: false }
     );
-
     viewport.addEventListener(
       "touchend",
       (e) => {
@@ -580,7 +534,6 @@ async function initTopRatedSlider(noCache = false) {
     );
   })();
 
-  // Keyboard support
   viewport.tabIndex = 0;
   viewport.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") {
@@ -594,17 +547,13 @@ async function initTopRatedSlider(noCache = false) {
     }
   });
 
-  // Helps browser know we will handle horizontal gestures; vertical scroll stays native
   viewport.style.touchAction = "pan-y";
 
-  // start autoplay if more than one slide
   if (trips.length > 1) start();
 
-  // Expose manual controls
   window.nextTrendingSlide = goNext;
   window.prevTrendingSlide = goPrev;
 
-  // expose a cleanup to callers (e.g., before re-init)
   root.__cleanup = () => {
     stop();
     window.nextTrendingSlide = undefined;
@@ -825,108 +774,55 @@ function tripCardHTML(t) {
   </a>`;
 }
 
-// Update the Featured Destination section with the first trip
-function renderFeatured(trip) {
+// --- Featured rotator ---
+let _featuredTimer = null;
+let _featuredIndex = 0;
+let _featuredIntervalMs = 8000; // change speed here
+let _featuredTrips = [];
+
+function stopFeaturedRotator() {
+  if (_featuredTimer) {
+    clearInterval(_featuredTimer);
+    _featuredTimer = null;
+  }
+}
+
+function startFeaturedRotator(trips, { intervalMs = 8000 } = {}) {
+  stopFeaturedRotator();
+  _featuredTrips = Array.isArray(trips) ? trips.slice() : [];
+  _featuredIntervalMs = intervalMs;
+
   const sec = document.getElementById("featuredSection");
   const link = document.getElementById("featuredLink");
-  const title = document.getElementById("featuredTitle");
-  const desc = document.getElementById("featuredDesc");
-  const tags = document.getElementById("featuredTags");
+  if (!sec || !link || _featuredTrips.length <= 1) return; // nothing to rotate
 
-  if (!trip) return;
+  // begin from the first (already rendered outside), go next on tick
+  _featuredIndex = 0;
 
-  // --- image ---
-  const imgUrl = _esc(_safeImg(trip.mainImageURL));
-  if (sec) sec.style.backgroundImage = `url('${imgUrl}')`;
+  // pause on hover, resume on leave
+  const pause = () => stopFeaturedRotator();
+  const resume = () => {
+    if (!_featuredTrips.length || _featuredTrips.length <= 1) return;
+    if (_featuredTimer) return;
+    _featuredTimer = setInterval(tick, _featuredIntervalMs);
+  };
+  sec.addEventListener("mouseenter", pause);
+  sec.addEventListener("mouseleave", resume);
 
-  // --- robust details URL (works on / and on /pages/) ---
-  const onPages = window.location.pathname.includes("/pages/");
-  const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
-  const detailsURL = new URL(baseHref, window.location.href);
-  detailsURL.searchParams.set("id", String(trip.id ?? "")); // e.g. ?id=34
-
-  // Write href + dataset for debugging
-  if (link) {
-    link.href = detailsURL.pathname + detailsURL.search; // keep site-subfolder safe
-    link.dataset.featuredId = String(trip.id ?? "");
-    link.classList.add("cursor-pointer", "z-20");
-
-    // Fallback: if some script mutates href later, ensure id is there on click
-    link.addEventListener(
-      "click",
-      (e) => {
-        // if somehow href lost the id, re-apply and go
-        if (!link.href.includes("id=")) {
-          e.preventDefault();
-          window.location.href = detailsURL.pathname + detailsURL.search;
-        }
-      },
-      { once: true }
-    );
+  function tick() {
+    _featuredIndex = (_featuredIndex + 1) % _featuredTrips.length;
+    renderFeatured(_featuredTrips[_featuredIndex]);
   }
 
-  // Also make the whole section clickable (nice UX + extra safety)
-  if (sec) {
-    sec.style.cursor = "pointer";
-    // prevent double navigation if user actually clicks the <a>
-    sec.addEventListener("click", (ev) => {
-      const target = ev.target;
-      if (target && target.closest && target.closest("#featuredLink")) return;
-      if (link && link.href) {
-        window.location.href = link.href;
-      }
-    });
-  }
-
-  // --- text bits ---
-  if (title) title.textContent = trip.name || "Featured Trip";
-  if (desc) {
-    desc.textContent =
-      _activitiesPreview(trip.activities, 200) ||
-      "Explore this experience in Hurghada.";
-  }
-
-  // --- tags ---
-  if (tags) {
-    const pills = [];
-    if (trip.category)
-      pills.push({
-        c: "bg-blue-100 text-blue-600",
-        icon: "fa-map-marker-alt",
-        label: trip.category,
-      });
-    if (trip.isBestSeller)
-      pills.push({
-        c: "bg-yellow-100 text-yellow-700",
-        icon: "fa-bolt",
-        label: "Best Seller",
-      });
-    pills.push({
-      c: "bg-green-100 text-green-700",
-      icon: "fa-clock",
-      label: _minsToLabel(trip.duration),
-    });
-    pills.push({
-      c: "bg-purple-100 text-purple-600",
-      icon: "fa-star",
-      label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
-    });
-
-    tags.innerHTML = pills
-      .map(
-        (p) => `
-        <span class="${
-          p.c
-        } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-          <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
-        </span>`
-      )
-      .join("");
-  }
-
-  // Debug (optional): check what href we ended up with
-  // console.debug("[featured] href:", link?.href, "id:", link?.dataset.featuredId);
+  _featuredTimer = setInterval(tick, intervalMs);
 }
+
+// Optional: stop when tab hidden, resume when visible
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopFeaturedRotator();
+  else if (_featuredTrips.length > 1)
+    startFeaturedRotator(_featuredTrips, { intervalMs: _featuredIntervalMs });
+});
 
 // ------- Main: fetch trips for a category and render -------
 async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
@@ -945,6 +841,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     PageSize: 50,
     PageNumber: 1,
   });
+  params.append("Sort", "rand"); // ask backend for random
   if (noCache) params.append("_ts", Date.now());
 
   try {
@@ -952,18 +849,29 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
       cache: "no-store",
     });
     const json = await res.json();
-    const trips = json?.data?.data ?? [];
+    let trips = json?.data?.data ?? [];
+
+    // Force random order even if backend ignores Sort=rand
+    if (typeof _shuffleInPlace === "function") _shuffleInPlace(trips);
 
     if (!trips.length) {
       grid.innerHTML = _emptyState;
+      // also stop any existing rotator
+      stopFeaturedRotator();
       return;
     }
 
-    // 1) Featured
+    // 1) Featured — pick first (already randomized)
     renderFeatured(trips[0]);
 
+    // 🔁 Start rotating featured among the (randomized) list.
+    //    Limit to first N if you want shorter loop, e.g. 10:
+    const rotateList = trips.slice(0, Math.min(trips.length, 10));
+    stopFeaturedRotator();
+    startFeaturedRotator(rotateList, { intervalMs: 8000 }); // 8s between swaps
+
     // 2) Next up to 4 cards
-    const cards = trips.slice(1, 4).map(tripCardHTML).join("");
+    const cards = trips.slice(1, 5).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
   } catch (e) {
     console.error("Failed to load trips by category:", e);
@@ -972,6 +880,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
         Something went wrong loading trips. Please try again.
       </div>
     `;
+    stopFeaturedRotator();
   }
 }
 
