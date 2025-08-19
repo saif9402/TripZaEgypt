@@ -1002,7 +1002,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     startFeaturedRotator(rotateList, { intervalMs: 8000 }); // 8s between swaps
 
     // 2) Next up to 4 cards (randomized order)
-    const cards = trips.slice(1, 5).map(tripCardHTML).join("");
+    const cards = trips.slice(1, 4).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
 
     // Ensure broken images show inline fallback
