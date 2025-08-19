@@ -37,7 +37,7 @@
     return "★".repeat(full + half) + "☆".repeat(5 - full - half);
   };
 
-  const formatPrice = (value, currency = "EGP") => {
+  const formatPrice = (value, currency = "USD") => {
     const lang = localStorage.getItem("lang") || "en";
     const locale = lang === "deu" ? "de-DE" : "en-EG";
     try {
@@ -506,7 +506,7 @@
 
     $("tripPrice") &&
       ($("tripPrice").innerHTML =
-        t.price != null ? `${formatPrice(t.price, "EGP")}` : "");
+        t.price != null ? `${formatPrice(t.price, "USD")}` : "");
 
     setUnavailableUI(!!t.isAvailable);
 
@@ -627,9 +627,9 @@
 
     bmAdults && (bmAdults.textContent = String(adultCount));
     bmChildren && (bmChildren.textContent = String(childCount));
-    bmPriceAdult && (bmPriceAdult.textContent = formatPrice(perAdult, "EGP"));
-    bmPriceChild && (bmPriceChild.textContent = formatPrice(perChild, "EGP"));
-    bmTotal && (bmTotal.textContent = formatPrice(total, "EGP"));
+    bmPriceAdult && (bmPriceAdult.textContent = formatPrice(perAdult, "USD"));
+    bmPriceChild && (bmPriceChild.textContent = formatPrice(perChild, "USD"));
+    bmTotal && (bmTotal.textContent = formatPrice(total, "USD"));
 
     bConfirm.dataset.payload = JSON.stringify({
       tripId: getTripIdFromUrl(),
@@ -682,7 +682,7 @@
         "Booking confirmed",
         `Trip: ${payload.tripName} • ${
           payload.date
-        } ${timeTxt}\nTotal: ${formatPrice(payload.total, "EGP")}`
+        } ${timeTxt}\nTotal: ${formatPrice(payload.total, "USD")}`
       );
       // Optional redirect:
       // window.location.href = `/pages/booking-success.html`;

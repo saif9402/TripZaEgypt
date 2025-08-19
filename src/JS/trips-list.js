@@ -128,11 +128,11 @@
     try {
       return new Intl.NumberFormat(locale, {
         style: "currency",
-        currency: "EGP",
+        currency: "USD",
         maximumFractionDigits: 0,
       }).format(value);
     } catch {
-      return `${value} EGP`;
+      return `${value} USD`;
     }
   };
 

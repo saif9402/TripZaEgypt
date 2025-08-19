@@ -157,7 +157,7 @@ async function initTopRatedSlider(noCache = false) {
 
   const formatPrice = (
     value,
-    currency = "EGP",
+    currency = "USD",
     locale = langCode === "deu" ? "de-DE" : "en-EG"
   ) => {
     try {
@@ -260,7 +260,7 @@ async function initTopRatedSlider(noCache = false) {
 
       <div class="meta text-gray-100">
         <span class="trending-price text-2xl">${
-          t.price != null ? formatPrice(t.price, "EGP") + "&nbsp;/ person" : ""
+          t.price != null ? formatPrice(t.price, "USD") + "&nbsp;/ person" : ""
         }</span>
         <span class="meta-sep">|</span>
         <span class="trending-rating inline-flex items-center gap-1">
@@ -748,7 +748,7 @@ const _activitiesPreview = (arr, max = 220) => {
   return s.length <= max ? s : s.slice(0, max).replace(/\s+\S*$/, "") + "…";
 };
 
-const _formatPrice = (value, currency = "EGP") => {
+const _formatPrice = (value, currency = "USD") => {
   const langCode = localStorage.getItem("lang") || "en";
   const locale = langCode === "deu" ? "de-DE" : "en-EG";
   try {
@@ -817,7 +817,7 @@ function tripCardHTML(t) {
           <span class="trip-card__reviews">${t.reviews ?? 0} reviews</span>
         </div>
         <div class="trip-card__price">
-          ${t.price != null ? _formatPrice(t.price, "EGP") : ""}
+          ${t.price != null ? _formatPrice(t.price, "USD") : ""}
           <span class="trip-card__per">/person</span>
         </div>
       </div>
