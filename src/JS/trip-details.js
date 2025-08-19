@@ -2,6 +2,40 @@
 (function () {
   const $ = (id) => document.getElementById(id);
 
+  // ---------- Image fallbacks (no external DNS needed) ----------
+  const FALLBACK_DATA_IMG =
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'>
+         <rect width='100%' height='100%' fill='#e5e7eb'/>
+         <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+               font-size='36' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>
+           No Image
+         </text>
+       </svg>`
+    );
+
+  function safeImg(u) {
+    if (!u) return FALLBACK_DATA_IMG;
+    if (/^data:/i.test(u)) return u;
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith("//")) return window.location.protocol + u;
+    return u.startsWith("/") ? u : `/${u}`;
+  }
+
+  function attachImgFallbacks(root = document) {
+    root.querySelectorAll("img").forEach((img) => {
+      img.addEventListener(
+        "error",
+        () => {
+          if (img.src !== FALLBACK_DATA_IMG) img.src = FALLBACK_DATA_IMG;
+        },
+        { once: true }
+      );
+    });
+  }
+
+  // ---------- Utils ----------
   const esc = (s) =>
     (s ?? "").toString().replace(
       /[&<>"']/g,
@@ -14,12 +48,6 @@
           "'": "&#39;",
         }[c])
     );
-
-  const safeImg = (u) => {
-    if (!u) return "https://via.placeholder.com/1200x800?text=No+Image";
-    if (u.startsWith("http")) return u;
-    return u.startsWith("/") ? u : `/${u}`;
-  };
 
   const minsToLabel = (mins) => {
     const m = Number(mins) || 0;
@@ -69,7 +97,7 @@
     }
   };
 
-  // ---------------- Toasts ----------------
+  // ---------------- Toasts (Tailwind-ish) ----------------
   function ensureToastRoot() {
     let root = document.getElementById("toast-root");
     if (!root) {
@@ -205,7 +233,7 @@
     return payload;
   }
 
-  // ---------------- Availability ----------------
+  // ---------------- Availability (dates + times) ----------------
   const fmtDateKey = (d) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -328,6 +356,30 @@
     }
   };
 
+  // ---------------- Ensure Related DOM IDs exist ----------------
+  function ensureRelatedDOM() {
+    if (
+      document.getElementById("relatedGrid") &&
+      document.getElementById("relatedPrevBtn") &&
+      document.getElementById("relatedNextBtn")
+    )
+      return;
+
+    const sections = Array.from(document.querySelectorAll("section"));
+    const sec = sections.find((s) => {
+      const h2 = s.querySelector("h2");
+      return h2 && /related tours/i.test(h2.textContent || "");
+    });
+    if (!sec) return;
+
+    const headerBtns = sec.querySelectorAll("button");
+    if (headerBtns[0] && !headerBtns[0].id) headerBtns[0].id = "relatedPrevBtn";
+    if (headerBtns[1] && !headerBtns[1].id) headerBtns[1].id = "relatedNextBtn";
+
+    const grid = sec.querySelector("div.grid");
+    if (grid && !grid.id) grid.id = "relatedGrid";
+  }
+
   // ---------------- Related trips (2 on small, 3 on ≥md) ----------------
   const relatedState = {
     trips: [],
@@ -336,7 +388,6 @@
   };
 
   function getRelatedWindowSize() {
-    // Tailwind md breakpoint ~768px
     return window.matchMedia("(min-width: 768px)").matches ? 3 : 2;
   }
 
@@ -348,13 +399,12 @@
   }
 
   function applyGridColumns(grid, cols) {
-    // Force exactly 2/3 columns so items render on ONE row
     grid.style.display = "grid";
     grid.style.gridTemplateColumns = `repeat(${Math.max(
       cols,
       1
     )}, minmax(0, 1fr))`;
-    grid.style.gap = "1.5rem"; // matches gap-6
+    grid.style.gap = "1.5rem"; // gap-6
   }
 
   function renderRelatedPage() {
@@ -373,6 +423,7 @@
       const start = relatedState.page * win;
       const slice = relatedState.trips.slice(start, start + win);
 
+      // Use global tripCardHTML if available
       if (typeof tripCardHTML === "function") {
         grid.innerHTML = slice.map((t) => tripCardHTML(t)).join("");
       } else {
@@ -411,7 +462,10 @@
       }
     }
 
-    // Enable/disable arrows based on pages
+    // attach image fallbacks for the freshly injected cards
+    attachImgFallbacks(grid);
+
+    // Enable/disable arrows
     const prev = $("relatedPrevBtn");
     const next = $("relatedNextBtn");
     const disabled = pages <= 1;
@@ -421,9 +475,18 @@
     if (next) next.classList.toggle("opacity-40", disabled);
   }
 
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(null, args), ms);
+    };
+  }
+
   function wireRelatedNav() {
     const prev = $("relatedPrevBtn");
     const next = $("relatedNextBtn");
+
     prev?.addEventListener("click", () => {
       const total = relatedState.trips.length;
       const win = relatedState.windowSize;
@@ -441,7 +504,7 @@
       renderRelatedPage();
     });
 
-    // Recalculate window size on resize and re-render current page
+    // Recalc window size on resize
     const onResize = () => {
       const newWin = getRelatedWindowSize();
       if (newWin !== relatedState.windowSize) {
@@ -450,14 +513,6 @@
       }
     };
     window.addEventListener("resize", debounce(onResize, 120));
-  }
-
-  function debounce(fn, ms) {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(null, args), ms);
-    };
   }
 
   async function resolveCategoryIdFromTrip(trip) {
@@ -487,10 +542,15 @@
     if (!grid) return;
 
     // skeletons
-    grid.innerHTML =
-      typeof _skeletonCards === "function"
-        ? _skeletonCards(relatedState.windowSize)
-        : `<div class="col-span-full text-center text-gray-500 py-8">Loading related trips…</div>`;
+    grid.innerHTML = `
+      <div class="animate-pulse bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="w-full h-40 bg-gray-200"></div>
+        <div class="p-4 space-y-3">
+          <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+        </div>
+      </div>`.repeat(relatedState.windowSize);
 
     const categoryId = await resolveCategoryIdFromTrip(trip);
     if (!categoryId) {
@@ -530,10 +590,6 @@
 
     renderRelatedPage();
   }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    wireRelatedNav();
-  });
 
   // ---------------- Image modal ----------------
   let imageList = [];
@@ -632,6 +688,14 @@
     if (main) {
       main.src = imageList[0];
       main.addEventListener("click", () => openModalAt(currentIndex));
+      // main image fallback
+      main.addEventListener(
+        "error",
+        () => {
+          main.src = FALLBACK_DATA_IMG;
+        },
+        { once: true }
+      );
     }
 
     if (!gal) return;
@@ -646,6 +710,9 @@
         />`
       )
       .join("");
+
+    // attach fallbacks for thumbnails
+    attachImgFallbacks(gal);
 
     gal.querySelectorAll("img").forEach((thumb) => {
       thumb.addEventListener("click", () => {
@@ -677,6 +744,8 @@
     (t.images || []).forEach(
       (img) => img?.imageURL && galleryUrls.push(img.imageURL)
     );
+    // if API only gives mainImageURL (string), include it
+    if (t.mainImageURL && !galleryUrls.length) galleryUrls.push(t.mainImageURL);
     renderGallery(galleryUrls.length ? galleryUrls : [""]);
 
     $("tripDurationLabel") &&
@@ -763,7 +832,7 @@
 
   window.refreshTripDetailsLang = () => loadTrip({ noCache: true });
 
-  // ---------------- Booking modal ----------------
+  // ---------------- Booking Confirmation Modal ----------------
   const bModal = $("bookingModal");
   const bBackdrop = $("bookingBackdrop");
   const bClose = $("bookingCloseBtn");
@@ -912,7 +981,8 @@
 
   // ---------------- Init ----------------
   window.addEventListener("DOMContentLoaded", () => {
-    wireRelatedNav();
-    loadTrip();
+    ensureRelatedDOM(); // ensure IDs exist even if HTML lacked them
+    wireRelatedNav(); // wire Next/Prev
+    loadTrip(); // fetch trip + related
   });
 })();

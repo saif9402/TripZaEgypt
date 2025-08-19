@@ -23,6 +23,16 @@ function checkAllIncludesLoaded() {
   if (loadedCount === 2) afterIncludesLoaded(); // header + footer
 }
 
+// ------- Randomize helper (used by trending & category) -------
+function _shuffleInPlace(arr) {
+  // Fisher–Yates
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 // ------- Auth-aware header include (boot trending ASAP after header) -------
 function checkAuthAndIncludeHeader() {
   const token = localStorage.getItem("accessToken");
@@ -89,15 +99,7 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-function _shuffleInPlace(arr) {
-  // Fisher–Yates
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
+// --- Top Rated (Trending) Slider with Next/Prev buttons — randomized ---
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
   if (!root) return;
@@ -112,7 +114,7 @@ async function initTopRatedSlider(noCache = false) {
   const params = new URLSearchParams({
     IsTopRated: true,
     TranslationLanguageId: langId,
-    Sort: "rand", // ⬅️ ask the API for random
+    Sort: "rand", // ask the API for random
   });
   if (noCache) params.append("_ts", Date.now());
 
@@ -135,7 +137,7 @@ async function initTopRatedSlider(noCache = false) {
     return;
   }
 
-  // ✅ Force randomness even if backend ignores Sort=rand
+  // Force randomness even if backend ignores Sort=rand
   _shuffleInPlace(trips);
 
   const i18n =
@@ -444,7 +446,7 @@ async function initTopRatedSlider(noCache = false) {
 
   viewport.append(prevBtn, nextBtn);
 
-  // swipe + keyboard (unchanged)
+  // swipe + keyboard
   (function enableSwipe() {
     let startX = 0,
       startY = 0,
@@ -674,14 +676,43 @@ const _esc = (s) =>
       }[c])
   );
 
+// Inline fallback image (no DNS)
+const _FALLBACK_DATA_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'>
+       <rect width='100%' height='100%' fill='#e5e7eb'/>
+       <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+             font-size='22' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>
+         No Image
+       </text>
+     </svg>`
+  );
+
 const _safeImg = (u) =>
   !u
-    ? "https://via.placeholder.com/800x450"
-    : u.startsWith("http")
+    ? _FALLBACK_DATA_IMG
+    : /^data:/i.test(u)
     ? u
+    : /^https?:\/\//i.test(u)
+    ? u
+    : u.startsWith("//")
+    ? window.location.protocol + u
     : u.startsWith("/")
     ? u
     : `/${u}`;
+
+function _attachImgFallbacks(root = document) {
+  root.querySelectorAll("img").forEach((img) => {
+    img.addEventListener(
+      "error",
+      () => {
+        if (img.src !== _FALLBACK_DATA_IMG) img.src = _FALLBACK_DATA_IMG;
+      },
+      { once: true }
+    );
+  });
+}
 
 const _stars = (r) => {
   const v = Math.max(0, Math.min(5, Number(r) || 0));
@@ -793,13 +824,13 @@ function renderFeatured(trip) {
   const desc = document.getElementById("featuredDesc");
   const tags = document.getElementById("featuredTags");
 
-  if (!sec) return; // not on a page that has Featured
+  if (!sec) return;
 
   // --- background image ---
   const imgUrl = _esc(_safeImg(trip.mainImageURL));
   sec.style.backgroundImage = `url('${imgUrl}')`;
 
-  // --- details URL (works both on / and /pages/) ---
+  // --- robust details URL (works on / and on /pages/) ---
   const onPages = window.location.pathname.includes("/pages/");
   const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
   const detailsURL = new URL(baseHref, window.location.href);
@@ -808,7 +839,6 @@ function renderFeatured(trip) {
   if (link) {
     link.href = detailsURL.pathname + detailsURL.search;
     link.dataset.featuredId = String(trip.id ?? "");
-    // Ensure click always carries the id
     link.addEventListener(
       "click",
       (e) => {
@@ -821,14 +851,14 @@ function renderFeatured(trip) {
     );
   }
 
-  // Also make the whole section clickable
+  // Make the whole section clickable
   sec.style.cursor = "pointer";
   sec.addEventListener("click", (ev) => {
     const a =
       ev.target && ev.target.closest
         ? ev.target.closest("#featuredLink")
         : null;
-    if (a) return; // avoid double navigation
+    if (a) return;
     if (link && link.href) window.location.href = link.href;
   });
 
@@ -901,10 +931,8 @@ function startFeaturedRotator(trips, { intervalMs = 8000 } = {}) {
   const link = document.getElementById("featuredLink");
   if (!sec || !link || _featuredTrips.length <= 1) return; // nothing to rotate
 
-  // begin from the first (already rendered outside), go next on tick
   _featuredIndex = 0;
 
-  // pause on hover, resume on leave
   const pause = () => stopFeaturedRotator();
   const resume = () => {
     if (!_featuredTrips.length || _featuredTrips.length <= 1) return;
@@ -929,7 +957,7 @@ document.addEventListener("visibilitychange", () => {
     startFeaturedRotator(_featuredTrips, { intervalMs: _featuredIntervalMs });
 });
 
-// ------- Main: fetch trips for a category and render -------
+// ------- Main: fetch trips for a category and render (random + rotator) -------
 async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   const langCode = localStorage.getItem("lang") || "en";
   const langId = langCode === "deu" ? 1 : 2;
@@ -957,11 +985,10 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     let trips = json?.data?.data ?? [];
 
     // Force random order even if backend ignores Sort=rand
-    if (typeof _shuffleInPlace === "function") _shuffleInPlace(trips);
+    _shuffleInPlace(trips);
 
     if (!trips.length) {
       grid.innerHTML = _emptyState;
-      // also stop any existing rotator
       stopFeaturedRotator();
       return;
     }
@@ -970,14 +997,16 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     renderFeatured(trips[0]);
 
     // 🔁 Start rotating featured among the (randomized) list.
-    //    Limit to first N if you want shorter loop, e.g. 10:
     const rotateList = trips.slice(0, Math.min(trips.length, 10));
     stopFeaturedRotator();
     startFeaturedRotator(rotateList, { intervalMs: 8000 }); // 8s between swaps
 
-    // 2) Next up to 4 cards
+    // 2) Next up to 4 cards (randomized order)
     const cards = trips.slice(1, 5).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
+
+    // Ensure broken images show inline fallback
+    _attachImgFallbacks(grid);
   } catch (e) {
     console.error("Failed to load trips by category:", e);
     grid.innerHTML = `
@@ -1082,7 +1111,7 @@ function renderSidebarCategoriesList(categories) {
 
     // If your trips list exposes a reload function, call it; else reload page.
     if (window.reloadTripsPage) {
-      window.reloadTripsPage(1); // (optional) your loader can re-read categoryId from the URL
+      window.reloadTripsPage(1);
     } else {
       location.reload();
     }
