@@ -154,18 +154,20 @@
             </div>
           </div>
 
-          <section class="max-w-7xl mx-auto px-4 py-12">
+          <section id="relatedSection" class="max-w-7xl mx-auto px-4 py-12">
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl font-semibold">Related Tours In Today</h2>
               <div class="flex space-x-2">
                 <button
-                  title="button"
+                  id="relatedPrevBtn"
+                  title="Previous"
                   class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
                 >
                   <i class="fas fa-chevron-left"></i>
                 </button>
                 <button
-                  title="button"
+                  id="relatedNextBtn"
+                  title="Next"
                   class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
                 >
                   <i class="fas fa-chevron-right"></i>
@@ -174,40 +176,10 @@
             </div>
 
             <div
+              id="relatedGrid"
               class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
             >
-              <!-- Tour Card -->
-              <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <img
-                  src="https://source.unsplash.com/400x200/?alaska,road"
-                  alt="Tour"
-                  class="w-full h-40 object-cover"
-                />
-                <div class="p-4">
-                  <h3 class="text-sm font-semibold mb-2">
-                    Alaska: Westminster to Greenwich River Thames
-                  </h3>
-                  <ul class="text-xs text-gray-600 space-y-1 mb-3">
-                    <li><i class="fas fa-clock mr-1"></i> Duration 2 hours</li>
-                    <li>
-                      <i class="fas fa-shuttle-van mr-1"></i> Transport Facility
-                    </li>
-                    <li><i class="fas fa-users mr-1"></i> Family Plan</li>
-                  </ul>
-                  <div class="flex justify-between items-center text-sm">
-                    <div class="text-yellow-500">
-                      ★★★★☆ <span class="text-gray-500 ml-1">584 reviews</span>
-                    </div>
-                    <div class="text-green-600 font-semibold">
-                      $35.00
-                      <span class="text-gray-400 text-xs">per person</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Repeat the above .bg-white block 3 more times and change content accordingly -->
-              <!-- Tip: Put dynamic generation in JS or a template loop if needed -->
+              <!-- filled by JS -->
             </div>
           </section>
         </div>

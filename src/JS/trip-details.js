@@ -330,6 +330,171 @@
     }
   };
 
+  // ---------------- Related trips (same category, randomized) ----------------
+  const RELATED_PAGE_SIZE = 8; // up to 8 per page
+  let relatedState = { trips: [], page: 0 };
+
+  function relatedEmptyHTML(msg = "No related trips found.") {
+    return `<div class="col-span-full text-center text-gray-500 py-8">${esc(
+      msg
+    )}</div>`;
+  }
+
+  function renderRelatedPage() {
+    const grid = $("relatedGrid");
+    if (!grid) return;
+
+    const total = relatedState.trips.length;
+    if (!total) {
+      grid.innerHTML = relatedEmptyHTML();
+    } else {
+      const pages = Math.max(1, Math.ceil(total / RELATED_PAGE_SIZE));
+      const page = ((relatedState.page % pages) + pages) % pages;
+      relatedState.page = page;
+
+      const start = page * RELATED_PAGE_SIZE;
+      const slice = relatedState.trips.slice(start, start + RELATED_PAGE_SIZE);
+
+      // Prefer shared renderer from includes.js if present
+      if (typeof tripCardHTML === "function") {
+        grid.innerHTML = slice.map((t) => tripCardHTML(t)).join("");
+      } else {
+        // Minimal fallback
+        grid.innerHTML = slice
+          .map(
+            (t) => `
+          <a href="/pages/trip-details.html?id=${t.id ?? ""}"
+             class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+            <img class="w-full h-40 object-cover"
+                 src="${esc(safeImg(t.mainImageURL))}"
+                 alt="${esc(t.name || "Trip")}" />
+            <div class="p-4">
+              <h3 class="text-sm font-semibold mb-2">${esc(
+                t.name || "Trip"
+              )}</h3>
+              <ul class="text-xs text-gray-600 space-y-1 mb-3">
+                <li><i class="fas fa-clock mr-1"></i> ${esc(
+                  minsToLabel(t.duration)
+                )}</li>
+                <li><i class="fas fa-users mr-1"></i> ${
+                  Number(t.reviews) || 0
+                } reviews</li>
+              </ul>
+              <div class="flex justify-between items-center text-sm">
+                <div class="text-yellow-500">${esc(stars(t.rating))}</div>
+                <div class="text-green-600 font-semibold">
+                  ${t.price != null ? esc(formatPrice(t.price, "EUR")) : ""}
+                  <span class="text-gray-400 text-xs">per person</span>
+                </div>
+              </div>
+            </div>
+          </a>`
+          )
+          .join("");
+      }
+
+      const prev = $("relatedPrevBtn");
+      const next = $("relatedNextBtn");
+      if (prev) prev.disabled = pages <= 1;
+      if (next) next.disabled = pages <= 1;
+    }
+  }
+
+  function wireRelatedNav() {
+    const prev = $("relatedPrevBtn");
+    const next = $("relatedNextBtn");
+    prev?.addEventListener("click", () => {
+      if (relatedState.trips.length <= RELATED_PAGE_SIZE) return;
+      relatedState.page -= 1;
+      renderRelatedPage();
+    });
+    next?.addEventListener("click", () => {
+      if (relatedState.trips.length <= RELATED_PAGE_SIZE) return;
+      relatedState.page += 1;
+      renderRelatedPage();
+    });
+  }
+
+  async function resolveCategoryIdFromTrip(trip) {
+    // Prefer direct id if API provides it
+    if (trip?.categoryId) return trip.categoryId;
+    if (trip?.category?.id) return trip.category.id;
+
+    // Fallback: map category name -> id via categories endpoint
+    const langId = getLangId();
+    try {
+      const res = await fetch(`/api/Category/GetAllCategories/${langId}`);
+      const json = await res.json();
+      const cats = json?.data?.data || [];
+      const wanted = ((trip?.categoryName ?? trip?.category) || "")
+        .toString()
+        .trim()
+        .toLowerCase();
+      const match = cats.find(
+        (c) => (c?.name || "").toString().trim().toLowerCase() === wanted
+      );
+      return match?.id ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function loadRelatedTripsForTrip(trip, { noCache = false } = {}) {
+    const grid = $("relatedGrid");
+    if (!grid) return; // section not on page
+
+    // Skeletons while loading (reuse helper from includes.js if available)
+    if (typeof _skeletonCards === "function") {
+      grid.innerHTML = _skeletonCards(4);
+    } else {
+      grid.innerHTML = relatedEmptyHTML("Loading related trips…");
+    }
+
+    const categoryId = await resolveCategoryIdFromTrip(trip);
+    if (!categoryId) {
+      grid.innerHTML = relatedEmptyHTML("No category found for this trip.");
+      return;
+    }
+
+    const langId = getLangId();
+    const params = new URLSearchParams({
+      CategoryId: String(categoryId),
+      TranslationLanguageId: String(langId),
+      PageSize: "50",
+      PageNumber: "1",
+    });
+    // server accepts "Sort=rand" (single)
+    params.append("Sort", "rand");
+    if (noCache) params.append("_ts", Date.now());
+
+    let trips = [];
+    try {
+      const res = await fetch(`/api/Trip/GetAllTrips?${params.toString()}`, {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      trips = json?.data?.data ?? [];
+    } catch (e) {
+      console.error("Related trips load error:", e);
+      grid.innerHTML = relatedEmptyHTML("Couldn't load related trips.");
+      return;
+    }
+
+    // Exclude the current trip
+    const currentId = getTripIdFromUrl();
+    relatedState.trips = trips.filter(
+      (t) => String(t.id) !== String(currentId)
+    );
+    relatedState.page = 0;
+
+    renderRelatedPage();
+  }
+
+  // Ensure nav buttons are wired
+  document.addEventListener("DOMContentLoaded", () => {
+    wireRelatedNav();
+  });
+
   // ---------------- Image modal ----------------
   let imageList = [];
   let currentIndex = 0;
@@ -511,6 +676,9 @@
     setUnavailableUI(!!t.isAvailable);
 
     setupAvailability(t.tripDates || []);
+
+    // 🔗 Load related trips for this trip/category
+    loadRelatedTripsForTrip(t);
   };
 
   // ---------------- Load trip ----------------
@@ -547,6 +715,9 @@
       setUnavailableUI(false);
       renderGallery([""]);
       setupAvailability([]);
+      // also clear related section if present
+      const grid = $("relatedGrid");
+      if (grid) grid.innerHTML = relatedEmptyHTML("No related trips.");
     }
   }
 
