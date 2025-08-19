@@ -937,7 +937,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   if (!grid) return;
 
   // skeletons while loading
-  grid.innerHTML = _skeletonCards(4);
+  grid.innerHTML = _skeletonCards(3);
 
   const params = new URLSearchParams({
     CategoryId: categoryId,
