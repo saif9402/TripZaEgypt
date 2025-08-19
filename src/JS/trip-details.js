@@ -69,7 +69,7 @@
     }
   };
 
-  // ---------------- Toasts (Tailwind) ----------------
+  // ---------------- Toasts ----------------
   function ensureToastRoot() {
     let root = document.getElementById("toast-root");
     if (!root) {
@@ -106,14 +106,13 @@
       wrap.style.transform = "translateY(-6px)";
       setTimeout(() => wrap.remove(), 200);
     }, ms);
-    // click to dismiss
     wrap.addEventListener("click", () => {
       clearTimeout(timer);
       wrap.remove();
     });
   }
 
-  // ---------------- Auth helpers (GetToken -> accessToken) ----------------
+  // ---------------- Auth helpers ----------------
   const LOGIN_URL = "sign-in.html"; // change if different
 
   const parseMaybeTextJSON = async (res) => {
@@ -165,7 +164,6 @@
       await getFreshAccessToken();
       return true;
     } catch (e) {
-      // Soft message then redirect
       toast("info", "Sign in required", "Please sign in to continue.");
       redirectToLogin();
       return false;
@@ -207,7 +205,7 @@
     return payload;
   }
 
-  // ---------------- Availability (dates + times) ----------------
+  // ---------------- Availability ----------------
   const fmtDateKey = (d) => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -330,14 +328,33 @@
     }
   };
 
-  // ---------------- Related trips (same category, randomized) ----------------
-  const RELATED_PAGE_SIZE = 8; // up to 8 per page
-  let relatedState = { trips: [], page: 0 };
+  // ---------------- Related trips (2 on small, 3 on ≥md) ----------------
+  const relatedState = {
+    trips: [],
+    page: 0,
+    windowSize: getRelatedWindowSize(),
+  };
 
-  function relatedEmptyHTML(msg = "No related trips found.") {
-    return `<div class="col-span-full text-center text-gray-500 py-8">${esc(
-      msg
-    )}</div>`;
+  function getRelatedWindowSize() {
+    // Tailwind md breakpoint ~768px
+    return window.matchMedia("(min-width: 768px)").matches ? 3 : 2;
+  }
+
+  function clampPage(total, win) {
+    const pages = Math.max(1, Math.ceil(total / win));
+    if (relatedState.page >= pages) relatedState.page = pages - 1;
+    if (relatedState.page < 0) relatedState.page = 0;
+    return pages;
+  }
+
+  function applyGridColumns(grid, cols) {
+    // Force exactly 2/3 columns so items render on ONE row
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = `repeat(${Math.max(
+      cols,
+      1
+    )}, minmax(0, 1fr))`;
+    grid.style.gap = "1.5rem"; // matches gap-6
   }
 
   function renderRelatedPage() {
@@ -345,82 +362,108 @@
     if (!grid) return;
 
     const total = relatedState.trips.length;
+    const win = relatedState.windowSize || 2;
+    const pages = clampPage(total, win);
+
+    applyGridColumns(grid, Math.min(win, total || win));
+
     if (!total) {
-      grid.innerHTML = relatedEmptyHTML();
+      grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8">No related trips found.</div>`;
     } else {
-      const pages = Math.max(1, Math.ceil(total / RELATED_PAGE_SIZE));
-      const page = ((relatedState.page % pages) + pages) % pages;
-      relatedState.page = page;
+      const start = relatedState.page * win;
+      const slice = relatedState.trips.slice(start, start + win);
 
-      const start = page * RELATED_PAGE_SIZE;
-      const slice = relatedState.trips.slice(start, start + RELATED_PAGE_SIZE);
-
-      // Prefer shared renderer from includes.js if present
       if (typeof tripCardHTML === "function") {
         grid.innerHTML = slice.map((t) => tripCardHTML(t)).join("");
       } else {
-        // Minimal fallback
         grid.innerHTML = slice
           .map(
             (t) => `
-          <a href="/pages/trip-details.html?id=${t.id ?? ""}"
-             class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-            <img class="w-full h-40 object-cover"
-                 src="${esc(safeImg(t.mainImageURL))}"
-                 alt="${esc(t.name || "Trip")}" />
-            <div class="p-4">
-              <h3 class="text-sm font-semibold mb-2">${esc(
-                t.name || "Trip"
-              )}</h3>
-              <ul class="text-xs text-gray-600 space-y-1 mb-3">
-                <li><i class="fas fa-clock mr-1"></i> ${esc(
-                  minsToLabel(t.duration)
-                )}</li>
-                <li><i class="fas fa-users mr-1"></i> ${
-                  Number(t.reviews) || 0
-                } reviews</li>
-              </ul>
-              <div class="flex justify-between items-center text-sm">
-                <div class="text-yellow-500">${esc(stars(t.rating))}</div>
-                <div class="text-green-600 font-semibold">
-                  ${t.price != null ? esc(formatPrice(t.price, "EUR")) : ""}
-                  <span class="text-gray-400 text-xs">per person</span>
+            <a href="/pages/trip-details.html?id=${t.id ?? ""}"
+               class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+               data-animate="card">
+              <img class="w-full h-40 object-cover"
+                   src="${esc(safeImg(t.mainImageURL))}"
+                   alt="${esc(t.name || "Trip")}" />
+              <div class="p-4">
+                <h3 class="text-sm font-semibold mb-2">${esc(
+                  t.name || "Trip"
+                )}</h3>
+                <ul class="text-xs text-gray-600 space-y-1 mb-3">
+                  <li><i class="fas fa-clock mr-1"></i> ${esc(
+                    minsToLabel(t.duration)
+                  )}</li>
+                  <li><i class="fas fa-users mr-1"></i> ${
+                    Number(t.reviews) || 0
+                  } reviews</li>
+                </ul>
+                <div class="flex justify-between items-center text-sm">
+                  <div class="text-yellow-500">${esc(stars(t.rating))}</div>
+                  <div class="text-green-600 font-semibold">
+                    ${t.price != null ? esc(formatPrice(t.price, "EUR")) : ""}
+                    <span class="text-gray-400 text-xs">per person</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </a>`
+            </a>`
           )
           .join("");
       }
-
-      const prev = $("relatedPrevBtn");
-      const next = $("relatedNextBtn");
-      if (prev) prev.disabled = pages <= 1;
-      if (next) next.disabled = pages <= 1;
     }
+
+    // Enable/disable arrows based on pages
+    const prev = $("relatedPrevBtn");
+    const next = $("relatedNextBtn");
+    const disabled = pages <= 1;
+    if (prev) prev.disabled = disabled;
+    if (next) next.disabled = disabled;
+    if (prev) prev.classList.toggle("opacity-40", disabled);
+    if (next) next.classList.toggle("opacity-40", disabled);
   }
 
   function wireRelatedNav() {
     const prev = $("relatedPrevBtn");
     const next = $("relatedNextBtn");
     prev?.addEventListener("click", () => {
-      if (relatedState.trips.length <= RELATED_PAGE_SIZE) return;
-      relatedState.page -= 1;
+      const total = relatedState.trips.length;
+      const win = relatedState.windowSize;
+      const pages = Math.max(1, Math.ceil(total / win));
+      if (pages <= 1) return;
+      relatedState.page = (relatedState.page - 1 + pages) % pages;
       renderRelatedPage();
     });
     next?.addEventListener("click", () => {
-      if (relatedState.trips.length <= RELATED_PAGE_SIZE) return;
-      relatedState.page += 1;
+      const total = relatedState.trips.length;
+      const win = relatedState.windowSize;
+      const pages = Math.max(1, Math.ceil(total / win));
+      if (pages <= 1) return;
+      relatedState.page = (relatedState.page + 1) % pages;
       renderRelatedPage();
     });
+
+    // Recalculate window size on resize and re-render current page
+    const onResize = () => {
+      const newWin = getRelatedWindowSize();
+      if (newWin !== relatedState.windowSize) {
+        relatedState.windowSize = newWin;
+        renderRelatedPage();
+      }
+    };
+    window.addEventListener("resize", debounce(onResize, 120));
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(null, args), ms);
+    };
   }
 
   async function resolveCategoryIdFromTrip(trip) {
-    // Prefer direct id if API provides it
     if (trip?.categoryId) return trip.categoryId;
     if (trip?.category?.id) return trip.category.id;
 
-    // Fallback: map category name -> id via categories endpoint
     const langId = getLangId();
     try {
       const res = await fetch(`/api/Category/GetAllCategories/${langId}`);
@@ -441,18 +484,17 @@
 
   async function loadRelatedTripsForTrip(trip, { noCache = false } = {}) {
     const grid = $("relatedGrid");
-    if (!grid) return; // section not on page
+    if (!grid) return;
 
-    // Skeletons while loading (reuse helper from includes.js if available)
-    if (typeof _skeletonCards === "function") {
-      grid.innerHTML = _skeletonCards(4);
-    } else {
-      grid.innerHTML = relatedEmptyHTML("Loading related trips…");
-    }
+    // skeletons
+    grid.innerHTML =
+      typeof _skeletonCards === "function"
+        ? _skeletonCards(relatedState.windowSize)
+        : `<div class="col-span-full text-center text-gray-500 py-8">Loading related trips…</div>`;
 
     const categoryId = await resolveCategoryIdFromTrip(trip);
     if (!categoryId) {
-      grid.innerHTML = relatedEmptyHTML("No category found for this trip.");
+      grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8">No category found for this trip.</div>`;
       return;
     }
 
@@ -463,7 +505,6 @@
       PageSize: "50",
       PageNumber: "1",
     });
-    // server accepts "Sort=rand" (single)
     params.append("Sort", "rand");
     if (noCache) params.append("_ts", Date.now());
 
@@ -476,11 +517,11 @@
       trips = json?.data?.data ?? [];
     } catch (e) {
       console.error("Related trips load error:", e);
-      grid.innerHTML = relatedEmptyHTML("Couldn't load related trips.");
+      grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-8">Couldn't load related trips.</div>`;
       return;
     }
 
-    // Exclude the current trip
+    // Exclude current trip
     const currentId = getTripIdFromUrl();
     relatedState.trips = trips.filter(
       (t) => String(t.id) !== String(currentId)
@@ -490,7 +531,6 @@
     renderRelatedPage();
   }
 
-  // Ensure nav buttons are wired
   document.addEventListener("DOMContentLoaded", () => {
     wireRelatedNav();
   });
@@ -677,7 +717,7 @@
 
     setupAvailability(t.tripDates || []);
 
-    // 🔗 Load related trips for this trip/category
+    // Load related trips for this category
     loadRelatedTripsForTrip(t);
   };
 
@@ -715,15 +755,15 @@
       setUnavailableUI(false);
       renderGallery([""]);
       setupAvailability([]);
-      // also clear related section if present
       const grid = $("relatedGrid");
-      if (grid) grid.innerHTML = relatedEmptyHTML("No related trips.");
+      if (grid)
+        grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8">No related trips.</div>`;
     }
   }
 
   window.refreshTripDetailsLang = () => loadTrip({ noCache: true });
 
-  // ---------------- Booking Confirmation Modal ----------------
+  // ---------------- Booking modal ----------------
   const bModal = $("bookingModal");
   const bBackdrop = $("bookingBackdrop");
   const bClose = $("bookingCloseBtn");
@@ -757,7 +797,6 @@
   bClose?.addEventListener("click", closeBookingModal);
   bEdit?.addEventListener("click", closeBookingModal);
 
-  // ---------------- Booking button -> validate + check auth + open modal ----------------
   $("bookBtn")?.addEventListener("click", async () => {
     const dateVal =
       (datePickerInstance?.selectedDates?.[0] &&
@@ -778,7 +817,6 @@
       return;
     }
 
-    // Require login before opening the confirmation modal
     const logged = await ensureLoggedInOrRedirect();
     if (!logged) return;
 
@@ -817,7 +855,6 @@
     openBookingModal();
   });
 
-  // ---------------- Confirm -> call API (GetToken -> AddBooking) ----------------
   bConfirm?.addEventListener("click", async () => {
     if (!bConfirm) return;
 
@@ -855,8 +892,6 @@
           payload.date
         } ${timeTxt}\nTotal: ${formatPrice(payload.total, "EUR")}`
       );
-      // Optional redirect:
-      // window.location.href = `/pages/booking-success.html`;
     } catch (e) {
       console.error("Booking error:", e);
       if (e?.status === 401 || e?.status === 403 || e?.code === "AUTH") {
@@ -876,5 +911,8 @@
   });
 
   // ---------------- Init ----------------
-  window.addEventListener("DOMContentLoaded", () => loadTrip());
+  window.addEventListener("DOMContentLoaded", () => {
+    wireRelatedNav();
+    loadTrip();
+  });
 })();
