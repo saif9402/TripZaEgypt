@@ -154,6 +154,193 @@
             </div>
           </div>
 
+          <!-- ===================== REVIEWS ===================== -->
+          <section id="reviewsSection" class="max-w-7xl mx-auto px-4 py-12">
+            <div class="flex items-center justify-between gap-4 mb-6">
+              <h2 class="text-2xl font-bold">Reviews</h2>
+              <div class="flex items-center gap-3 text-sm">
+                <span id="reviewsAverageText" class="font-semibold text-lg"
+                  >—</span
+                >
+                <span id="reviewsHeaderStars" class="text-yellow-400"></span>
+                <span id="reviewsCountHeader" class="text-gray-500"
+                  >0 reviews</span
+                >
+                <a
+                  href="#writeReviewCard"
+                  class="ml-2 text-green-700 hover:text-green-900 font-medium"
+                  >Write a review</a
+                >
+              </div>
+            </div>
+
+            <!-- Summary + Breakdown -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <!-- Summary Card -->
+              <div class="bg-white rounded-xl shadow p-6">
+                <div class="flex items-center gap-4">
+                  <div>
+                    <div id="avgRating" class="text-4xl font-extrabold">—</div>
+                    <div
+                      id="avgStars"
+                      class="text-yellow-400 text-xl mt-1"
+                    ></div>
+                    <div id="reviewsCount" class="text-gray-500 text-sm mt-1">
+                      0 reviews
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <!-- Rating bars -->
+                    <div class="space-y-2">
+                      <!-- Repeat rows 5..1 -->
+                      <template id="ratingRowTemplate">
+                        <div class="flex items-center gap-3">
+                          <span class="w-10 text-sm text-gray-600 font-medium"
+                            ><span class="starLabel"></span>★</span
+                          >
+                          <div class="flex-1 h-2 bg-gray-100 rounded">
+                            <div
+                              class="bar h-2 bg-yellow-400 rounded"
+                              style="width: 0%"
+                            ></div>
+                          </div>
+                          <span class="w-8 text-sm text-gray-500 count">0</span>
+                        </div>
+                      </template>
+                      <div id="breakdownRows" class="space-y-2"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Write Review -->
+              <div
+                id="writeReviewCard"
+                class="lg:col-span-2 bg-white rounded-xl shadow p-6"
+              >
+                <h3 class="text-lg font-semibold mb-4">Write a review</h3>
+
+                <form
+                  id="writeReviewForm"
+                  class="space-y-4"
+                  x-data="{ rating: 0, hover: 0 }"
+                >
+                  <!-- Star rating -->
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Your rating</label
+                    >
+                    <div class="flex items-center gap-1">
+                      <template x-for="i in 5">
+                        <button
+                          type="button"
+                          class="p-1"
+                          @mouseenter="hover = i"
+                          @mouseleave="hover = 0"
+                          @click="rating = i; $refs.rvRating.value = i"
+                          :aria-label="'Rate '+i+' stars'"
+                        >
+                          <i
+                            class="fa-star text-xl"
+                            :class="(hover ? i <= hover : i <= rating) ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'"
+                          ></i>
+                        </button>
+                      </template>
+                    </div>
+                    <input
+                      type="hidden"
+                      x-ref="rvRating"
+                      id="rvRating"
+                      value="0"
+                    />
+                  </div>
+
+                  <!-- Name (optional) -->
+                  <div>
+                    <label for="rvName" class="block text-sm font-medium mb-1"
+                      >Your name (optional)</label
+                    >
+                    <input
+                      id="rvName"
+                      type="text"
+                      class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+                      placeholder="eg. Ahmed S."
+                    />
+                  </div>
+
+                  <!-- Comment -->
+                  <div>
+                    <label
+                      for="rvComment"
+                      class="block text-sm font-medium mb-1"
+                      >Comment</label
+                    >
+                    <textarea
+                      id="rvComment"
+                      rows="4"
+                      class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+                      placeholder="Share details of your experience..."
+                      required
+                    ></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                      Minimum 10 characters.
+                    </p>
+                  </div>
+
+                  <!-- Submit -->
+                  <div class="flex items-center gap-3">
+                    <button
+                      type="submit"
+                      class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded"
+                    >
+                      Submit review
+                    </button>
+                    <span id="rvToast" class="text-sm text-green-600 hidden"
+                      >Thanks! Your review was added.</span
+                    >
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+              <select
+                id="reviewsFilter"
+                class="border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+              >
+                <option value="all">All ratings</option>
+                <option value="5">5 stars</option>
+                <option value="4">4 stars</option>
+                <option value="3">3 stars</option>
+                <option value="2">2 stars</option>
+                <option value="1">1 star</option>
+              </select>
+              <select
+                id="reviewsSort"
+                class="border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+              >
+                <option value="newest">Newest</option>
+                <option value="highest">Highest rating</option>
+                <option value="lowest">Lowest rating</option>
+              </select>
+            </div>
+
+            <!-- Reviews list -->
+            <div id="reviewsList" class="space-y-4"></div>
+
+            <!-- Load more -->
+            <div class="mt-6 text-center">
+              <button
+                id="reviewsLoadMore"
+                class="hidden border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded"
+              >
+                Load more
+              </button>
+            </div>
+          </section>
+          <!-- =================== /REVIEWS =================== -->
+
           <section id="relatedSection" class="max-w-7xl mx-auto px-4 py-12">
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-xl font-semibold">Related Tours In Today</h2>
