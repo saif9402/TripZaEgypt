@@ -89,6 +89,15 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 });
 
+function _shuffleInPlace(arr) {
+  // Fisher–Yates
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 async function initTopRatedSlider(noCache = false) {
   const root = document.getElementById("trending-root");
   if (!root) return;
@@ -772,6 +781,102 @@ function tripCardHTML(t) {
       </div>
     </div>
   </a>`;
+}
+
+// Update the Featured Destination section with one trip
+function renderFeatured(trip) {
+  if (!trip) return;
+
+  const sec = document.getElementById("featuredSection");
+  const link = document.getElementById("featuredLink");
+  const title = document.getElementById("featuredTitle");
+  const desc = document.getElementById("featuredDesc");
+  const tags = document.getElementById("featuredTags");
+
+  if (!sec) return; // not on a page that has Featured
+
+  // --- background image ---
+  const imgUrl = _esc(_safeImg(trip.mainImageURL));
+  sec.style.backgroundImage = `url('${imgUrl}')`;
+
+  // --- details URL (works both on / and /pages/) ---
+  const onPages = window.location.pathname.includes("/pages/");
+  const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
+  const detailsURL = new URL(baseHref, window.location.href);
+  detailsURL.searchParams.set("id", String(trip.id ?? ""));
+
+  if (link) {
+    link.href = detailsURL.pathname + detailsURL.search;
+    link.dataset.featuredId = String(trip.id ?? "");
+    // Ensure click always carries the id
+    link.addEventListener(
+      "click",
+      (e) => {
+        if (!link.href.includes("id=")) {
+          e.preventDefault();
+          window.location.href = detailsURL.pathname + detailsURL.search;
+        }
+      },
+      { once: true }
+    );
+  }
+
+  // Also make the whole section clickable
+  sec.style.cursor = "pointer";
+  sec.addEventListener("click", (ev) => {
+    const a =
+      ev.target && ev.target.closest
+        ? ev.target.closest("#featuredLink")
+        : null;
+    if (a) return; // avoid double navigation
+    if (link && link.href) window.location.href = link.href;
+  });
+
+  // --- text bits ---
+  if (title) title.textContent = trip.name || "Featured Trip";
+  if (desc) {
+    desc.textContent =
+      _activitiesPreview(trip.activities, 200) ||
+      "Explore this experience in Hurghada.";
+  }
+
+  // --- pills/tags ---
+  if (tags) {
+    const pills = [];
+    if (trip.category)
+      pills.push({
+        c: "bg-blue-100 text-blue-600",
+        icon: "fa-map-marker-alt",
+        label: trip.category,
+      });
+    if (trip.isBestSeller)
+      pills.push({
+        c: "bg-yellow-100 text-yellow-700",
+        icon: "fa-bolt",
+        label: "Best Seller",
+      });
+    pills.push({
+      c: "bg-green-100 text-green-700",
+      icon: "fa-clock",
+      label: _minsToLabel(trip.duration),
+    });
+    pills.push({
+      c: "bg-purple-100 text-purple-600",
+      icon: "fa-star",
+      label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
+    });
+
+    tags.innerHTML = pills
+      .map(
+        (p) => `
+        <span class="${
+          p.c
+        } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+          <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
+        </span>`
+      )
+      .join("");
+  }
 }
 
 // --- Featured rotator ---
