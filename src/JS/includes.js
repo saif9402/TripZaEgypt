@@ -32,6 +32,35 @@ function _shuffleInPlace(arr) {
   }
   return arr;
 }
+// --- Global logout (works for desktop & mobile header) ---
+if (!window.logout) {
+  window.logout = async function logout({ redirect = "/index.html" } = {}) {
+    try {
+      // Call server to invalidate refresh token / session cookie
+      await fetch("/api/Auth/LogOut", {
+        method: "POST",
+        credentials: "include", // send cookies!
+        // Don't force Content-Type; many backends expect an empty body here
+        headers: {
+          Accept: "application/json, text/plain, */*",
+        },
+      }).catch((e) => {
+        // Network issues shouldn't block client-side cleanup
+        console.error("Logout request failed:", e);
+      });
+    } finally {
+      // Always clear client state so header re-renders as logged-out
+      try {
+        localStorage.removeItem("accessToken");
+      } catch {}
+      window.currentUser = undefined;
+
+      // Redirect to a neutral page (or just reload if you prefer)
+      if (redirect) window.location.href = redirect;
+      else window.location.reload();
+    }
+  };
+}
 
 // ------- Auth-aware header include (boot trending ASAP after header) -------
 function checkAuthAndIncludeHeader() {
