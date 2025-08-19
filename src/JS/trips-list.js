@@ -128,11 +128,11 @@
     try {
       return new Intl.NumberFormat(locale, {
         style: "currency",
-        currency: "EURO",
+        currency: "EUR",
         maximumFractionDigits: 0,
       }).format(value);
     } catch {
-      return `${value} EURO`;
+      return `${value} EUR`;
     }
   };
 
