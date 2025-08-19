@@ -963,7 +963,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     renderFeatured(trips[0]);
 
     // 2) Next up to 4 cards
-    const cards = trips.slice(1, 5).map(tripCardHTML).join("");
+    const cards = trips.slice(1, 4).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
   } catch (e) {
     console.error("Failed to load trips by category:", e);
