@@ -211,17 +211,18 @@
           </div>
         </div>
 
-        <!-- Google Sign-up -->
+        <!-- Google Sign-In -->
         <a
-          href="/api/ExternalAuth/google-redirect-login"
-          class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-sm hover:bg-gray-50 transition no-underline"
+          id="googleBtn"
+          href="#"
+          class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-sm hover:bg-gray-50 transition no-underline mb-2"
         >
           <img
             src="https://www.google.com/favicon.ico"
             alt="Google logo"
             class="w-5 h-5"
           />
-          <span class="text-black">Sign up with Google</span>
+          <span class="text-black font-medium">Sign Up with Google</span>
         </a>
 
         <p class="text-center text-xs text-gray-400 mt-4">
@@ -233,10 +234,114 @@
       </div>
     </div>
 
-    <!-- ✅ JS to Submit FormData and Show Toasts Based on Status -->
+    <!-- Complete Profile Modal (shown after Google login) -->
+    <div
+      id="completeProfileModal"
+      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+        <h3 class="text-lg font-semibold">Complete your profile</h3>
+        <p class="text-sm text-gray-600 mb-4">
+          We need your phone number and country to finish setting up your
+          account.
+        </p>
+
+        <form id="completeProfileForm" class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-600">Full name</label>
+            <input
+              id="cp_name"
+              type="text"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600">Email</label>
+            <input
+              id="cp_email"
+              type="email"
+              disabled
+              class="w-full px-3 py-2 border rounded-lg bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600">Country</label>
+            <select
+              id="cp_country"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+            >
+              <option value="">Select Country</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600">Phone number</label>
+            <input
+              id="cp_phone"
+              type="tel"
+              placeholder="+201234567890"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              id="cp_logout"
+              class="px-4 py-2 rounded-lg border hover:bg-gray-100"
+            >
+              Use another account
+            </button>
+            <button
+              type="submit"
+              id="cp_save"
+              class="px-5 py-2 rounded-lg bg-yellow-400 text-black font-semibold hover:bg-yellow-500"
+            >
+              Save & Continue
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
-      const countrySelect = document.getElementById("country");
-      const countries = [
+      // --- Build Google link with a return URL back to THIS page
+      (function wireGoogleBtn() {
+        const btn = document.getElementById("googleBtn");
+        if (!btn) return;
+        const base =
+          "https://tourguidehurghda.runasp.net/api/ExternalAuth/google-redirect-login";
+        // If your backend uses a different query key than returnUrl, change it here.
+        const returnUrl = `${location.origin}${location.pathname}`;
+        const sep = base.includes("?") ? "&" : "?";
+        btn.href = `${base}${sep}returnUrl=${encodeURIComponent(returnUrl)}`;
+      })();
+
+      // --- Small helper to show toasts (uses your existing showToast if present)
+      function toast(msg, type = "success") {
+        if (typeof showToast === "function") return showToast(msg, type);
+        alert(msg);
+      }
+
+      // --- Decode JWT to pull name/email if backend doesn't send them as query params
+      function decodeJwt(token) {
+        try {
+          const [, payload] = token.split(".");
+          const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+          try {
+            return JSON.parse(decodeURIComponent(escape(json)));
+          } catch {
+            return JSON.parse(json);
+          }
+        } catch {
+          return {};
+        }
+      }
+
+      // --- Countries (reuse the same list you used on sign-up)
+      const COUNTRIES = [
         "Afghanistan",
         "Albania",
         "Algeria",
@@ -309,139 +414,124 @@
         "Yemen",
         "Zimbabwe",
       ];
+      (function fillCountries() {
+        const sel = document.getElementById("cp_country");
+        if (!sel) return;
+        COUNTRIES.forEach((c) => {
+          const o = document.createElement("option");
+          o.value = c;
+          o.textContent = c;
+          sel.appendChild(o);
+        });
+      })();
 
-      countries.forEach((country) => {
-        const option = document.createElement("option");
-        option.value = country;
-        option.textContent = country;
-        countrySelect.appendChild(option);
-      });
-      new TomSelect("#country", {
-        create: false,
-        sortField: "text",
-        placeholder: "Select a country...",
-      });
-
-      function showToast(message, type = "success") {
-        const toastContainer = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = `
-          max-w-sm w-full px-4 py-3 rounded-lg shadow-lg text-white animate-fade-in-up transition
-          ${type === "success" ? "bg-green-600" : "bg-red-600"}
-        `;
-        toast.textContent = message;
-        toastContainer.appendChild(toast);
-        setTimeout(() => {
-          toast.classList.add("opacity-0", "translate-y-2");
-          toast.addEventListener("transitionend", () => toast.remove());
-        }, 5000);
+      // --- Modal helpers
+      const modal = document.getElementById("completeProfileModal");
+      function openModal() {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+      function closeModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
 
+      // --- Update endpoint (query params + Bearer)
+      async function updateProfile(fullName, phone, country) {
+        const token = localStorage.getItem("accessToken");
+        const qs = new URLSearchParams({
+          FullName: fullName,
+          PhoneNumber: phone,
+          Country: country,
+        }).toString();
+        const url = `/api/Auth/Update?${qs}`;
+        const common = { headers: { Authorization: `Bearer ${token}` } };
+        let res = await fetch(url, { method: "POST", ...common });
+
+        return res;
+      }
+
+      // --- After Google redirects back here, capture token + force profile completion
+      function handleGoogleCallback() {
+        const sp = new URLSearchParams(location.search);
+        const token = sp.get("accessToken") || sp.get("token") || sp.get("jwt");
+        const qName = sp.get("fullName") || sp.get("name");
+        const qEmail = sp.get("email") || sp.get("mail");
+
+        if (!token) return; // Normal (non-Google) visit
+
+        // Store token and clean URL
+        localStorage.setItem("accessToken", token);
+        history.replaceState({}, document.title, location.pathname);
+
+        // Prefill name/email
+        const claims = decodeJwt(token);
+        document.getElementById("cp_name").value =
+          qName || claims.fullName || claims.name || "";
+        document.getElementById("cp_email").value =
+          qEmail || claims.email || claims.unique_name || "";
+
+        // Block the flow until user completes
+        openModal();
+      }
+
+      // --- Modal actions
+      document.getElementById("cp_logout")?.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        // Back to sign-in cleanly
+        window.location.href = "sign-in.html";
+      });
+
       document
-        .getElementById("registerForm")
-        .addEventListener("submit", async function (e) {
+        .getElementById("completeProfileForm")
+        ?.addEventListener("submit", async (e) => {
           e.preventDefault();
+          const fullName = document.getElementById("cp_name").value.trim();
+          const phone = document.getElementById("cp_phone").value.trim();
+          const country = document.getElementById("cp_country").value.trim();
 
-          const form = e.target;
-          const password = form.Password.value;
-          const confirmPassword =
-            document.getElementById("confirm-password").value;
-
-          if (password !== confirmPassword) {
-            showToast("Passwords do not match!", "error");
+          if (!fullName || !phone || !country) {
+            toast("Please fill in all fields.", "error");
+            return;
+          }
+          if (!/^[\d+\-\s()]{6,}$/.test(phone)) {
+            toast("Please enter a valid phone number.", "error");
             return;
           }
 
-          const formData = new FormData();
-          formData.append("Email", form.Email.value);
-          formData.append("FullName", form.FullName.value);
-          formData.append("Country", form.Country.value);
-          formData.append("Password", form.Password.value);
-          formData.append("PhoneNumber", form.PhoneNumber.value);
+          const btn = document.getElementById("cp_save");
+          const old = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = "Saving…";
 
           try {
-            const response = await fetch("/api/Auth/Register", {
-              method: "POST",
-              body: formData,
-            });
-
-            const result = await response.json();
-            const toastType = result.succeeded ? "success" : "error";
-            console.log(result);
-
-            const message =
-              result.errors?.join(", ") ||
-              result.message ||
-              (toastType === "success"
-                ? "Registration successful!"
-                : "Registration failed.");
-
-            showToast(message, toastType);
-
-            if (result.succeeded) {
-              form.reset();
-              window.location.href = "check-email.html";
+            const res = await updateProfile(fullName, phone, country);
+            if (!res.ok) {
+              let msg = res.statusText;
+              try {
+                const j = await res.json();
+                msg =
+                  j.message ||
+                  (Array.isArray(j.errors) ? j.errors.join(", ") : j.errors) ||
+                  msg;
+              } catch {}
+              throw new Error(msg || "Update failed");
             }
+
+            // Done — continue to profile (or wherever you want)
+            toast("Profile completed!", "success");
+            window.location.href = "profile.html";
           } catch (err) {
             console.error(err);
-            showToast("Network error. Please try again.", "error");
+            toast(err.message || "Could not save profile.", "error");
+          } finally {
+            btn.disabled = false;
+            btn.textContent = old;
           }
         });
-      function togglePassword(inputId, button) {
-        const input = document.getElementById(inputId);
-        const icon = button.querySelector("i");
 
-        const isVisible = input.type === "text";
-        input.type = isVisible ? "password" : "text";
-
-        icon.classList.toggle("fa-eye");
-        icon.classList.toggle("fa-eye-slash");
-      }
-
-      // Wizard Navigation
-      const steps = document.querySelectorAll(".step");
-      let currentStep = 0;
-
-      function showStep(index) {
-        steps.forEach((step, i) => {
-          if (i === index) {
-            step.classList.remove("step-hidden");
-            step.classList.add("step-active");
-          } else {
-            step.classList.remove("step-active");
-            step.classList.add("step-hidden");
-          }
-        });
-      }
-
-      document.querySelectorAll(".next-step").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const current = steps[currentStep];
-          const inputs = current.querySelectorAll("input, select");
-          let valid = true;
-
-          inputs.forEach((input) => {
-            if (!input.checkValidity()) {
-              input.reportValidity();
-              valid = false;
-            }
-          });
-
-          if (valid) {
-            currentStep++;
-            showStep(currentStep);
-          }
-        });
-      });
-
-      document.querySelectorAll(".prev-step").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          currentStep--;
-          showStep(currentStep);
-        });
-      });
-
-      showStep(currentStep);
+      // Kick off handler on page load
+      document.addEventListener("DOMContentLoaded", handleGoogleCallback);
     </script>
 
     <!-- Optional Scripts -->
