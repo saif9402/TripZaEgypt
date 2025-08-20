@@ -819,11 +819,11 @@ function _ensureFeaturedAnimStyles() {
   #featuredSection{position:relative; overflow:hidden;}
   #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
   #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
-    filter:brightness(0.82); opacity:0; transform:scale(1.04);
+    filter:brightness(1.06); opacity:0; transform:scale(1.04);
     transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
   #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
   #featuredSection .featured-gradient{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 60%, rgba(0,0,0,.65) 100%);
+    background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.20) 60%, rgba(0,0,0,.30) 100%);
     pointer-events:none; z-index:1;}
   #featuredSection .featured-content{position:relative; z-index:2;}
 
