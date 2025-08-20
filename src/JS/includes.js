@@ -233,6 +233,128 @@ async function initTopRatedSlider(noCache = false) {
         }[c])
     );
 
+  // --- Featured animation helpers (background crossfade + text slide)
+  const _featuredAnim = {
+    first: true,
+    stack: null,
+    a: null,
+    b: null,
+    active: "a",
+  };
+
+  function _ensureFeaturedAnimStyles() {
+    if (document.getElementById("featured-anim-styles")) return;
+    const css = `
+  #featuredSection{position:relative; overflow:hidden;}
+  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
+  #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
+    filter:brightness(0.82); opacity:0; transform:scale(1.04);
+    transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
+  #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
+  #featuredSection .featured-gradient{position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 60%, rgba(0,0,0,.65) 100%);
+    pointer-events:none; z-index:1;}
+  #featuredSection .featured-content{position:relative; z-index:2;}
+
+  ._fade-swap{transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
+                          transform 420ms cubic-bezier(.22,.61,.36,1);
+              will-change:opacity,transform;}
+  ._fade-swap._out{opacity:0; transform:translateY(-6px);}
+  ._fade-swap._in{opacity:1; transform:translateY(0);}
+  `;
+    const style = document.createElement("style");
+    style.id = "featured-anim-styles";
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  function _ensureFeaturedLayers() {
+    _ensureFeaturedAnimStyles();
+    const sec = document.getElementById("featuredSection");
+    if (!sec) return null;
+
+    if (!_featuredAnim.stack) {
+      const stack = document.createElement("div");
+      stack.className = "featured-bg-stack";
+      const a = document.createElement("div");
+      const b = document.createElement("div");
+      a.className = "featured-bg-layer";
+      b.className = "featured-bg-layer";
+
+      const grad = document.createElement("div");
+      grad.className = "featured-gradient";
+
+      stack.append(a, b, grad);
+      sec.prepend(stack);
+
+      // Mark the rest of the section as "content" so it sits above backgrounds
+      sec
+        .querySelectorAll(":scope > *:not(.featured-bg-stack)")
+        .forEach((el) => {
+          if (!el.classList.contains("featured-content"))
+            el.classList.add("featured-content");
+        });
+
+      _featuredAnim.stack = stack;
+      _featuredAnim.a = a;
+      _featuredAnim.b = b;
+      _featuredAnim.active = "a";
+      _featuredAnim.first = true;
+    }
+    return sec;
+  }
+
+  function _swapFeaturedBackground(imgUrl) {
+    _ensureFeaturedLayers();
+    const { a, b } = _featuredAnim;
+    const showNext = _featuredAnim.active === "a" ? b : a;
+    const hideCur = _featuredAnim.active === "a" ? a : b;
+
+    showNext.style.backgroundImage = `url('${imgUrl}')`;
+
+    // Start state for the next layer
+    showNext.classList.remove("is-active");
+    void showNext.offsetWidth; // reflow
+
+    // Animate: fade old out, fade new in (with slight zoom settle)
+    hideCur.classList.remove("is-active");
+    showNext.classList.add("is-active");
+
+    _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
+  }
+
+  function _swapText(el, newHTML, { asHTML = false } = {}) {
+    if (!el) return;
+
+    // First run: paint immediately, then mark as "in"
+    if (_featuredAnim.first) {
+      if (asHTML) el.innerHTML = newHTML;
+      else el.textContent = newHTML;
+      el.classList.add("_fade-swap", "_in");
+      return;
+    }
+
+    el.classList.add("_fade-swap", "_out");
+    const doSwap = () => {
+      el.removeEventListener("transitionend", doSwap);
+      if (asHTML) el.innerHTML = newHTML;
+      else el.textContent = newHTML;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.classList.remove("_out");
+          el.classList.add("_in");
+        });
+      });
+    };
+
+    el.addEventListener("transitionend", doSwap, { once: true });
+    // Fallback in case transitionend doesn't fire
+    setTimeout(() => {
+      if (el.classList.contains("_out")) doSwap();
+    }, 180);
+  }
+
   const activitiesToDescription = (arr, maxChars = 260) => {
     const cleaned = (arr || [])
       .map((t) => t.replace(/^[•\-\s]+/, "").trim())
@@ -843,7 +965,7 @@ function tripCardHTML(t) {
   </a>`;
 }
 
-// Update the Featured Destination section with one trip
+// Update the Featured Destination section with animations
 function renderFeatured(trip) {
   if (!trip) return;
 
@@ -852,12 +974,19 @@ function renderFeatured(trip) {
   const title = document.getElementById("featuredTitle");
   const desc = document.getElementById("featuredDesc");
   const tags = document.getElementById("featuredTags");
-
   if (!sec) return;
 
-  // --- background image ---
+  // --- background (animated crossfade + subtle zoom) ---
   const imgUrl = _esc(_safeImg(trip.mainImageURL));
-  sec.style.backgroundImage = `url('${imgUrl}')`;
+  _ensureFeaturedLayers();
+  if (_featuredAnim.first) {
+    // Prime both layers on first render = no flash
+    _featuredAnim.a.style.backgroundImage = `url('${imgUrl}')`;
+    _featuredAnim.a.classList.add("is-active");
+    _featuredAnim.b.style.backgroundImage = `url('${imgUrl}')`;
+  } else {
+    _swapFeaturedBackground(imgUrl);
+  }
 
   // --- robust details URL (works on / and on /pages/) ---
   const onPages = window.location.pathname.includes("/pages/");
@@ -882,24 +1011,20 @@ function renderFeatured(trip) {
 
   // Make the whole section clickable
   sec.style.cursor = "pointer";
-  sec.addEventListener("click", (ev) => {
-    const a =
-      ev.target && ev.target.closest
-        ? ev.target.closest("#featuredLink")
-        : null;
+  sec.onclick = (ev) => {
+    const a = ev.target?.closest?.("#featuredLink");
     if (a) return;
-    if (link && link.href) window.location.href = link.href;
-  });
+    if (link?.href) window.location.href = link.href;
+  };
 
-  // --- text bits ---
-  if (title) title.textContent = trip.name || "Featured Trip";
-  if (desc) {
-    desc.textContent =
-      _activitiesPreview(trip.activities, 200) ||
-      "Explore this experience in Hurghada.";
-  }
+  // --- text bits (animated swaps) ---
+  _swapText(title, trip.name || "Featured Trip");
 
-  // --- pills/tags ---
+  const descText =
+    _activitiesPreview(trip.activities, 200) ||
+    "Explore this experience in Hurghada.";
+  _swapText(desc, descText);
+
   if (tags) {
     const pills = [];
     if (trip.category)
@@ -925,7 +1050,7 @@ function renderFeatured(trip) {
       label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
     });
 
-    tags.innerHTML = pills
+    const html = pills
       .map(
         (p) => `
         <span class="${
@@ -935,7 +1060,10 @@ function renderFeatured(trip) {
         </span>`
       )
       .join("");
+    _swapText(tags, html, { asHTML: true });
   }
+
+  _featuredAnim.first = false;
 }
 
 // --- Featured rotator ---
@@ -968,12 +1096,17 @@ function startFeaturedRotator(trips, { intervalMs = 8000 } = {}) {
     if (_featuredTimer) return;
     _featuredTimer = setInterval(tick, _featuredIntervalMs);
   };
-  sec.addEventListener("mouseenter", pause);
-  sec.addEventListener("mouseleave", resume);
+
+  // Bind hover only once per page load
+  if (!sec.__featuredHoverBound) {
+    sec.addEventListener("mouseenter", pause);
+    sec.addEventListener("mouseleave", resume);
+    sec.__featuredHoverBound = true;
+  }
 
   function tick() {
     _featuredIndex = (_featuredIndex + 1) % _featuredTrips.length;
-    renderFeatured(_featuredTrips[_featuredIndex]);
+    renderFeatured(_featuredTrips[_featuredIndex]); // animated swap
   }
 
   _featuredTimer = setInterval(tick, intervalMs);
