@@ -233,128 +233,6 @@ async function initTopRatedSlider(noCache = false) {
         }[c])
     );
 
-  // --- Featured animation helpers (background crossfade + text slide)
-  const _featuredAnim = {
-    first: true,
-    stack: null,
-    a: null,
-    b: null,
-    active: "a",
-  };
-
-  function _ensureFeaturedAnimStyles() {
-    if (document.getElementById("featured-anim-styles")) return;
-    const css = `
-  #featuredSection{position:relative; overflow:hidden;}
-  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
-  #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
-    filter:brightness(0.82); opacity:0; transform:scale(1.04);
-    transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
-  #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
-  #featuredSection .featured-gradient{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 60%, rgba(0,0,0,.65) 100%);
-    pointer-events:none; z-index:1;}
-  #featuredSection .featured-content{position:relative; z-index:2;}
-
-  ._fade-swap{transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
-                          transform 420ms cubic-bezier(.22,.61,.36,1);
-              will-change:opacity,transform;}
-  ._fade-swap._out{opacity:0; transform:translateY(-6px);}
-  ._fade-swap._in{opacity:1; transform:translateY(0);}
-  `;
-    const style = document.createElement("style");
-    style.id = "featured-anim-styles";
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
-
-  function _ensureFeaturedLayers() {
-    _ensureFeaturedAnimStyles();
-    const sec = document.getElementById("featuredSection");
-    if (!sec) return null;
-
-    if (!_featuredAnim.stack) {
-      const stack = document.createElement("div");
-      stack.className = "featured-bg-stack";
-      const a = document.createElement("div");
-      const b = document.createElement("div");
-      a.className = "featured-bg-layer";
-      b.className = "featured-bg-layer";
-
-      const grad = document.createElement("div");
-      grad.className = "featured-gradient";
-
-      stack.append(a, b, grad);
-      sec.prepend(stack);
-
-      // Mark the rest of the section as "content" so it sits above backgrounds
-      sec
-        .querySelectorAll(":scope > *:not(.featured-bg-stack)")
-        .forEach((el) => {
-          if (!el.classList.contains("featured-content"))
-            el.classList.add("featured-content");
-        });
-
-      _featuredAnim.stack = stack;
-      _featuredAnim.a = a;
-      _featuredAnim.b = b;
-      _featuredAnim.active = "a";
-      _featuredAnim.first = true;
-    }
-    return sec;
-  }
-
-  function _swapFeaturedBackground(imgUrl) {
-    _ensureFeaturedLayers();
-    const { a, b } = _featuredAnim;
-    const showNext = _featuredAnim.active === "a" ? b : a;
-    const hideCur = _featuredAnim.active === "a" ? a : b;
-
-    showNext.style.backgroundImage = `url('${imgUrl}')`;
-
-    // Start state for the next layer
-    showNext.classList.remove("is-active");
-    void showNext.offsetWidth; // reflow
-
-    // Animate: fade old out, fade new in (with slight zoom settle)
-    hideCur.classList.remove("is-active");
-    showNext.classList.add("is-active");
-
-    _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
-  }
-
-  function _swapText(el, newHTML, { asHTML = false } = {}) {
-    if (!el) return;
-
-    // First run: paint immediately, then mark as "in"
-    if (_featuredAnim.first) {
-      if (asHTML) el.innerHTML = newHTML;
-      else el.textContent = newHTML;
-      el.classList.add("_fade-swap", "_in");
-      return;
-    }
-
-    el.classList.add("_fade-swap", "_out");
-    const doSwap = () => {
-      el.removeEventListener("transitionend", doSwap);
-      if (asHTML) el.innerHTML = newHTML;
-      else el.textContent = newHTML;
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.classList.remove("_out");
-          el.classList.add("_in");
-        });
-      });
-    };
-
-    el.addEventListener("transitionend", doSwap, { once: true });
-    // Fallback in case transitionend doesn't fire
-    setTimeout(() => {
-      if (el.classList.contains("_out")) doSwap();
-    }, 180);
-  }
-
   const activitiesToDescription = (arr, maxChars = 260) => {
     const cleaned = (arr || [])
       .map((t) => t.replace(/^[•\-\s]+/, "").trim())
@@ -924,6 +802,128 @@ const _emptyState = `
     No other trips found in this category.
   </div>
 `;
+
+// --- Featured animation helpers (GLOBAL, used by renderFeatured + rotator) ---
+let _featuredAnim = window._featuredAnim || {
+  first: true,
+  stack: null,
+  a: null,
+  b: null,
+  active: "a",
+};
+window._featuredAnim = _featuredAnim;
+
+function _ensureFeaturedAnimStyles() {
+  if (document.getElementById("featured-anim-styles")) return;
+  const css = `
+  #featuredSection{position:relative; overflow:hidden;}
+  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
+  #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
+    filter:brightness(0.82); opacity:0; transform:scale(1.04);
+    transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
+  #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
+  #featuredSection .featured-gradient{position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.45) 60%, rgba(0,0,0,.65) 100%);
+    pointer-events:none; z-index:1;}
+  #featuredSection .featured-content{position:relative; z-index:2;}
+
+  ._fade-swap{
+    transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
+               transform 420ms cubic-bezier(.22,.61,.36,1);
+    will-change:opacity,transform;
+  }
+  ._fade-swap._out{opacity:0; transform:translateY(-6px);}
+  ._fade-swap._in{opacity:1; transform:translateY(0);}
+  `;
+  const style = document.createElement("style");
+  style.id = "featured-anim-styles";
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
+function _ensureFeaturedLayers() {
+  _ensureFeaturedAnimStyles();
+  const sec = document.getElementById("featuredSection");
+  if (!sec) return null;
+
+  if (!_featuredAnim.stack) {
+    const stack = document.createElement("div");
+    stack.className = "featured-bg-stack";
+    const a = document.createElement("div");
+    const b = document.createElement("div");
+    a.className = "featured-bg-layer";
+    b.className = "featured-bg-layer";
+
+    const grad = document.createElement("div");
+    grad.className = "featured-gradient";
+
+    stack.append(a, b, grad);
+    sec.prepend(stack);
+
+    // Make existing children sit above backgrounds
+    sec.querySelectorAll(":scope > *:not(.featured-bg-stack)").forEach((el) => {
+      if (!el.classList.contains("featured-content"))
+        el.classList.add("featured-content");
+    });
+
+    _featuredAnim.stack = stack;
+    _featuredAnim.a = a;
+    _featuredAnim.b = b;
+    _featuredAnim.active = "a";
+    _featuredAnim.first = true;
+  }
+  return sec;
+}
+
+function _swapFeaturedBackground(imgUrl) {
+  _ensureFeaturedLayers();
+  const { a, b } = _featuredAnim;
+  const showNext = _featuredAnim.active === "a" ? b : a;
+  const hideCur = _featuredAnim.active === "a" ? a : b;
+
+  showNext.style.backgroundImage = `url('${imgUrl}')`;
+
+  // Reset then animate
+  showNext.classList.remove("is-active");
+  void showNext.offsetWidth; // reflow
+  hideCur.classList.remove("is-active");
+  showNext.classList.add("is-active");
+
+  _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
+}
+
+function _swapText(el, newHTML, { asHTML = false } = {}) {
+  if (!el) return;
+
+  // First paint: no outgoing transition
+  if (_featuredAnim.first) {
+    if (asHTML) el.innerHTML = newHTML;
+    else el.textContent = newHTML;
+    el.classList.add("_fade-swap", "_in");
+    return;
+  }
+
+  el.classList.add("_fade-swap", "_out");
+
+  const doSwap = () => {
+    el.removeEventListener("transitionend", doSwap);
+    if (asHTML) el.innerHTML = newHTML;
+    else el.textContent = newHTML;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.classList.remove("_out");
+        el.classList.add("_in");
+      });
+    });
+  };
+
+  el.addEventListener("transitionend", doSwap, { once: true });
+  // Safety fallback
+  setTimeout(() => {
+    if (el.classList.contains("_out")) doSwap();
+  }, 180);
+}
 
 // Build one trip card
 function tripCardHTML(t) {
