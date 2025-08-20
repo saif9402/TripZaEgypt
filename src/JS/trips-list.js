@@ -1,7 +1,7 @@
 /* trips-list.js — Trips list with pagination + Sort + Search + Date & Duration filters + i18n */
 
 (() => {
-  "use strict";
+  ("use strict");
 
   // ----------- Config / DOM -----------
   const PAGE_SIZE = 10;
@@ -108,11 +108,45 @@
         }[c])
     );
 
-  const safeImg = (u) => {
-    if (!u) return "https://via.placeholder.com/640x360?text=Trip";
-    if (u.startsWith("http")) return u;
-    return u.startsWith("/") ? u : `/${u}`;
-  };
+  // Inline fallback image (no DNS)
+  const FALLBACK_DATA_IMG =
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'>
+       <rect width='100%' height='100%' fill='#e5e7eb'/>
+       <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+             font-size='22' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>
+         No Image
+       </text>
+     </svg>`
+    );
+
+  // Safer image URL normalizer (matches includes.js behavior)
+  const safeImg = (u) =>
+    !u
+      ? FALLBACK_DATA_IMG
+      : /^data:/i.test(u)
+      ? u
+      : /^https?:\/\//i.test(u)
+      ? u
+      : u.startsWith("//")
+      ? window.location.protocol + u
+      : u.startsWith("/")
+      ? u
+      : `/${u}`;
+
+  // Attach one-time error fallbacks to any <img> inside root
+  function attachImgFallbacks(root = document) {
+    root.querySelectorAll("img").forEach((img) => {
+      img.addEventListener(
+        "error",
+        () => {
+          if (img.src !== FALLBACK_DATA_IMG) img.src = FALLBACK_DATA_IMG;
+        },
+        { once: true }
+      );
+    });
+  }
 
   const minutesToLabel = (mins) => {
     const m = Number(mins) || 0;
@@ -483,8 +517,10 @@
     <a href="/pages/trip-details.html?id=${t.id}" 
        class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden">
       <div class="flex flex-col sm:flex-row">
-        <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}" 
-             class="w-full sm:w-56 h-44 object-cover">
+       <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}"
+          class="w-full sm:w-56 h-44 object-cover"
+          loading="lazy" decoding="async"
+          onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'">
 
         <div class="flex-1 p-4">
           <div class="flex items-center gap-2 text-xs">
@@ -814,23 +850,65 @@
         const durText = summarizeDuration(dMin, dMax);
 
         listEl.innerHTML = `
-          <div class="bg-white rounded p-10 text-center text-gray-500">
-            ${
-              srch || hasDate || hasDur
-                ? `No trips found${
-                    srch
-                      ? ` for "<span class="font-semibold">${esc(srch)}</span>"`
-                      : ""
-                  }${
-                    hasDate
-                      ? ` in ${esc(summarizeDateFilter(startQS, endQS))}`
-                      : ""
-                  }${hasDur ? ` • ${esc(durText)}` : ""}.`
-                : "No trips found."
-            }
-          </div>`;
+        <div class="bg-white rounded p-10 text-center text-gray-500">
+          ${
+            srch || hasDate || hasDur
+              ? `No trips found${
+                  srch
+                    ? ` for "<span class="font-semibold">${esc(srch)}</span>"`
+                    : ""
+                }${
+                  hasDate
+                    ? ` in ${esc(summarizeDateFilter(startQS, endQS))}`
+                    : ""
+                }${hasDur ? ` • ${esc(durText)}` : ""}.`
+              : "No trips found."
+          }
+        </div>`;
       } else {
         listEl.innerHTML = items.map(rowHTML).join("");
+
+        // --- Robust image fallback (inline SVG, no DNS) ---
+        const FALLBACK_DATA_IMG =
+          "data:image/svg+xml;utf8," +
+          encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'>
+             <rect width='100%' height='100%' fill='#e5e7eb'/>
+             <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+                   font-size='22' fill='#9ca3af'
+                   font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>
+               No Image
+             </text>
+           </svg>`
+          );
+
+        // Replace external placeholder host and attach onerror fallbacks
+        listEl.querySelectorAll("img").forEach((img) => {
+          // Ensure progressive image decoding + lazy loading
+          try {
+            img.loading = "lazy";
+            img.decoding = "async";
+          } catch {}
+
+          // If the src is an external placeholder, swap to inline SVG immediately
+          try {
+            const u = new URL(img.src, window.location.href);
+            if (u.hostname.includes("via.placeholder.com")) {
+              img.src = FALLBACK_DATA_IMG;
+            }
+          } catch {
+            // ignore URL parsing issues; onerror below will still catch failures
+          }
+
+          // Guarantee a graceful fallback on any load error
+          img.addEventListener(
+            "error",
+            () => {
+              if (img.src !== FALLBACK_DATA_IMG) img.src = FALLBACK_DATA_IMG;
+            },
+            { once: true }
+          );
+        });
       }
 
       renderPagination();
