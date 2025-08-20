@@ -3,9 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Profile | Tour Guide</title>
+
+    <!-- Tailwind build + site styles -->
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
 
+    <!-- Icons / Alpine (optional) -->
     <link
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
@@ -15,18 +20,27 @@
       defer
     ></script>
 
-    <title>Profile</title>
+    <!-- Block unauthenticated users (uses the same token your email/password flow stores) -->
     <script>
       if (!localStorage.getItem("accessToken")) {
+        // If your Google flow sets an HttpOnly cookie (no token), remove this redirect,
+        // or replace with a lightweight "ping" to your API to verify session.
         window.location.href = "/pages/login.html";
       }
     </script>
   </head>
+
   <body class="bg-gray-50 font-sans text-gray-800">
+    <!-- Toasts (also used by the blocking modal) -->
+    <div
+      id="toast-container"
+      class="fixed top-4 right-4 z-[10000] space-y-2"
+    ></div>
+
     <!-- Navbar -->
     <div id="header-placeholder"></div>
 
-    <!-- Main Section -->
+    <!-- Main -->
     <main class="max-w-6xl mx-auto mt-16 px-6">
       <div
         class="bg-white shadow-lg rounded-2xl p-8 flex flex-col lg:flex-row gap-8"
@@ -39,14 +53,15 @@
             >
               <i class="fas fa-user"></i>
             </div>
-            <h2 id="sidebarName" class="text-2xl font-semibold">Masum Rana</h2>
+            <h2 id="sidebarName" class="text-2xl font-semibold">User</h2>
             <p
               id="sidebarLocation"
               class="text-sm text-gray-500 mt-1 flex items-center justify-center"
             >
-              <i class="fas fa-map-marker-alt mr-1"></i> Hurghada
+              <i class="fas fa-map-marker-alt mr-1"></i> Location
             </p>
           </div>
+
           <div class="mt-8 flex flex-col items-center justify-center gap-3">
             <button
               class="w-auto bg-yellow-400 hover:bg-yellow-500 transition text-black font-medium px-4 py-2 rounded-lg"
@@ -61,16 +76,17 @@
           </div>
         </aside>
 
-        <!-- Main Form Section -->
+        <!-- Details -->
         <section class="lg:w-3/4 w-full">
           <h2 class="text-xl font-semibold mb-6 border-b pb-2">
             Personal Information
           </h2>
 
-          <!-- Editable Fields -->
           <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium mb-1">Name</label>
+              <label class="block text-sm font-medium mb-1" for="profileName"
+                >Name</label
+              >
               <input
                 disabled
                 id="profileName"
@@ -80,7 +96,9 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Phone</label>
+              <label class="block text-sm font-medium mb-1" for="profilePhone"
+                >Phone</label
+              >
               <input
                 disabled
                 id="profilePhone"
@@ -91,7 +109,11 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Location</label>
+              <label
+                class="block text-sm font-medium mb-1"
+                for="profileLocation"
+                >Country</label
+              >
               <input
                 disabled
                 id="profileLocation"
@@ -127,7 +149,7 @@
           </h2>
           <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium mb-1"
+              <label class="block text-sm font-medium mb-1" for="profileEmail"
                 >Email Address</label
               >
               <input
@@ -145,17 +167,18 @@
     <!-- Footer -->
     <div id="footer-placeholder" class="mt-10"></div>
 
-    <!-- Tiny toast -->
+    <!-- Tiny (center) toast for in-page edits if you still want it -->
     <div
       id="toast"
       class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-lg text-white shadow-lg"
     ></div>
 
-    <!-- Scripts -->
+    <!-- Shared scripts your project already uses -->
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
 
+    <!-- Profile page logic (populate + inline edit/save to /api/Auth/Update) -->
     <script>
       // --- Helpers
       function showToast(msg, type = "success") {
@@ -177,11 +200,10 @@
         });
       }
 
-      // --- Populate once currentUser is ready (comes from includes.js in your project)
+      // Populate from global currentUser if includes.js provides it
       function populateProfileWhenReady() {
         if (window.currentUser) {
           const user = window.currentUser;
-
           document.getElementById("profileName").value = user.fullName || "";
           document.getElementById("profilePhone").value =
             user.phoneNumber || "";
@@ -190,11 +212,9 @@
 
           document.getElementById("sidebarName").textContent =
             user.fullName || "User";
-          document.getElementById(
-            "sidebarLocation"
-          ).innerHTML = `<i class="fas fa-map-marker-alt mr-1"></i> ${
-            user.country || "Location"
-          }`;
+          document.getElementById("sidebarLocation").innerHTML =
+            '<i class="fas fa-map-marker-alt mr-1"></i> ' +
+            (user.country || "Location");
         } else {
           setTimeout(populateProfileWhenReady, 100);
         }
@@ -236,12 +256,17 @@
           if (on) {
             icon.className = "fas fa-save mr-2";
             label.textContent = "Save changes";
-            editSaveBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+            // switch yellow -> green while editing to save
+            editSaveBtn.classList.remove(
+              "bg-yellow-400",
+              "hover:bg-yellow-500"
+            );
             editSaveBtn.classList.add("bg-green-600", "hover:bg-green-700");
           } else {
             icon.className = "fas fa-pen mr-2";
             label.textContent = "Edit";
-            editSaveBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+            // switch back to yellow after save/cancel
+            editSaveBtn.classList.add("bg-yellow-400", "hover:bg-yellow-500");
             editSaveBtn.classList.remove("bg-green-600", "hover:bg-green-700");
           }
         }
@@ -254,23 +279,18 @@
             Country: country,
           });
 
-          const base = "/api/Auth/Update?" + params.toString();
-
-          // Try PUT first, then fallback to POST on 405
-          const common = {
-            headers: { Authorization: `Bearer ${token}` },
-          };
-
-          let res = await fetch(base, { method: "POST", ...common });
-
-          return res;
+          // Your backend expects POST (per your earlier code)
+          return fetch("/api/Auth/Update?" + params.toString(), {
+            method: "POST",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            credentials: "include",
+          });
         }
 
         function validateInputs({ name, phone, country }) {
           if (!name.trim() || !country.trim() || !phone.trim()) {
-            return "Name, Phone, and Location are required.";
+            return "Name, Phone, and Country are required.";
           }
-          // basic phone sanity (allows digits, spaces, +, -, parentheses)
           if (!/^[\d+\-\s()]{6,}$/.test(phone.trim())) {
             return "Please enter a valid phone number.";
           }
@@ -300,7 +320,6 @@
             const res = await callUpdateEndpoint(name, phone, country);
 
             if (!res.ok) {
-              // Try to read JSON error object if available
               let errorMsg = res.statusText;
               try {
                 const payload = await res.json();
@@ -317,9 +336,8 @@
 
             // Update sidebar + memory
             document.getElementById("sidebarName").textContent = name;
-            document.getElementById(
-              "sidebarLocation"
-            ).innerHTML = `<i class="fas fa-map-marker-alt mr-1"></i> ${country}`;
+            document.getElementById("sidebarLocation").innerHTML =
+              '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
 
             if (window.currentUser) {
               window.currentUser.fullName = name;
@@ -357,6 +375,276 @@
           setEditingState(false);
         });
       });
+    </script>
+
+    <!-- BLOCKING MODAL: forces Phone + Country after Google sign-in (uses only /api/Auth/Update) -->
+    <script>
+      (function () {
+        // Only trigger this gate if your Google button previously set the flag:
+        // onclick="localStorage.setItem('mustCompleteProfile','1')"
+        if (localStorage.getItem("mustCompleteProfile") !== "1") return;
+
+        // ---- Toast helper (uses top-right container) ----
+        function toast(message, ok = true) {
+          const tc = document.getElementById("toast-container");
+          const el = document.createElement("div");
+          el.className =
+            "max-w-sm w-full px-4 py-3 rounded-lg shadow-lg text-white animate-fade-in-up transition " +
+            (ok ? "bg-green-600" : "bg-red-600");
+          el.textContent = message;
+          tc.appendChild(el);
+          setTimeout(() => {
+            el.style.opacity = "0";
+            el.addEventListener("transitionend", () => el.remove());
+          }, 3500);
+        }
+
+        function lockScroll(lock) {
+          document.documentElement.style.overflow = lock ? "hidden" : "";
+        }
+
+        const countries = [
+          "Afghanistan",
+          "Albania",
+          "Algeria",
+          "Argentina",
+          "Australia",
+          "Austria",
+          "Bahrain",
+          "Bangladesh",
+          "Belgium",
+          "Brazil",
+          "Canada",
+          "Chile",
+          "China",
+          "Colombia",
+          "Denmark",
+          "Egypt",
+          "Finland",
+          "France",
+          "Germany",
+          "Greece",
+          "India",
+          "Indonesia",
+          "Iran",
+          "Iraq",
+          "Ireland",
+          "Israel",
+          "Italy",
+          "Japan",
+          "Jordan",
+          "Kenya",
+          "Kuwait",
+          "Lebanon",
+          "Libya",
+          "Malaysia",
+          "Mexico",
+          "Morocco",
+          "Netherlands",
+          "New Zealand",
+          "Nigeria",
+          "Norway",
+          "Oman",
+          "Pakistan",
+          "Peru",
+          "Philippines",
+          "Poland",
+          "Portugal",
+          "Qatar",
+          "Romania",
+          "Russia",
+          "Saudi Arabia",
+          "Singapore",
+          "South Africa",
+          "South Korea",
+          "Spain",
+          "Sri Lanka",
+          "Sudan",
+          "Sweden",
+          "Switzerland",
+          "Syria",
+          "Thailand",
+          "Tunisia",
+          "Turkey",
+          "UAE",
+          "UK",
+          "USA",
+          "Ukraine",
+          "Uzbekistan",
+          "Venezuela",
+          "Vietnam",
+          "Yemen",
+          "Zimbabwe",
+        ];
+
+        // Build modal
+        const overlay = document.createElement("div");
+        overlay.id = "completeProfileModal";
+        overlay.className =
+          "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
+
+        const u = window.currentUser || {};
+        const safeName = (u.fullName || "").replace(/"/g, "&quot;");
+
+        overlay.innerHTML = `
+          <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
+            <h2 class="text-xl font-semibold mb-1">Complete your profile</h2>
+            <p class="text-sm text-gray-600 mb-4">Please add your phone number and country to continue.</p>
+
+            <form id="cpForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input id="cpName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2" value="${safeName}">
+                <p class="text-xs text-gray-500 mt-1">Optional if already correct.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                <input id="cpPhone" type="tel" inputmode="tel" placeholder="+201234567890"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2" required />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Country <span class="text-red-500">*</span></label>
+                <select id="cpCountry" class="w-full border border-gray-300 rounded-lg px-3 py-2" required></select>
+              </div>
+
+              <button id="cpSave" type="submit"
+                      class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 rounded-lg">
+                Save & Continue
+              </button>
+              <p class="text-[11px] text-gray-500 text-center">You can’t navigate away until this is saved.</p>
+            </form>
+          </div>
+        `;
+
+        document.body.appendChild(overlay);
+        lockScroll(true);
+
+        // Fill countries
+        const sel = overlay.querySelector("#cpCountry");
+        countries.forEach((c) => {
+          const o = document.createElement("option");
+          o.value = c;
+          o.textContent = c;
+          sel.appendChild(o);
+        });
+        sel.value = u.country || "Egypt";
+
+        // Prevent closing / outside clicks / ESC
+        overlay.addEventListener(
+          "click",
+          (e) => {
+            const card = overlay.firstElementChild;
+            if (!card.contains(e.target)) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          },
+          true
+        );
+        document.addEventListener(
+          "keydown",
+          (e) => {
+            if (e.key === "Escape") e.preventDefault();
+          },
+          true
+        );
+
+        // Submit => /api/Auth/Update
+        overlay
+          .querySelector("#cpForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = overlay.querySelector("#cpName").value.trim();
+            const phone = overlay.querySelector("#cpPhone").value.trim();
+            const country = overlay.querySelector("#cpCountry").value.trim();
+
+            if (!/^[\d+\-\s()]{6,}$/.test(phone)) {
+              toast("Please enter a valid phone number.", false);
+              return;
+            }
+            if (!country) {
+              toast("Please choose your country.", false);
+              return;
+            }
+
+            const btn = overlay.querySelector("#cpSave");
+            const prev = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Saving…";
+
+            const token = localStorage.getItem("accessToken");
+            const params = new URLSearchParams({
+              FullName: name || u.fullName || "",
+              PhoneNumber: phone,
+              Country: country,
+            });
+
+            try {
+              const res = await fetch(`/api/Auth/Update?${params.toString()}`, {
+                method: "POST", // matches your existing usage
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                credentials: "include",
+              });
+
+              if (!res.ok) {
+                let msg = res.statusText;
+                try {
+                  const payload = await res.json();
+                  msg =
+                    payload?.message ||
+                    (Array.isArray(payload?.errors)
+                      ? payload.errors.join(", ")
+                      : msg);
+                } catch (_) {}
+                throw new Error(msg || "Update failed");
+              }
+
+              // Success: clear flag, update UI, release the user
+              localStorage.setItem("mustCompleteProfile", "0");
+              toast("Profile updated. You're good to go!");
+
+              try {
+                document.getElementById("profilePhone").value = phone;
+                document.getElementById("profileLocation").value = country;
+                if (name) document.getElementById("profileName").value = name;
+
+                // sidebar
+                document.getElementById("sidebarName").textContent =
+                  name || u.fullName || "User";
+                document.getElementById("sidebarLocation").innerHTML =
+                  '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
+
+                // memory
+                if (window.currentUser) {
+                  window.currentUser.fullName =
+                    name || window.currentUser.fullName;
+                  window.currentUser.phoneNumber = phone;
+                  window.currentUser.country = country;
+                }
+              } catch (_) {}
+
+              // remove modal and unlock scrolling
+              overlay.remove();
+              lockScroll(false);
+
+              // If a page set where the user wanted to go, send them there
+              const back = sessionStorage.getItem("afterProfile");
+              if (back && back !== location.href) {
+                sessionStorage.removeItem("afterProfile");
+                location.href = back;
+              }
+            } catch (ex) {
+              console.error(ex);
+              toast(ex.message || "Could not update profile.", false);
+            } finally {
+              btn.disabled = false;
+              btn.textContent = prev;
+            }
+          });
+      })();
     </script>
   </body>
 </html>
