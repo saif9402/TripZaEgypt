@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
+
     <link
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
@@ -13,6 +14,7 @@
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
     ></script>
+
     <title>Profile</title>
     <script>
       if (!localStorage.getItem("accessToken")) {
@@ -64,13 +66,16 @@
           <h2 class="text-xl font-semibold mb-6 border-b pb-2">
             Personal Information
           </h2>
-          <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Editable Fields -->
+          <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium mb-1">Name</label>
               <input
                 disabled
                 id="profileName"
                 type="text"
+                autocomplete="name"
                 class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
@@ -79,7 +84,9 @@
               <input
                 disabled
                 id="profilePhone"
-                type="text"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
                 class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
@@ -89,10 +96,31 @@
                 disabled
                 id="profileLocation"
                 type="text"
+                autocomplete="country-name"
                 class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
               />
             </div>
           </form>
+
+          <!-- Actions -->
+          <div class="mt-6 flex items-center gap-3">
+            <button
+              id="editSaveBtn"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg transition"
+            >
+              <i class="fas fa-pen mr-2"></i><span>Edit</span>
+            </button>
+            <button
+              id="cancelBtn"
+              class="hidden border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg transition"
+              type="button"
+            >
+              Cancel
+            </button>
+            <span id="saveHint" class="hidden text-sm text-gray-500"
+              >Edit your details, then click <b>Save changes</b>.</span
+            >
+          </div>
 
           <h2 class="text-xl font-semibold mt-10 mb-6 border-b pb-2">
             Security
@@ -117,11 +145,39 @@
     <!-- Footer -->
     <div id="footer-placeholder" class="mt-10"></div>
 
+    <!-- Tiny toast -->
+    <div
+      id="toast"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-lg text-white shadow-lg"
+    ></div>
+
     <!-- Scripts -->
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
+
     <script>
+      // --- Helpers
+      function showToast(msg, type = "success") {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.className =
+          "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-white shadow-lg " +
+          (type === "success" ? "bg-green-600" : "bg-red-600");
+        t.classList.remove("hidden");
+        setTimeout(() => t.classList.add("hidden"), 2500);
+      }
+
+      function setInputsDisabled(disabled) {
+        const ids = ["profileName", "profilePhone", "profileLocation"];
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          el.disabled = disabled;
+          el.classList.toggle("bg-gray-100", disabled);
+        });
+      }
+
+      // --- Populate once currentUser is ready (comes from includes.js in your project)
       function populateProfileWhenReady() {
         if (window.currentUser) {
           const user = window.currentUser;
@@ -144,7 +200,163 @@
         }
       }
 
-      document.addEventListener("DOMContentLoaded", populateProfileWhenReady);
+      document.addEventListener("DOMContentLoaded", () => {
+        populateProfileWhenReady();
+
+        const editSaveBtn = document.getElementById("editSaveBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const saveHint = document.getElementById("saveHint");
+
+        // Keep a copy to restore on Cancel
+        let original = { name: "", phone: "", country: "" };
+        let editing = false;
+
+        function snapshotValues() {
+          original = {
+            name: document.getElementById("profileName").value,
+            phone: document.getElementById("profilePhone").value,
+            country: document.getElementById("profileLocation").value,
+          };
+        }
+
+        function restoreValues() {
+          document.getElementById("profileName").value = original.name;
+          document.getElementById("profilePhone").value = original.phone;
+          document.getElementById("profileLocation").value = original.country;
+        }
+
+        function setEditingState(on) {
+          editing = on;
+          setInputsDisabled(!on);
+          cancelBtn.classList.toggle("hidden", !on);
+          saveHint.classList.toggle("hidden", !on);
+
+          const icon = editSaveBtn.querySelector("i");
+          const label = editSaveBtn.querySelector("span");
+          if (on) {
+            icon.className = "fas fa-save mr-2";
+            label.textContent = "Save changes";
+            editSaveBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+            editSaveBtn.classList.add("bg-green-600", "hover:bg-green-700");
+          } else {
+            icon.className = "fas fa-pen mr-2";
+            label.textContent = "Edit";
+            editSaveBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+            editSaveBtn.classList.remove("bg-green-600", "hover:bg-green-700");
+          }
+        }
+
+        async function callUpdateEndpoint(fullName, phoneNumber, country) {
+          const token = localStorage.getItem("accessToken");
+          const params = new URLSearchParams({
+            FullName: fullName,
+            PhoneNumber: phoneNumber,
+            Country: country,
+          });
+
+          const base = "/api/Auth/Update?" + params.toString();
+
+          // Try PUT first, then fallback to POST on 405
+          const common = {
+            headers: { Authorization: `Bearer ${token}` },
+          };
+
+          let res = await fetch(base, { method: "POST", ...common });
+
+          return res;
+        }
+
+        function validateInputs({ name, phone, country }) {
+          if (!name.trim() || !country.trim() || !phone.trim()) {
+            return "Name, Phone, and Location are required.";
+          }
+          // basic phone sanity (allows digits, spaces, +, -, parentheses)
+          if (!/^[\d+\-\s()]{6,}$/.test(phone.trim())) {
+            return "Please enter a valid phone number.";
+          }
+          return null;
+        }
+
+        async function handleSave() {
+          const name = document.getElementById("profileName").value.trim();
+          const phone = document.getElementById("profilePhone").value.trim();
+          const country = document
+            .getElementById("profileLocation")
+            .value.trim();
+
+          const err = validateInputs({ name, phone, country });
+          if (err) {
+            showToast(err, "error");
+            return;
+          }
+
+          // UI lock
+          editSaveBtn.disabled = true;
+          const prevHtml = editSaveBtn.innerHTML;
+          editSaveBtn.innerHTML =
+            '<i class="fas fa-circle-notch fa-spin mr-2"></i><span>Saving…</span>';
+
+          try {
+            const res = await callUpdateEndpoint(name, phone, country);
+
+            if (!res.ok) {
+              // Try to read JSON error object if available
+              let errorMsg = res.statusText;
+              try {
+                const payload = await res.json();
+                if (payload?.errors) {
+                  errorMsg = Array.isArray(payload.errors)
+                    ? payload.errors.join(", ")
+                    : String(payload.errors);
+                } else if (payload?.message) {
+                  errorMsg = payload.message;
+                }
+              } catch (_) {}
+              throw new Error(errorMsg || "Update failed");
+            }
+
+            // Update sidebar + memory
+            document.getElementById("sidebarName").textContent = name;
+            document.getElementById(
+              "sidebarLocation"
+            ).innerHTML = `<i class="fas fa-map-marker-alt mr-1"></i> ${country}`;
+
+            if (window.currentUser) {
+              window.currentUser.fullName = name;
+              window.currentUser.phoneNumber = phone;
+              window.currentUser.country = country;
+            }
+
+            snapshotValues(); // new baseline
+            setEditingState(false);
+            showToast("Profile updated successfully.");
+          } catch (ex) {
+            console.error(ex);
+            showToast(ex.message || "Could not update profile.", "error");
+          } finally {
+            editSaveBtn.disabled = false;
+            editSaveBtn.innerHTML = prevHtml;
+          }
+        }
+
+        // Button actions
+        editSaveBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          if (!editing) {
+            snapshotValues();
+            setEditingState(true);
+            document.getElementById("profileName").focus();
+          } else {
+            await handleSave();
+          }
+        });
+
+        cancelBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          restoreValues();
+          setEditingState(false);
+        });
+      });
     </script>
   </body>
 </html>
