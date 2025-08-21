@@ -210,61 +210,68 @@ if (!window.logout) {
   };
 }
 
-// ------- Auth-aware header include (boot trending ASAP after header) -------
+// ------- Auth-aware header include (always refresh first) -------
 function checkAuthAndIncludeHeader() {
-  const token = localStorage.getItem("accessToken");
-
   const bootTrendingIfNeeded = () => {
-    // Start trending ASAP (don’t wait for footer). Guard to avoid double-boot.
     const tr = document.getElementById("trending-root");
     if (tr && !tr.__cleanup) initTopRatedSlider();
     checkAllIncludesLoaded();
   };
 
-  if (!token) {
-    // Not logged in
+  const showGuest = () =>
     includeHTML(
       "header-placeholder",
       "pages/header.html",
       bootTrendingIfNeeded
     );
-    return;
-  }
+  const showAuthed = () =>
+    includeHTML(
+      "header-placeholder",
+      "pages/header-auth.html",
+      bootTrendingIfNeeded
+    );
 
-  fetch("/api/Auth/GetToken", {
-    method: "POST",
-    credentials: "include",
-  })
-    .then(async (res) => {
-      if (!res.ok) throw new Error("Response not OK");
+  (async () => {
+    try {
+      // Use interceptor's refresh (de-duped, handles text/plain JSON)
+      const user = await (window.__authRefresh?.refresh?.() ||
+        Promise.resolve(undefined));
 
-      const text = await res.text(); // because response is text/plain
-      const data = JSON.parse(text); // manually parse JSON string
-
-      if (data?.succeeded && data?.data?.email) {
-        window.currentUser = data.data;
-        includeHTML(
-          "header-placeholder",
-          "pages/header-auth.html",
-          bootTrendingIfNeeded
-        );
-      } else {
-        localStorage.removeItem("accessToken");
-        includeHTML(
-          "header-placeholder",
-          "pages/header.html",
-          bootTrendingIfNeeded
-        );
+      if (user && user.email) {
+        // accessToken already stored by interceptor's storeUserFromResponse
+        return showAuthed();
       }
-    })
-    .catch((err) => {
-      console.error("Auth check failed:", err);
-      includeHTML(
-        "header-placeholder",
-        "pages/header.html",
-        bootTrendingIfNeeded
-      );
-    });
+
+      // Fallback path: call GetToken directly if interceptor not present
+      const res = await fetch("/api/Auth/GetToken", {
+        method: "POST",
+        credentials: "include",
+        headers: { Accept: "application/json, text/plain, */*" },
+      });
+
+      let data;
+      try {
+        data = await res.clone().json();
+      } catch {
+        data = JSON.parse(await res.text());
+      }
+
+      if (res.ok && data?.succeeded && data?.data?.email) {
+        window.currentUser = data.data;
+        if (data.data.accessToken)
+          localStorage.setItem("accessToken", data.data.accessToken);
+        return showAuthed();
+      }
+
+      // Not authenticated
+      localStorage.removeItem("accessToken");
+      window.currentUser = undefined;
+      return showGuest();
+    } catch (err) {
+      console.warn("Auth check failed:", err);
+      return showGuest();
+    }
+  })();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
