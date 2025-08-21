@@ -25,26 +25,35 @@
         </span>`;
   }
 
-  function formatMoney(v) {
-    if (typeof v !== "number") return String(v ?? "");
+  const formatPrice = (
+    value,
+    currency = "EUR",
+    locale = langCode === "deu" ? "de-DE" : "en-EG"
+  ) => {
     try {
-      return v.toLocaleString();
-    } catch (_) {
-      return String(v);
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(value);
+    } catch {
+      return `${value} ${currency}`;
     }
-  }
+  };
 
   function formatDateLocal(iso) {
     if (!iso) return "-";
     const d = new Date(iso);
     if (isNaN(d.getTime())) return "-";
     try {
-      return new Intl.DateTimeFormat(undefined, {
+      return new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Africa/Cairo",
         year: "numeric",
-        month: "short",
+        month: "2-digit",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
+        hour12: true,
       }).format(d);
     } catch (_) {
       return d.toLocaleString();
@@ -71,7 +80,7 @@
             </div>
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-tag text-gray-400"></i>
-              <span>Total: <b>${formatMoney(b.totalCost)}</b></span>
+              <span>Total: <b>${formatPrice(b.totalCost, "EUR")}</b></span>
             </div>
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-fingerprint text-gray-400"></i>
@@ -225,11 +234,7 @@
       "fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
     overlay.innerHTML = `
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl relative">
-          <button id="bookingModalClose"
-                  class="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
-                  aria-label="Close">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          
 
           <div class="p-6">
             <div id="bookingModalHeader" class="flex items-start justify-between gap-3">
@@ -347,7 +352,7 @@
 
             <div class="space-y-1">
               <div class="text-xs text-gray-500">Total</div>
-              <div class="font-medium">${formatMoney(b.totalCost)}</div>
+              <div class="font-medium">${formatPrice(b.totalCost, "EUR")}</div>
             </div>
           </div>
         `;
