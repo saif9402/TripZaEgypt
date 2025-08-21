@@ -816,8 +816,8 @@ window._featuredAnim = _featuredAnim;
 function _ensureFeaturedAnimStyles() {
   if (document.getElementById("featured-anim-styles")) return;
   const css = `
-  #featuredSection{ position:relative; overflow:visible; --featured-card-overhang:0px; }
-  #featuredSection .featured-bg-stack{ position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  #featuredSection{position:relative; overflow:visible;}
+  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
   #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
     filter:brightness(1.06); opacity:0; transform:scale(1.04);
     transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
@@ -827,9 +827,6 @@ function _ensureFeaturedAnimStyles() {
     pointer-events:none; z-index:1;}
   #featuredSection .featured-content{position:relative; z-index:2;}
 
-  @media (min-width:640px){
-  #featuredSection{ padding-bottom: calc(var(--featured-card-overhang) + 1rem); }
-}
   ._fade-swap{
     transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
                transform 420ms cubic-bezier(.22,.61,.36,1);
@@ -1093,32 +1090,6 @@ function renderFeatured(trip) {
       .join("");
 
     _swapText(tags, html, { asHTML: true });
-    // --- reserve space below the section equal to half the card height (for desktop/tablet)
-    const secEl = document.getElementById("featuredSection");
-    const cardEl = document.getElementById("featuredLink");
-
-    function _applyFeaturedPadding() {
-      if (!secEl || !cardEl) return;
-      // Only add padding on >= sm screens
-      const isDesktop = window.matchMedia("(min-width: 640px)").matches;
-      const half = isDesktop ? Math.round(cardEl.offsetHeight / 2) : 0;
-      secEl.style.setProperty("--featured-card-overhang", `${half}px`);
-    }
-
-    // Run once after DOM paints updated content
-    requestAnimationFrame(() => {
-      _applyFeaturedPadding();
-    });
-
-    // Keep it correct on resize (bind once)
-    if (!window.__featuredPadBound) {
-      window.__featuredPadBound = true;
-      window.addEventListener("resize", () => {
-        // small debounce
-        clearTimeout(window.__featPadTO);
-        window.__featPadTO = setTimeout(_applyFeaturedPadding, 100);
-      });
-    }
   }
 
   _featuredAnim.first = false;
