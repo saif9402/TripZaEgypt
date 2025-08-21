@@ -816,8 +816,8 @@ window._featuredAnim = _featuredAnim;
 function _ensureFeaturedAnimStyles() {
   if (document.getElementById("featured-anim-styles")) return;
   const css = `
-  #featuredSection{position:relative; overflow:hidden;}
-  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
+  #featuredSection{position:relative; overflow:visible;}
+  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
   #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
     filter:brightness(1.06); opacity:0; transform:scale(1.04);
     transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
