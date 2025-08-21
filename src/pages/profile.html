@@ -20,18 +20,16 @@
       defer
     ></script>
 
-    <!-- Block unauthenticated users (uses the same token your email/password flow stores) -->
+    <!-- Block unauthenticated users -->
     <script>
       if (!localStorage.getItem("accessToken")) {
-        // If your Google flow sets an HttpOnly cookie (no token), remove this redirect,
-        // or replace with a lightweight "ping" to your API to verify session.
         window.location.href = "/pages/login.html";
       }
     </script>
   </head>
 
   <body class="bg-gray-50 font-sans text-gray-800">
-    <!-- Toasts (also used by the blocking modal) -->
+    <!-- Toasts -->
     <div
       id="toast-container"
       class="fixed top-4 right-4 z-[10000] space-y-2"
@@ -62,104 +60,164 @@
             </p>
           </div>
 
-          <div class="mt-8 flex flex-col items-center justify-center gap-3">
+          <div class="mt-8 grid gap-3">
             <button
-              class="w-auto bg-yellow-400 hover:bg-yellow-500 transition text-black font-medium px-4 py-2 rounded-lg"
+              id="navProfile"
+              class="w-full bg-yellow-400 hover:bg-yellow-500 transition text-black font-medium px-4 py-2 rounded-lg"
+              type="button"
             >
               Profile Information
             </button>
             <button
-              class="w-auto border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-medium px-6 py-2 rounded-lg"
+              id="navBookings"
+              class="w-full border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-medium px-4 py-2 rounded-lg"
+              type="button"
             >
               Booking History
             </button>
           </div>
         </aside>
 
-        <!-- Details -->
+        <!-- Content -->
         <section class="lg:w-3/4 w-full">
-          <h2 class="text-xl font-semibold mb-6 border-b pb-2">
-            Personal Information
-          </h2>
+          <!-- Profile Section -->
+          <section id="profileSection">
+            <h2 class="text-xl font-semibold mb-6 border-b pb-2">
+              Personal Information
+            </h2>
 
-          <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium mb-1" for="profileName"
-                >Name</label
-              >
-              <input
-                disabled
-                id="profileName"
-                type="text"
-                autocomplete="name"
-                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1" for="profilePhone"
-                >Phone</label
-              >
-              <input
-                disabled
-                id="profilePhone"
-                type="tel"
-                inputmode="tel"
-                autocomplete="tel"
-                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
-              />
-            </div>
-            <div>
-              <label
-                class="block text-sm font-medium mb-1"
-                for="profileLocation"
-                >Country</label
-              >
-              <input
-                disabled
-                id="profileLocation"
-                type="text"
-                autocomplete="country-name"
-                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
-              />
-            </div>
-          </form>
+            <form
+              id="profileForm"
+              class="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div>
+                <label class="block text-sm font-medium mb-1" for="profileName"
+                  >Name</label
+                >
+                <input
+                  disabled
+                  id="profileName"
+                  type="text"
+                  autocomplete="name"
+                  class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1" for="profilePhone"
+                  >Phone</label
+                >
+                <input
+                  disabled
+                  id="profilePhone"
+                  type="tel"
+                  inputmode="tel"
+                  autocomplete="tel"
+                  class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium mb-1"
+                  for="profileLocation"
+                  >Country</label
+                >
+                <input
+                  disabled
+                  id="profileLocation"
+                  type="text"
+                  autocomplete="country-name"
+                  class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
+                />
+              </div>
+            </form>
 
-          <!-- Actions -->
-          <div class="mt-6 flex items-center gap-3">
-            <button
-              id="editSaveBtn"
-              class="bg-yellow-400 hover:bg-yellow-500 text-white font-medium px-5 py-2.5 rounded-lg transition"
-            >
-              <i class="fas fa-pen mr-2"></i><span>Edit</span>
-            </button>
-            <button
-              id="cancelBtn"
-              class="hidden border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg transition"
-              type="button"
-            >
-              Cancel
-            </button>
-            <span id="saveHint" class="hidden text-sm text-gray-500"
-              >Edit your details, then click <b>Save changes</b>.</span
-            >
-          </div>
-
-          <h2 class="text-xl font-semibold mt-10 mb-6 border-b pb-2">
-            Security
-          </h2>
-          <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium mb-1" for="profileEmail"
-                >Email Address</label
+            <!-- Actions -->
+            <div class="mt-6 flex items-center gap-3">
+              <button
+                id="editSaveBtn"
+                class="bg-yellow-400 hover:bg-yellow-500 text-white font-medium px-5 py-2.5 rounded-lg transition"
               >
-              <input
-                disabled
-                id="profileEmail"
-                type="email"
-                class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
-              />
+                <i class="fas fa-pen mr-2"></i><span>Edit</span>
+              </button>
+              <button
+                id="cancelBtn"
+                class="hidden border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg transition"
+                type="button"
+              >
+                Cancel
+              </button>
+              <span id="saveHint" class="hidden text-sm text-gray-500"
+                >Edit your details, then click <b>Save changes</b>.</span
+              >
             </div>
-          </form>
+
+            <h2 class="text-xl font-semibold mt-10 mb-6 border-b pb-2">
+              Security
+            </h2>
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium mb-1" for="profileEmail"
+                  >Email Address</label
+                >
+                <input
+                  disabled
+                  id="profileEmail"
+                  type="email"
+                  class="w-full border border-gray-300 px-4 py-2 rounded-lg bg-gray-100"
+                />
+              </div>
+            </form>
+          </section>
+
+          <!-- Booking Section -->
+          <section id="bookingSection" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold border-b pb-2 w-full">
+                Booking History
+              </h2>
+            </div>
+
+            <!-- Error -->
+            <div
+              id="bookingsError"
+              class="hidden mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm"
+            >
+              Couldn’t load bookings. Please try again.
+            </div>
+
+            <!-- Empty -->
+            <div
+              id="bookingsEmpty"
+              class="hidden text-center py-10 text-gray-500"
+            >
+              <i class="fas fa-calendar-times text-4xl mb-3"></i>
+              <p>No bookings yet.</p>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div
+              id="bookingsLoading"
+              class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              <div class="p-4 rounded-xl border bg-white animate-pulse">
+                <div class="h-5 w-40 bg-gray-200 rounded mb-3"></div>
+                <div class="h-4 w-56 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-4"></div>
+                <div class="flex justify-between items-center">
+                  <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                  <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+              <div class="p-4 rounded-xl border bg-white animate-pulse"></div>
+              <div class="p-4 rounded-xl border bg-white animate-pulse"></div>
+            </div>
+
+            <!-- Cards -->
+            <div
+              id="bookingsGrid"
+              class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            ></div>
+          </section>
         </section>
       </div>
     </main>
@@ -167,18 +225,18 @@
     <!-- Footer -->
     <div id="footer-placeholder" class="mt-10"></div>
 
-    <!-- Tiny (center) toast for in-page edits if you still want it -->
+    <!-- Tiny toast -->
     <div
       id="toast"
-      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-lg text-white shadow-lg"
+      class="fixed top-4 right-4 z-50 hidden px-4 py-2 rounded-lg text-white shadow-lg"
     ></div>
 
-    <!-- Shared scripts your project already uses -->
+    <!-- Shared scripts -->
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
 
-    <!-- Profile page logic (populate + inline edit/save to /api/Auth/Update) -->
+    <!-- Profile page logic (existing) -->
     <script>
       // --- Helpers
       function showToast(msg, type = "success") {
@@ -256,7 +314,6 @@
           if (on) {
             icon.className = "fas fa-save mr-2";
             label.textContent = "Save changes";
-            // switch yellow -> green while editing to save
             editSaveBtn.classList.remove(
               "bg-yellow-400",
               "hover:bg-yellow-500"
@@ -265,7 +322,6 @@
           } else {
             icon.className = "fas fa-pen mr-2";
             label.textContent = "Edit";
-            // switch back to yellow after save/cancel
             editSaveBtn.classList.add("bg-yellow-400", "hover:bg-yellow-500");
             editSaveBtn.classList.remove("bg-green-600", "hover:bg-green-700");
           }
@@ -279,7 +335,6 @@
             Country: country,
           });
 
-          // Your backend expects POST (per your earlier code)
           return fetch("/api/Auth/Update?" + params.toString(), {
             method: "POST",
             headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -291,7 +346,7 @@
           if (!name.trim() || !country.trim() || !phone.trim()) {
             return "Name, Phone, and Country are required.";
           }
-          if (!/^[\d+\-\s()]{6,}$/.test(phone.trim())) {
+          if (!/^[\\d+\\-\\s()]{6,}$/.test(phone.trim())) {
             return "Please enter a valid phone number.";
           }
           return null;
@@ -310,7 +365,6 @@
             return;
           }
 
-          // UI lock + show spinner without nuking innerHTML
           editSaveBtn.disabled = true;
           const icon = editSaveBtn.querySelector("i");
           const label = editSaveBtn.querySelector("span");
@@ -334,7 +388,6 @@
               throw new Error(errorMsg || "Update failed");
             }
 
-            // Update sidebar + memory
             document.getElementById("sidebarName").textContent = name;
             document.getElementById("sidebarLocation").innerHTML =
               '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
@@ -345,15 +398,14 @@
               window.currentUser.country = country;
             }
 
-            snapshotValues(); // new baseline
-            setEditingState(false); // switches to yellow + "Edit"
+            snapshotValues();
+            setEditingState(false);
             showToast("Profile updated successfully.");
           } catch (ex) {
             console.error(ex);
             showToast(ex.message || "Could not update profile.", "error");
           } finally {
             editSaveBtn.disabled = false;
-            // Ensure label/icon match the current state (editing may be false now)
             if (editing) {
               icon.className = "fas fa-save mr-2";
               label.textContent = "Save changes";
@@ -384,14 +436,318 @@
       });
     </script>
 
-    <!-- BLOCKING MODAL: forces Phone + Country after Google sign-in (uses only /api/Auth/Update) -->
+    <!-- Booking history logic -->
     <script>
       (function () {
-        // Only trigger this gate if your Google button previously set the flag:
-        // onclick="localStorage.setItem('mustCompleteProfile','1')"
+        const grid = () => document.getElementById("bookingsGrid");
+        const loading = () => document.getElementById("bookingsLoading");
+        const empty = () => document.getElementById("bookingsEmpty");
+        const errorBox = () => document.getElementById("bookingsError");
+
+        let bookingsCache = null; // cache after first fetch
+        let loadedOnce = false;
+
+        const STATUS_STYLES = {
+          Pending: { cls: "bg-yellow-100 text-yellow-800", icon: "fa-clock" },
+          Confirmed: {
+            cls: "bg-green-100 text-green-800",
+            icon: "fa-circle-check",
+          },
+          Canceled: { cls: "bg-red-100 text-red-800", icon: "fa-circle-xmark" },
+          Cancelled: {
+            cls: "bg-red-100 text-red-800",
+            icon: "fa-circle-xmark",
+          }, // just in case
+          Rejected: { cls: "bg-gray-100 text-gray-700", icon: "fa-ban" },
+        };
+
+        function statusBadge(status) {
+          const s = STATUS_STYLES[status] || {
+            cls: "bg-gray-100 text-gray-700",
+            icon: "fa-info-circle",
+          };
+          return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${s.cls}">
+              <i class="fa-solid ${s.icon}"></i> ${status}
+            </span>`;
+        }
+
+        function formatMoney(v) {
+          if (typeof v !== "number") return String(v ?? "");
+          try {
+            return v.toLocaleString();
+          } catch (_) {
+            return String(v);
+          }
+        }
+
+        function bookingCard(b) {
+          const isPending = String(b.status).toLowerCase() === "pending";
+          return `
+            <article class="booking-card p-4 rounded-xl border bg-white shadow-sm hover:shadow transition" data-id="${
+              b.id
+            }">
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="font-semibold text-gray-900 leading-snug line-clamp-2 mr-2">${
+                  b.tripName
+                }</h3>
+                ${statusBadge(b.status)}
+              </div>
+
+              <div class="mt-2 text-sm text-gray-600 space-y-1">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-user text-gray-400"></i>
+                  <span class="truncate">${b.userName}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-phone text-gray-400"></i>
+                  <span class="truncate">${b.phoneNumber}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-tag text-gray-400"></i>
+                  <span>Total: <b>${formatMoney(b.totalCost)}</b></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-fingerprint text-gray-400"></i>
+                  <code class="text-xs bg-gray-50 px-1.5 py-0.5 rounded break-all">${
+                    b.bookingPublicId
+                  }</code>
+                  <button class="copy-id ml-1 text-xs underline hover:no-underline" type="button" data-id="${
+                    b.bookingPublicId
+                  }">
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between">
+                <div class="text-xs text-gray-400">#${b.id}</div>
+                ${
+                  isPending
+                    ? `<button class="delete-booking inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+                           type="button" data-bid="${b.id}">
+                         <i class="fa-solid fa-trash"></i> Delete
+                       </button>`
+                    : `<button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-gray-500 text-sm cursor-not-allowed opacity-60" disabled>
+                         <i class="fa-solid fa-ban"></i> Delete
+                       </button>`
+                }
+              </div>
+            </article>
+          `;
+        }
+
+        function renderBookings(list) {
+          loading().classList.add("hidden");
+          errorBox().classList.add("hidden");
+
+          if (!list || list.length === 0) {
+            empty().classList.remove("hidden");
+            grid().classList.add("hidden");
+            return;
+          }
+
+          empty().classList.add("hidden");
+          const html = list.map(bookingCard).join("");
+          const g = grid();
+          g.innerHTML = html;
+          g.classList.remove("hidden");
+        }
+
+        async function fetchBookings() {
+          const token = localStorage.getItem("accessToken");
+          loading().classList.remove("hidden");
+          empty().classList.add("hidden");
+          grid().classList.add("hidden");
+          errorBox().classList.add("hidden");
+
+          try {
+            const res = await fetch("/api/Booking/GetAllBookings", {
+              method: "GET",
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              credentials: "include",
+            });
+
+            if (!res.ok) {
+              let msg = res.statusText;
+              try {
+                const payload = await res.json();
+                msg = payload?.message || msg;
+              } catch (_) {}
+              throw new Error(msg || "Failed to fetch bookings.");
+            }
+
+            const payload = await res.json();
+            const rows = payload?.data?.data || [];
+            bookingsCache = rows;
+            renderBookings(rows);
+          } catch (err) {
+            console.error(err);
+            loading().classList.add("hidden");
+            errorBox().textContent =
+              "Couldn’t load bookings. " + (err?.message || "");
+            errorBox().classList.remove("hidden");
+          } finally {
+            loadedOnce = true;
+          }
+        }
+
+        async function deleteBooking(id, btn) {
+          const token = localStorage.getItem("accessToken");
+          if (!confirm("Delete this booking? This action cannot be undone.")) {
+            return;
+          }
+
+          // lock UI
+          btn.disabled = true;
+          const prevHtml = btn.innerHTML;
+          btn.innerHTML =
+            '<i class="fa-solid fa-circle-notch fa-spin"></i> Deleting…';
+
+          try {
+            const res = await fetch(`/api/Booking/DeleteBooking/${id}`, {
+              method: "DELETE",
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              credentials: "include",
+            });
+
+            if (!res.ok) {
+              let msg = res.statusText;
+              try {
+                const payload = await res.json();
+                msg = payload?.message || msg;
+              } catch (_) {}
+              throw new Error(msg || "Delete failed");
+            }
+
+            // Remove from cache + UI
+            if (Array.isArray(bookingsCache)) {
+              bookingsCache = bookingsCache.filter(
+                (b) => String(b.id) !== String(id)
+              );
+            }
+            const card = btn.closest(".booking-card");
+            card?.classList.add("opacity-50", "pointer-events-none");
+            setTimeout(() => card?.remove(), 150);
+
+            showToast("Booking deleted.");
+            if (!grid().querySelector(".booking-card")) {
+              renderBookings([]);
+            }
+          } catch (err) {
+            console.error(err);
+            showToast(err?.message || "Could not delete booking.", "error");
+            btn.disabled = false;
+            btn.innerHTML = prevHtml;
+          }
+        }
+
+        // Copy public id
+        function copyText(t) {
+          try {
+            navigator.clipboard.writeText(t);
+            showToast("Copied!");
+          } catch (_) {
+            showToast("Copy failed", "error");
+          }
+        }
+
+        // Sidebar nav
+        function setActiveNav(which) {
+          const btnProfile = document.getElementById("navProfile");
+          const btnBookings = document.getElementById("navBookings");
+          const profileSection = document.getElementById("profileSection");
+          const bookingSection = document.getElementById("bookingSection");
+
+          const onProfile = which === "profile";
+          profileSection.classList.toggle("hidden", !onProfile);
+          bookingSection.classList.toggle("hidden", onProfile);
+
+          if (onProfile) {
+            btnProfile.classList.add(
+              "bg-yellow-400",
+              "hover:bg-yellow-500",
+              "text-black"
+            );
+            btnProfile.classList.remove(
+              "border",
+              "border-gray-300",
+              "text-gray-700"
+            );
+            btnBookings.classList.remove(
+              "bg-yellow-400",
+              "hover:bg-yellow-500",
+              "text-black"
+            );
+            btnBookings.classList.add(
+              "border",
+              "border-gray-300",
+              "text-gray-700"
+            );
+          } else {
+            btnBookings.classList.add(
+              "bg-yellow-400",
+              "hover:bg-yellow-500",
+              "text-black"
+            );
+            btnBookings.classList.remove(
+              "border",
+              "border-gray-300",
+              "text-gray-700"
+            );
+            btnProfile.classList.remove(
+              "bg-yellow-400",
+              "hover:bg-yellow-500",
+              "text-black"
+            );
+            btnProfile.classList.add(
+              "border",
+              "border-gray-300",
+              "text-gray-700"
+            );
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          // Nav clicks
+          document
+            .getElementById("navProfile")
+            .addEventListener("click", () => {
+              setActiveNav("profile");
+            });
+          document
+            .getElementById("navBookings")
+            .addEventListener("click", async () => {
+              setActiveNav("bookings");
+              if (!loadedOnce) {
+                await fetchBookings();
+              }
+            });
+
+          // Default: show profile; you can auto-open bookings by calling setActiveNav("bookings")
+          setActiveNav("profile");
+
+          // Delegated actions for bookings grid
+          grid().addEventListener("click", (e) => {
+            const delBtn = e.target.closest(".delete-booking");
+            if (delBtn) {
+              const id = delBtn.getAttribute("data-bid");
+              deleteBooking(id, delBtn);
+              return;
+            }
+            const copyBtn = e.target.closest(".copy-id");
+            if (copyBtn) {
+              copyText(copyBtn.getAttribute("data-id"));
+            }
+          });
+        });
+      })();
+    </script>
+
+    <!-- BLOCKING MODAL: Complete profile after Google sign-in (unchanged) -->
+    <script>
+      (function () {
         if (localStorage.getItem("mustCompleteProfile") !== "1") return;
 
-        // ---- Toast helper (uses top-right container) ----
         function toast(message, ok = true) {
           const tc = document.getElementById("toast-container");
           const el = document.createElement("div");
@@ -411,87 +767,75 @@
         }
 
         const countries = [
-          "Afghanistan",
-          "Albania",
-          "Algeria",
-          "Argentina",
-          "Australia",
-          "Austria",
-          "Bahrain",
-          "Bangladesh",
-          "Belgium",
-          "Brazil",
-          "Canada",
-          "Chile",
-          "China",
-          "Colombia",
-          "Denmark",
           "Egypt",
-          "Finland",
+          "Saudi Arabia",
+          "UAE",
+          "Qatar",
+          "Kuwait",
+          "Jordan",
+          "Bahrain",
+          "Oman",
+          "Morocco",
+          "Algeria",
+          "Tunisia",
+          "Libya",
+          "Lebanon",
+          "Iraq",
+          "Syria",
+          "Yemen",
+          "Turkey",
+          "USA",
+          "UK",
           "France",
           "Germany",
-          "Greece",
-          "India",
-          "Indonesia",
-          "Iran",
-          "Iraq",
-          "Ireland",
-          "Israel",
           "Italy",
-          "Japan",
-          "Jordan",
-          "Kenya",
-          "Kuwait",
-          "Lebanon",
-          "Libya",
-          "Malaysia",
-          "Mexico",
-          "Morocco",
+          "Spain",
           "Netherlands",
-          "New Zealand",
-          "Nigeria",
+          "Switzerland",
+          "Sweden",
           "Norway",
-          "Oman",
+          "Denmark",
+          "Finland",
+          "Canada",
+          "Brazil",
+          "Argentina",
+          "Mexico",
+          "South Africa",
+          "Kenya",
+          "Nigeria",
+          "India",
           "Pakistan",
-          "Peru",
+          "Bangladesh",
+          "China",
+          "Japan",
+          "South Korea",
+          "Indonesia",
+          "Malaysia",
           "Philippines",
+          "Australia",
+          "New Zealand",
+          "Russia",
+          "Ukraine",
+          "Romania",
           "Poland",
           "Portugal",
-          "Qatar",
-          "Romania",
-          "Russia",
-          "Saudi Arabia",
+          "Greece",
+          "Ireland",
+          "Austria",
+          "Belgium",
           "Singapore",
-          "South Africa",
-          "South Korea",
-          "Spain",
-          "Sri Lanka",
-          "Sudan",
-          "Sweden",
-          "Switzerland",
-          "Syria",
-          "Thailand",
-          "Tunisia",
-          "Turkey",
-          "UAE",
-          "UK",
-          "USA",
-          "Ukraine",
-          "Uzbekistan",
-          "Venezuela",
           "Vietnam",
-          "Yemen",
-          "Zimbabwe",
+          "Thailand",
+          "Sri Lanka",
         ];
 
-        // Build modal
         const overlay = document.createElement("div");
         overlay.id = "completeProfileModal";
         overlay.className =
           "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
 
         const u = window.currentUser || {};
-        const safeName = (u.fullName || "").replace(/"/g, "&quot;");
+        const safeName = (u.fullName || "").replace(/\"/g, "&quot;");
 
         overlay.innerHTML = `
           <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
@@ -502,7 +846,6 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input required id="cpName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2" value="${safeName}">
-                
               </div>
 
               <div>
@@ -528,7 +871,6 @@
         document.body.appendChild(overlay);
         lockScroll(true);
 
-        // Fill countries
         const sel = overlay.querySelector("#cpCountry");
         countries.forEach((c) => {
           const o = document.createElement("option");
@@ -538,7 +880,6 @@
         });
         sel.value = u.country || "Egypt";
 
-        // Prevent closing / outside clicks / ESC
         overlay.addEventListener(
           "click",
           (e) => {
@@ -558,7 +899,6 @@
           true
         );
 
-        // Submit => /api/Auth/Update
         overlay
           .querySelector("#cpForm")
           .addEventListener("submit", async (e) => {
@@ -568,7 +908,7 @@
             const phone = overlay.querySelector("#cpPhone").value.trim();
             const country = overlay.querySelector("#cpCountry").value.trim();
 
-            if (!/^[\d+\-\s()]{6,}$/.test(phone)) {
+            if (!/^[\\d+\\-\\s()]{6,}$/.test(phone)) {
               toast("Please enter a valid phone number.", false);
               return;
             }
@@ -591,7 +931,7 @@
 
             try {
               const res = await fetch(`/api/Auth/Update?${params.toString()}`, {
-                method: "POST", // matches your existing usage
+                method: "POST",
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
                 credentials: "include",
               });
@@ -609,7 +949,6 @@
                 throw new Error(msg || "Update failed");
               }
 
-              // Success: clear flag, update UI, release the user
               localStorage.setItem("mustCompleteProfile", "0");
               toast("Profile updated. You're good to go!");
 
@@ -617,14 +956,10 @@
                 document.getElementById("profilePhone").value = phone;
                 document.getElementById("profileLocation").value = country;
                 if (name) document.getElementById("profileName").value = name;
-
-                // sidebar
                 document.getElementById("sidebarName").textContent =
                   name || u.fullName || "User";
                 document.getElementById("sidebarLocation").innerHTML =
                   '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
-
-                // memory
                 if (window.currentUser) {
                   window.currentUser.fullName =
                     name || window.currentUser.fullName;
@@ -633,11 +968,9 @@
                 }
               } catch (_) {}
 
-              // remove modal and unlock scrolling
               overlay.remove();
               lockScroll(false);
 
-              // If a page set where the user wanted to go, send them there
               const back = sessionStorage.getItem("afterProfile");
               if (back && back !== location.href) {
                 sessionStorage.removeItem("afterProfile");
