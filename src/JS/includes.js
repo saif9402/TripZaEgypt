@@ -630,23 +630,33 @@ function fetchAndRenderCategories() {
     .then((res) => res.json())
     .then((data) => {
       if (data.succeeded && data.data?.data) {
-        const categories = data.data.data;
-        renderSidebarCategoriesList(categories);
+        // Map once, keep original object but attach a display label
+        const categoriesRaw = data.data.data;
+        const categories = categoriesRaw.map((c) => ({
+          ...c,
+          _label: _categoryLabel(c),
+        }));
 
-        // 1️⃣ Render Header Dropdowns (already existing)
+        renderSidebarCategoriesList(categories); // 👈 passes labeled cats
+
+        // 1️⃣ Header dropdowns
         const desktopDropdown = document.getElementById("tripsDropdown");
         const mobileDropdown = document.getElementById("mobileTripsDropdown");
 
         if (desktopDropdown) {
           desktopDropdown.innerHTML = `
-            <li>
-              <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
-            </li>
-            <li><hr class="border-t border-gray-200 my-1" /></li>
-          `;
+        <li>
+          <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
+        </li>
+        <li><hr class="border-t border-gray-200 my-1" /></li>
+      `;
           categories.forEach((cat) => {
             const li = document.createElement("li");
-            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="block px-4 py-2 hover:bg-gray-100">${cat.name}</a>`;
+            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${
+              cat.id
+            }" class="block px-4 py-2 hover:bg-gray-100">${_esc(
+              cat._label
+            )}</a>`;
             desktopDropdown.appendChild(li);
           });
         }
@@ -655,12 +665,14 @@ function fetchAndRenderCategories() {
           mobileDropdown.innerHTML = "";
           categories.forEach((cat) => {
             const li = document.createElement("li");
-            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="hover:text-blue-500">${cat.name}</a>`;
+            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${
+              cat.id
+            }" class="hover:text-blue-500">${_esc(cat._label)}</a>`;
             mobileDropdown.appendChild(li);
           });
         }
 
-        // 2️⃣ Render Category Filter Buttons
+        // 2️⃣ Category filter buttons
         const categoryButtons = document.getElementById("categoryButtons");
         if (categoryButtons) {
           categoryButtons.innerHTML = "";
@@ -668,14 +680,13 @@ function fetchAndRenderCategories() {
             const btn = document.createElement("button");
             btn.className =
               "bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition";
-            btn.textContent = cat.name;
+            btn.textContent = cat._label; // 👈 use fallback-safe label
             btn.addEventListener("click", () => {
               setActiveCategoryButton(btn);
               loadTripsByCategory(cat.id, { noCache: true });
             });
             categoryButtons.appendChild(btn);
 
-            // Auto-load the first category once
             if (idx === 0) {
               setActiveCategoryButton(btn);
               loadTripsByCategory(cat.id);
@@ -686,6 +697,7 @@ function fetchAndRenderCategories() {
         console.warn("No categories found in API response");
       }
     })
+
     .catch((err) => {
       console.error("Error loading categories for header & filter:", err);
     });
@@ -802,6 +814,45 @@ const _emptyState = `
     No other trips found in this category.
   </div>
 `;
+
+// --- Category name fallbacks ---
+const _NO_TRANS_REGEX = /^\s*no translation data\s*$/i;
+
+function _pickFirstValid(...vals) {
+  for (const v of vals) {
+    if (!v) continue;
+    const s = String(v).trim();
+    if (s && !_NO_TRANS_REGEX.test(s)) return s;
+  }
+  return "";
+}
+
+function _categoryLabel(cat) {
+  const lang = localStorage.getItem("lang") || "en";
+  // Try common API shapes for an English/default name if translated name is missing
+  const label = _pickFirstValid(
+    cat?.name,
+    cat?.nameEn,
+    cat?.nameEN,
+    cat?.enName,
+    cat?.englishName,
+    cat?.defaultName,
+    cat?.originalName,
+    cat?.title
+  );
+  if (label) return label;
+  // Last-resort fallback text (localized)
+  return lang === "deu" ? "Nicht übersetzt" : "Untranslated";
+}
+
+// Also useful when a trip object carries a category string already
+function _safeCategoryName(name) {
+  if (!name || _NO_TRANS_REGEX.test(String(name))) {
+    const lang = localStorage.getItem("lang") || "en";
+    return lang === "deu" ? "Nicht übersetzt" : "Untranslated";
+  }
+  return String(name);
+}
 
 // --- Featured animation helpers (GLOBAL, used by renderFeatured + rotator) ---
 let _featuredAnim = window._featuredAnim || {
@@ -948,8 +999,9 @@ function tripCardHTML(t) {
     <img src="${_esc(_safeImg(t.mainImageURL))}" alt="${_esc(
     t.name || "Trip Image"
   )}" class="trip-card__img" />
-    <div class="trip-card__body">
-      <h2 class="trip-card__title">${_esc(t.name || "Trip")}</h2>
+    <div class="trip-card__row"><span class="i">🏷️</span><span>${_esc(
+      _safeCategoryName(t.category)
+    )}</span></div>
 
       <div class="trip-card__meta">
         <div class="trip-card__row"><span class="i">🕒</span><span>${_esc(
@@ -1262,7 +1314,7 @@ function renderSidebarCategoriesList(categories) {
              id="${id}" value="${cat.id}" ${
       String(selectedId) === String(cat.id) ? "checked" : ""
     }/>
-      <span>${esc(cat.name)}</span>
+    <span>${esc(cat._label || _categoryLabel(cat))}</span>
     `;
     root.appendChild(label);
   });
