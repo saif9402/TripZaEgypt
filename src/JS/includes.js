@@ -1040,6 +1040,18 @@ function renderFeatured(trip) {
   _swapText(desc, descText);
 
   if (tags) {
+    // Make sure the container itself wraps on mobile
+    tags.classList.add(
+      "flex",
+      "flex-wrap",
+      "gap-2",
+      "items-center",
+      "max-w-full"
+    );
+    // In case some global class forced no-wrap or hidden overflow:
+    tags.style.whiteSpace = "normal";
+    tags.style.overflow = "visible";
+
     const pills = [];
     if (trip.category)
       pills.push({
@@ -1064,16 +1076,19 @@ function renderFeatured(trip) {
       label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
     });
 
+    // ✅ inline-flex + shrink-0 = no clipping + natural wrapping
     const html = pills
       .map(
         (p) => `
         <span class="${
           p.c
-        } text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-          <i class="fas ${p.icon} text-xs"></i> ${_esc(p.label)}
+        } inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full shrink-0">
+          <i class="fas ${p.icon} text-[10px]"></i>
+          <span>${_esc(p.label)}</span>
         </span>`
       )
       .join("");
+
     _swapText(tags, html, { asHTML: true });
   }
 
