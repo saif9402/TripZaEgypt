@@ -1,152 +1,4 @@
-/* ======= AUTH REFRESH INTERCEPTOR (paste at very top of includes.js) ======= */
-(() => {
-  const ORIGINAL_FETCH = window.fetch.bind(window);
-  const REFRESH_URL = "/api/Auth/GetToken";
-
-  let refreshInFlight = null; // de-dupe concurrent refreshes
-  let lastRefreshAt = 0;
-  const MIN_GAP_MS = 2000; // avoid spamming when many requests fire together
-
-  // Save user + token from the sample shape you shared
-  function storeUserFromResponse(payload) {
-    if (!payload || !payload.data) return;
-    const u = payload.data;
-    if (u.accessToken) localStorage.setItem("accessToken", u.accessToken);
-    // Keep whole user handy for your header
-    window.currentUser = u;
-  }
-
-  // Call GetToken (using ORIGINAL_FETCH to avoid recursion)
-  async function refreshToken() {
-    // throttle a bit
-    if (Date.now() - lastRefreshAt < MIN_GAP_MS && window.currentUser)
-      return window.currentUser;
-    if (refreshInFlight) return refreshInFlight;
-
-    refreshInFlight = (async () => {
-      try {
-        const res = await ORIGINAL_FETCH(REFRESH_URL, {
-          method: "POST", // use POST as in your current code
-          credentials: "include",
-          headers: { Accept: "application/json, text/plain, */*" },
-        });
-
-        // Some backends return text/plain with JSON; be defensive
-        let data;
-        try {
-          data = await res.clone().json();
-        } catch {
-          const t = await res.text();
-          try {
-            data = JSON.parse(t);
-          } catch {
-            data = null;
-          }
-        }
-
-        if (res.ok && data?.succeeded) {
-          storeUserFromResponse(data);
-        } else if (res.status === 401) {
-          localStorage.removeItem("accessToken");
-          window.currentUser = undefined;
-        }
-      } catch (err) {
-        // network errors should not break the app; just continue unauthenticated
-        console.warn("[auth] GetToken failed:", err);
-      } finally {
-        lastRefreshAt = Date.now();
-      }
-      return window.currentUser;
-    })().finally(() => {
-      refreshInFlight = null;
-    });
-
-    return refreshInFlight;
-  }
-
-  function isApiRequest(input) {
-    const urlStr = typeof input === "string" ? input : input?.url || "";
-    try {
-      const u = new URL(urlStr, location.href);
-      return u.pathname.startsWith("/api/");
-    } catch {
-      return false;
-    }
-  }
-
-  // Monkey-patch fetch: refresh first, then perform the original request
-  window.fetch = async function patchedFetch(input, init = {}) {
-    // Determine URL + whether this is an API call (skip HTML/asset fetches)
-    const urlStr = typeof input === "string" ? input : input?.url || "";
-    let pathname = "";
-    try {
-      pathname = new URL(urlStr, location.href).pathname;
-    } catch {}
-
-    const isApi = pathname.startsWith("/api/");
-    const isRefreshCall = pathname === REFRESH_URL;
-
-    // Only refresh BEFORE real API calls (and avoid recursion on the refresh call itself)
-    if (isApi && !isRefreshCall) {
-      await refreshToken();
-
-      // If we have a token, add Authorization unless caller already set it
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        const headers = new Headers(
-          (init && init.headers) ||
-            (typeof input !== "string" && input && input.headers) ||
-            {}
-        );
-        if (!headers.has("Authorization"))
-          headers.set("Authorization", "Bearer " + token);
-        init = { ...init, headers, credentials: init.credentials || "include" };
-      } else {
-        // still include cookies for cookie-based auth
-        init = { ...init, credentials: init.credentials || "include" };
-      }
-    }
-
-    // Perform the real request
-    let res = await ORIGINAL_FETCH(input, init);
-
-    // If token somehow went stale between refresh and call, try one forced refresh + retry once
-    if (isApi && !isRefreshCall && res.status === 401) {
-      await refreshToken(); // force
-      const token2 = localStorage.getItem("accessToken");
-      if (token2) {
-        const headers = new Headers(init.headers || {});
-        headers.set("Authorization", "Bearer " + token2);
-        init = { ...init, headers, credentials: init.credentials || "include" };
-      }
-      res = await ORIGINAL_FETCH(input, init);
-    }
-
-    // If the response itself is a GetToken (e.g., called explicitly somewhere), capture user
-    if (isRefreshCall) {
-      try {
-        const clone = res.clone();
-        let data;
-        try {
-          data = await clone.json();
-        } catch {
-          data = JSON.parse(await clone.text());
-        }
-        if (data?.succeeded) storeUserFromResponse(data);
-      } catch {}
-    }
-
-    return res;
-  };
-
-  // Optional: pre-warm once on page load (harmless if logged out)
-  document.addEventListener("DOMContentLoaded", () => {
-    refreshToken().catch(() => {});
-  });
-
-  // Expose manual trigger if you ever need it
-  window.__authRefresh = { refresh: refreshToken };
-})();
+// includes.js — shared layout + trending + categories
 
 // ------- Utilities to include HTML fragments -------
 function includeHTML(id, file, onDone) {
@@ -210,68 +62,61 @@ if (!window.logout) {
   };
 }
 
-// ------- Auth-aware header include (always refresh first) -------
+// ------- Auth-aware header include (boot trending ASAP after header) -------
 function checkAuthAndIncludeHeader() {
+  const token = localStorage.getItem("accessToken");
+
   const bootTrendingIfNeeded = () => {
+    // Start trending ASAP (don’t wait for footer). Guard to avoid double-boot.
     const tr = document.getElementById("trending-root");
     if (tr && !tr.__cleanup) initTopRatedSlider();
     checkAllIncludesLoaded();
   };
 
-  const showGuest = () =>
+  if (!token) {
+    // Not logged in
     includeHTML(
       "header-placeholder",
       "pages/header.html",
       bootTrendingIfNeeded
     );
-  const showAuthed = () =>
-    includeHTML(
-      "header-placeholder",
-      "pages/header-auth.html",
-      bootTrendingIfNeeded
-    );
+    return;
+  }
 
-  (async () => {
-    try {
-      // Use interceptor's refresh (de-duped, handles text/plain JSON)
-      const user = await (window.__authRefresh?.refresh?.() ||
-        Promise.resolve(undefined));
+  fetch("/api/Auth/GetToken", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then(async (res) => {
+      if (!res.ok) throw new Error("Response not OK");
 
-      if (user && user.email) {
-        // accessToken already stored by interceptor's storeUserFromResponse
-        return showAuthed();
-      }
+      const text = await res.text(); // because response is text/plain
+      const data = JSON.parse(text); // manually parse JSON string
 
-      // Fallback path: call GetToken directly if interceptor not present
-      const res = await fetch("/api/Auth/GetToken", {
-        method: "POST",
-        credentials: "include",
-        headers: { Accept: "application/json, text/plain, */*" },
-      });
-
-      let data;
-      try {
-        data = await res.clone().json();
-      } catch {
-        data = JSON.parse(await res.text());
-      }
-
-      if (res.ok && data?.succeeded && data?.data?.email) {
+      if (data?.succeeded && data?.data?.email) {
         window.currentUser = data.data;
-        if (data.data.accessToken)
-          localStorage.setItem("accessToken", data.data.accessToken);
-        return showAuthed();
+        includeHTML(
+          "header-placeholder",
+          "pages/header-auth.html",
+          bootTrendingIfNeeded
+        );
+      } else {
+        localStorage.removeItem("accessToken");
+        includeHTML(
+          "header-placeholder",
+          "pages/header.html",
+          bootTrendingIfNeeded
+        );
       }
-
-      // Not authenticated
-      localStorage.removeItem("accessToken");
-      window.currentUser = undefined;
-      return showGuest();
-    } catch (err) {
-      console.warn("Auth check failed:", err);
-      return showGuest();
-    }
-  })();
+    })
+    .catch((err) => {
+      console.error("Auth check failed:", err);
+      includeHTML(
+        "header-placeholder",
+        "pages/header.html",
+        bootTrendingIfNeeded
+      );
+    });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
