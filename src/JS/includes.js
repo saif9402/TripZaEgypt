@@ -621,74 +621,116 @@ function afterIncludesLoaded() {
   setupHomeSearch(); // 🔸 add/keep this line
   if (typeof bindPageTransitions === "function") bindPageTransitions();
 }
+// ---- Add these small helpers anywhere above fetchAndRenderCategories ----
+const _NO_TRANSLATION = /^\s*No Translation data\s*$/i;
+const _isMissingName = (s) => !s || _NO_TRANSLATION.test(String(s));
 
-function fetchAndRenderCategories() {
+function _resolveCategoryNames(primaryList, fallbackList) {
+  const fb = new Map((fallbackList || []).map((c) => [String(c.id), c]));
+  return (primaryList || []).map((c) => {
+    const primaryName = (c?.name ?? "").trim();
+    let name = primaryName;
+
+    if (_isMissingName(primaryName)) {
+      const fbName = (fb.get(String(c.id))?.name ?? "").trim();
+      if (!_isMissingName(fbName)) name = fbName;
+    }
+
+    // If still missing, leave as-is (you could put a generic label here)
+    return { ...c, name };
+  });
+}
+
+// ---- Replace your whole fetchAndRenderCategories with this version ----
+async function fetchAndRenderCategories() {
   const langCode = localStorage.getItem("lang") || "en";
   const langId = langCode === "deu" ? 1 : 2;
+  const fallbackLangId = langId === 1 ? 2 : 1; // if primary is German, fallback to English, else fallback to German
 
-  fetch(`/api/Category/GetAllCategories/${langId}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.succeeded && data.data?.data) {
-        const categories = data.data.data;
-        renderSidebarCategoriesList(categories);
+  const fetchCats = async (lid) => {
+    try {
+      const res = await fetch(`/api/Category/GetAllCategories/${lid}`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      return data?.succeeded && data.data?.data ? data.data.data : [];
+    } catch {
+      return [];
+    }
+  };
 
-        // 1️⃣ Render Header Dropdowns (already existing)
-        const desktopDropdown = document.getElementById("tripsDropdown");
-        const mobileDropdown = document.getElementById("mobileTripsDropdown");
+  // Pull primary + fallback in parallel
+  const [primaryCats, fallbackCats] = await Promise.all([
+    fetchCats(langId),
+    fetchCats(fallbackLangId),
+  ]);
 
-        if (desktopDropdown) {
-          desktopDropdown.innerHTML = `
-            <li>
-              <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
-            </li>
-            <li><hr class="border-t border-gray-200 my-1" /></li>
-          `;
-          categories.forEach((cat) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="block px-4 py-2 hover:bg-gray-100">${cat.name}</a>`;
-            desktopDropdown.appendChild(li);
-          });
-        }
+  if (!primaryCats.length && !fallbackCats.length) {
+    console.warn("No categories found in API response");
+    return;
+  }
 
-        if (mobileDropdown) {
-          mobileDropdown.innerHTML = "";
-          categories.forEach((cat) => {
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${cat.id}" class="hover:text-blue-500">${cat.name}</a>`;
-            mobileDropdown.appendChild(li);
-          });
-        }
+  // If primary is empty, just use fallback entirely; otherwise resolve per item
+  const categories = primaryCats.length
+    ? _resolveCategoryNames(primaryCats, fallbackCats)
+    : _resolveCategoryNames(fallbackCats, primaryCats);
 
-        // 2️⃣ Render Category Filter Buttons
-        const categoryButtons = document.getElementById("categoryButtons");
-        if (categoryButtons) {
-          categoryButtons.innerHTML = "";
-          categories.forEach((cat, idx) => {
-            const btn = document.createElement("button");
-            btn.className =
-              "bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition";
-            btn.textContent = cat.name;
-            btn.addEventListener("click", () => {
-              setActiveCategoryButton(btn);
-              loadTripsByCategory(cat.id, { noCache: true });
-            });
-            categoryButtons.appendChild(btn);
+  // ---------- Sidebar ----------
+  renderSidebarCategoriesList(categories);
 
-            // Auto-load the first category once
-            if (idx === 0) {
-              setActiveCategoryButton(btn);
-              loadTripsByCategory(cat.id);
-            }
-          });
-        }
-      } else {
-        console.warn("No categories found in API response");
-      }
-    })
-    .catch((err) => {
-      console.error("Error loading categories for header & filter:", err);
+  // ---------- Header dropdowns ----------
+  const desktopDropdown = document.getElementById("tripsDropdown");
+  const mobileDropdown = document.getElementById("mobileTripsDropdown");
+
+  if (desktopDropdown) {
+    desktopDropdown.innerHTML = `
+      <li>
+        <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
+      </li>
+      <li><hr class="border-t border-gray-200 my-1" /></li>
+    `;
+    categories.forEach((cat) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${
+        cat.id
+      }" class="block px-4 py-2 hover:bg-gray-100">${_esc(cat.name)}</a>`;
+      desktopDropdown.appendChild(li);
     });
+  }
+
+  if (mobileDropdown) {
+    mobileDropdown.innerHTML = "";
+    categories.forEach((cat) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="/pages/trips-list.html?categoryId=${
+        cat.id
+      }" class="hover:text-blue-500">${_esc(cat.name)}</a>`;
+      mobileDropdown.appendChild(li);
+    });
+  }
+
+  // ---------- Category filter buttons ----------
+  const categoryButtons = document.getElementById("categoryButtons");
+  if (categoryButtons) {
+    categoryButtons.innerHTML = "";
+    categories.forEach((cat, idx) => {
+      const btn = document.createElement("button");
+      btn.className =
+        "bg-gray-100 px-4 py-1 rounded-full text-sm hover:bg-blue-400 hover:text-white transition";
+      btn.textContent = cat.name;
+      btn.addEventListener("click", () => {
+        setActiveCategoryButton(btn);
+        loadTripsByCategory(cat.id, { noCache: true });
+      });
+      categoryButtons.appendChild(btn);
+
+      // Auto-load the first category once
+      if (idx === 0) {
+        setActiveCategoryButton(btn);
+        loadTripsByCategory(cat.id);
+      }
+    });
+  }
 }
 
 // ---------- Helpers for Category Trips ----------
