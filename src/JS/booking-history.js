@@ -27,6 +27,116 @@
         </span>`;
   }
 
+  function confirmModal({
+    title = "Are you sure?",
+    html = "",
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+    danger = false,
+  } = {}) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement("div");
+      overlay.id = "confirmModal";
+      overlay.className =
+        "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity";
+      overlay.innerHTML = `
+      <div id="confirmCard"
+           role="dialog" aria-modal="true" aria-labelledby="confirmTitle"
+           class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative transform scale-95 transition-transform">
+        <button type="button" aria-label="Close"
+                class="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
+                id="confirmCloseBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="flex items-start gap-3">
+          <div class="mt-1 shrink-0 ${
+            danger ? "text-red-600" : "text-yellow-500"
+          }">
+            <i class="fa-solid ${
+              danger ? "fa-triangle-exclamation" : "fa-circle-info"
+            } text-xl"></i>
+          </div>
+          <div class="flex-1">
+            <h3 id="confirmTitle" class="text-lg font-semibold mb-1">${title}</h3>
+            <div class="text-sm text-gray-600" id="confirmBody">${html}</div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-end gap-2">
+          <button type="button" class="px-4 py-2 rounded-lg border hover:bg-gray-50" id="confirmCancel">${cancelText}</button>
+          <button type="button"
+            class="px-4 py-2 rounded-lg text-white ${
+              danger
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-yellow-500 hover:bg-yellow-600"
+            }"
+            id="confirmOk">${confirmText}</button>
+        </div>
+      </div>
+    `;
+
+      // mount + animate
+      document.body.appendChild(overlay);
+      document.documentElement.style.overflow = "hidden";
+      requestAnimationFrame(() => {
+        overlay.classList.remove("opacity-0");
+        overlay.classList.add("opacity-100");
+        overlay.querySelector("#confirmCard").classList.remove("scale-95");
+        overlay.querySelector("#confirmCard").classList.add("scale-100");
+      });
+
+      const cleanup = (val) => {
+        overlay.classList.remove("opacity-100");
+        overlay.classList.add("opacity-0");
+        overlay.querySelector("#confirmCard").classList.remove("scale-100");
+        overlay.querySelector("#confirmCard").classList.add("scale-95");
+        setTimeout(() => {
+          overlay.remove();
+          document.documentElement.style.overflow = "";
+          resolve(val);
+        }, 150);
+      };
+
+      // events
+      overlay.addEventListener("click", (e) => {
+        const card = overlay.querySelector("#confirmCard");
+        if (!card.contains(e.target)) cleanup(false);
+      });
+      overlay
+        .querySelector("#confirmCancel")
+        .addEventListener("click", () => cleanup(false));
+      overlay
+        .querySelector("#confirmOk")
+        .addEventListener("click", () => cleanup(true));
+      overlay
+        .querySelector("#confirmCloseBtn")
+        .addEventListener("click", () => cleanup(false));
+      const onEsc = (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          cleanup(false);
+        }
+      };
+      document.addEventListener("keydown", onEsc, { once: true });
+    });
+  }
+
+  // Escape HTML (for safe interpolation)
+  function escapeHtml(s) {
+    return String(s ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[c])
+    );
+  }
+
   const formatPrice = (
     value,
     currency = "EUR",
@@ -67,6 +177,33 @@
     } catch {
       return d.toLocaleString("en-GB");
     }
+  }
+  async function confirmDeleteBooking(id) {
+    // try to enrich with details from cache
+    const b = Array.isArray(bookingsCache)
+      ? bookingsCache.find((x) => String(x.id) === String(id))
+      : null;
+
+    const trip = b?.tripName ? escapeHtml(b.tripName) : "this booking";
+    const created = b?.createdAt ? formatDateLocal(b.createdAt) : null;
+    const total =
+      (b?.totalCost ?? null) !== null ? formatPrice(b.totalCost, "EUR") : null;
+
+    const html = `
+    <p>You’re about to permanently delete <b>${trip}</b>${
+      created ? ` (created ${created})` : ""
+    }.</p>
+    ${total ? `<p class="mt-1">Total: <b>${total}</b></p>` : ""}
+    <p class="mt-3 text-xs text-red-600">This action cannot be undone.</p>
+  `;
+
+    return confirmModal({
+      title: "Delete booking?",
+      html,
+      confirmText: "Delete",
+      cancelText: "Keep Booking",
+      danger: true,
+    });
   }
 
   function bookingCard(b) {
@@ -178,9 +315,8 @@
   // Delete API (pending only)
   async function deleteBooking(id, btn) {
     const token = localStorage.getItem("accessToken");
-    if (!confirm("Delete this booking? This action cannot be undone.")) {
-      return;
-    }
+    const ok = await confirmDeleteBooking(id);
+    if (!ok) return;
 
     // lock UI
     btn.disabled = true;
