@@ -1,4 +1,152 @@
-// includes.js — shared layout + trending + categories
+/* ======= AUTH REFRESH INTERCEPTOR (paste at very top of includes.js) ======= */
+(() => {
+  const ORIGINAL_FETCH = window.fetch.bind(window);
+  const REFRESH_URL = "/api/Auth/GetToken";
+
+  let refreshInFlight = null; // de-dupe concurrent refreshes
+  let lastRefreshAt = 0;
+  const MIN_GAP_MS = 2000; // avoid spamming when many requests fire together
+
+  // Save user + token from the sample shape you shared
+  function storeUserFromResponse(payload) {
+    if (!payload || !payload.data) return;
+    const u = payload.data;
+    if (u.accessToken) localStorage.setItem("accessToken", u.accessToken);
+    // Keep whole user handy for your header
+    window.currentUser = u;
+  }
+
+  // Call GetToken (using ORIGINAL_FETCH to avoid recursion)
+  async function refreshToken() {
+    // throttle a bit
+    if (Date.now() - lastRefreshAt < MIN_GAP_MS && window.currentUser)
+      return window.currentUser;
+    if (refreshInFlight) return refreshInFlight;
+
+    refreshInFlight = (async () => {
+      try {
+        const res = await ORIGINAL_FETCH(REFRESH_URL, {
+          method: "POST", // use POST as in your current code
+          credentials: "include",
+          headers: { Accept: "application/json, text/plain, */*" },
+        });
+
+        // Some backends return text/plain with JSON; be defensive
+        let data;
+        try {
+          data = await res.clone().json();
+        } catch {
+          const t = await res.text();
+          try {
+            data = JSON.parse(t);
+          } catch {
+            data = null;
+          }
+        }
+
+        if (res.ok && data?.succeeded) {
+          storeUserFromResponse(data);
+        } else if (res.status === 401) {
+          localStorage.removeItem("accessToken");
+          window.currentUser = undefined;
+        }
+      } catch (err) {
+        // network errors should not break the app; just continue unauthenticated
+        console.warn("[auth] GetToken failed:", err);
+      } finally {
+        lastRefreshAt = Date.now();
+      }
+      return window.currentUser;
+    })().finally(() => {
+      refreshInFlight = null;
+    });
+
+    return refreshInFlight;
+  }
+
+  function isApiRequest(input) {
+    const urlStr = typeof input === "string" ? input : input?.url || "";
+    try {
+      const u = new URL(urlStr, location.href);
+      return u.pathname.startsWith("/api/");
+    } catch {
+      return false;
+    }
+  }
+
+  // Monkey-patch fetch: refresh first, then perform the original request
+  window.fetch = async function patchedFetch(input, init = {}) {
+    // Determine URL + whether this is an API call (skip HTML/asset fetches)
+    const urlStr = typeof input === "string" ? input : input?.url || "";
+    let pathname = "";
+    try {
+      pathname = new URL(urlStr, location.href).pathname;
+    } catch {}
+
+    const isApi = pathname.startsWith("/api/");
+    const isRefreshCall = pathname === REFRESH_URL;
+
+    // Only refresh BEFORE real API calls (and avoid recursion on the refresh call itself)
+    if (isApi && !isRefreshCall) {
+      await refreshToken();
+
+      // If we have a token, add Authorization unless caller already set it
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        const headers = new Headers(
+          (init && init.headers) ||
+            (typeof input !== "string" && input && input.headers) ||
+            {}
+        );
+        if (!headers.has("Authorization"))
+          headers.set("Authorization", "Bearer " + token);
+        init = { ...init, headers, credentials: init.credentials || "include" };
+      } else {
+        // still include cookies for cookie-based auth
+        init = { ...init, credentials: init.credentials || "include" };
+      }
+    }
+
+    // Perform the real request
+    let res = await ORIGINAL_FETCH(input, init);
+
+    // If token somehow went stale between refresh and call, try one forced refresh + retry once
+    if (isApi && !isRefreshCall && res.status === 401) {
+      await refreshToken(); // force
+      const token2 = localStorage.getItem("accessToken");
+      if (token2) {
+        const headers = new Headers(init.headers || {});
+        headers.set("Authorization", "Bearer " + token2);
+        init = { ...init, headers, credentials: init.credentials || "include" };
+      }
+      res = await ORIGINAL_FETCH(input, init);
+    }
+
+    // If the response itself is a GetToken (e.g., called explicitly somewhere), capture user
+    if (isRefreshCall) {
+      try {
+        const clone = res.clone();
+        let data;
+        try {
+          data = await clone.json();
+        } catch {
+          data = JSON.parse(await clone.text());
+        }
+        if (data?.succeeded) storeUserFromResponse(data);
+      } catch {}
+    }
+
+    return res;
+  };
+
+  // Optional: pre-warm once on page load (harmless if logged out)
+  document.addEventListener("DOMContentLoaded", () => {
+    refreshToken().catch(() => {});
+  });
+
+  // Expose manual trigger if you ever need it
+  window.__authRefresh = { refresh: refreshToken };
+})();
 
 // ------- Utilities to include HTML fragments -------
 function includeHTML(id, file, onDone) {
