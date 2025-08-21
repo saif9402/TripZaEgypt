@@ -834,6 +834,20 @@ function _ensureFeaturedAnimStyles() {
   }
   ._fade-swap._out{opacity:0; transform:translateY(-6px);}
   ._fade-swap._in{opacity:1; transform:translateY(0);}
+  
+  /* ✅ Featured tags wrap nicely on small screens */
+  #featuredTags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+    align-items:center;
+    max-width:100%;
+    overflow:visible;
+    white-space:normal;
+  }
+  #featuredTags > *{
+    flex:0 0 auto; /* don’t squish */
+  }
   `;
   const style = document.createElement("style");
   style.id = "featured-anim-styles";
