@@ -621,7 +621,7 @@ function afterIncludesLoaded() {
   setupHomeSearch(); // 🔸 add/keep this line
   if (typeof bindPageTransitions === "function") bindPageTransitions();
 }
-// ---- Add these small helpers anywhere above fetchAndRenderCategories ----
+
 const _NO_TRANSLATION = /^\s*No Translation data\s*$/i;
 const _isMissingName = (s) => !s || _NO_TRANSLATION.test(String(s));
 
