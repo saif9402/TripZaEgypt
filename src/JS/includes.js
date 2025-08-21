@@ -1351,7 +1351,6 @@ function renderSidebarCategoriesList(categories) {
   });
 }
 
-// --- Home search wiring (ISO 8601 with timezone offset) ---
 function setupHomeSearch() {
   const form = document.getElementById("homeSearchForm");
   if (!form) return; // only runs on the home page
@@ -1360,7 +1359,6 @@ function setupHomeSearch() {
   const sEl = document.getElementById("homeStartDate");
   const eEl = document.getElementById("homeEndDate");
   const hint = document.getElementById("homeSearchHint");
-  const swapBtn = document.getElementById("homeDateSwapBtn");
 
   // Build local ISO-8601 with timezone offset, e.g. 2025-08-16T00:00:00+03:00
   const toLocalISOWithOffset = (yyyy_mm_dd, endOfDay = false) => {
@@ -1388,22 +1386,84 @@ function setupHomeSearch() {
     return `${year}-${month}-${day}T${hh}:${mm}:${ss}${sign}${offH}:${offM}`;
   };
 
-  // Keep EndDate >= StartDate in UI
-  const syncMin = () => {
-    if (sEl && eEl) {
-      if (sEl.value) eEl.min = sEl.value;
-      else eEl.removeAttribute("min");
+  // ----- Flatpickr: consistent placeholders & UI on phones -----
+  let sPicker = null;
+  let ePicker = null;
+  const hasFP = typeof flatpickr === "function";
+
+  if (hasFP) {
+    const langCode = localStorage.getItem("lang") || "en";
+    const altFmt = langCode === "deu" ? "d.m.Y" : "d/m/Y"; // visible
+    const valueFmt = "Y-m-d"; // stored in the original input (what we submit)
+
+    sPicker = flatpickr("#homeStartDate", {
+      altInput: true,
+      altFormat: altFmt,
+      dateFormat: valueFmt,
+      allowInput: true,
+      clickOpens: true,
+      disableMobile: true,
+      onChange: (dates) => {
+        if (dates && dates[0]) ePicker?.set("minDate", dates[0]);
+        else ePicker?.set("minDate", null);
+      },
+    });
+
+    ePicker = flatpickr("#homeEndDate", {
+      altInput: true,
+      altFormat: altFmt,
+      dateFormat: valueFmt,
+      allowInput: true,
+      clickOpens: true,
+      disableMobile: true,
+      onChange: (dates) => {
+        if (dates && dates[0]) sPicker?.set("maxDate", dates[0]);
+        else sPicker?.set("maxDate", null);
+      },
+    });
+
+    // Visible placeholders (these show on mobile because they're regular text inputs)
+    sPicker.altInput?.setAttribute("placeholder", "Start Date");
+    ePicker.altInput?.setAttribute("placeholder", "End Date");
+  } else {
+    // Fallback: native date inputs (placeholders may not show on some phones)
+    sEl?.setAttribute("placeholder", "Start Date");
+    eEl?.setAttribute("placeholder", "End Date");
+  }
+
+  // Keep EndDate >= StartDate in UI (works for both Flatpickr & native)
+  const updateBounds = () => {
+    const sVal = hasFP ? sPicker.input.value : sEl?.value || "";
+    const eVal = hasFP ? ePicker.input.value : eEl?.value || "";
+
+    if (hasFP) {
+      if (sVal) ePicker.set("minDate", sVal);
+      else ePicker.set("minDate", null);
+      if (eVal) sPicker.set("maxDate", eVal);
+      else sPicker.set("maxDate", null);
+    } else {
+      if (sEl && eEl) {
+        if (sVal) eEl.min = sVal;
+        else eEl.removeAttribute("min");
+        if (eVal) sEl.max = eVal;
+        else sEl.removeAttribute("max");
+      }
     }
   };
-  sEl?.addEventListener("change", syncMin);
-  syncMin();
 
+  sEl?.addEventListener("change", updateBounds);
+  eEl?.addEventListener("change", updateBounds);
+  updateBounds();
+
+  // Submit -> build URL with Search, StartDate, EndDate (ISO with TZ offset)
   form.addEventListener("submit", (ev) => {
     ev.preventDefault();
 
     const q = (qEl?.value || "").trim();
-    let sd = sEl?.value || "";
-    let ed = eEl?.value || "";
+
+    // Values from the original inputs (Y-m-d when Flatpickr is used)
+    let sd = hasFP ? sPicker.input.value : sEl?.value || "";
+    let ed = hasFP ? ePicker.input.value : eEl?.value || "";
 
     // If only one date provided, treat it as a single day
     if (sd && !ed) ed = sd;
@@ -1417,7 +1477,7 @@ function setupHomeSearch() {
     if (sd) params.set("StartDate", toLocalISOWithOffset(sd, false));
     if (ed) params.set("EndDate", toLocalISOWithOffset(ed, true));
 
-    hint.textContent = ""; // clear any previous hint or errors
+    hint && (hint.textContent = ""); // clear any previous hint
 
     const url = `/pages/trips-list.html${
       params.toString() ? "?" + params : ""
