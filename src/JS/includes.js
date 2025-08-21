@@ -817,7 +817,7 @@ function _ensureFeaturedLayers() {
   const sec = document.getElementById("featuredSection");
   if (!sec) return null;
 
-  // Make sure section can layer children
+  // Section stacks children
   sec.classList.add("relative", "overflow-hidden");
 
   if (!_featuredAnim.stack) {
@@ -837,15 +837,16 @@ function _ensureFeaturedLayers() {
     const a = mkLayer();
     const b = mkLayer();
 
+    // Softer gradient = brighter image but still readable text
     const grad = document.createElement("div");
     grad.className =
       "absolute inset-0 pointer-events-none z-10 " +
-      "bg-gradient-to-b from-black/10 via-black/20 to-black/30";
+      "bg-gradient-to-b from-black/10 via-black/15 to-black/30";
 
     stack.append(a, b, grad);
     sec.prepend(stack);
 
-    // Ensure the rest of the section content sits above backgrounds
+    // Keep ALL existing section content floating above the bg
     sec.querySelectorAll(":scope > *:not(:first-child)").forEach((el) => {
       el.classList.add("relative", "z-20");
     });
@@ -877,7 +878,6 @@ function _swapFeaturedBackground(imgUrl) {
   _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
 }
 
-// Create a mobile-first text panel (solid card on phones, overlay on md+)
 function _ensureFeaturedTextContainer() {
   const sec = document.getElementById("featuredSection");
   if (!sec) return null;
@@ -889,31 +889,41 @@ function _ensureFeaturedTextContainer() {
   const link = document.getElementById("featuredLink");
   if (!title && !desc && !tags && !link) return null;
 
-  // Wrap existing bits into a single container (once)
+  // Keep it floating (no bg), just a container to control spacing on all sizes
   const wrap = document.createElement("div");
   wrap.id = "featuredTextWrap";
   wrap.className = [
-    "relative z-20 w-full md:w-auto md:max-w-xl",
-    // Mobile = solid card; md+ = transparent overlay
-    "bg-white/90 md:bg-transparent",
-    "text-slate-900 md:text-white",
-    "rounded-xl md:rounded-none",
-    "shadow-lg md:shadow-none",
-    "p-4 md:p-0",
+    "relative z-20 w-full md:max-w-2xl",
+    "text-white", // floating white text
+    "p-4 md:p-0", // light padding on small screens, align on md+
+    "space-y-2 md:space-y-3", // tidy vertical rhythm
   ].join(" ");
 
-  // Move known elements into the wrap in logical order
-  [link, title, desc, tags].forEach((el) => el && wrap.appendChild(el));
+  // Move bits into the wrap (order: title -> desc -> tags -> button/link)
+  [title, desc, tags, link].forEach((el) => el && wrap.appendChild(el));
   sec.appendChild(wrap);
   sec.__textWrap = wrap;
 
-  // Tighten spacing/typography with Tailwind
-  title?.classList.add("text-2xl", "md:text-4xl", "font-bold", "mb-2");
-  desc?.classList.add("text-sm", "md:text-base", "opacity-90", "mb-2");
-  tags?.classList.add("flex", "flex-wrap", "gap-2", "mt-2");
+  // Tweak typography (white + subtle drop shadow for readability)
+  title?.classList.add(
+    "text-3xl",
+    "md:text-5xl",
+    "font-extrabold",
+    "tracking-tight",
+    "drop-shadow"
+  );
+  desc?.classList.add(
+    "text-base",
+    "md:text-lg",
+    "text-white/90",
+    "drop-shadow"
+  );
+  tags?.classList.add("flex", "flex-wrap", "gap-2", "mt-1");
+
+  // Keep the CTA floating with no background
   link?.classList.add(
     "inline-block",
-    "mt-3",
+    "mt-2",
     "px-5",
     "py-2",
     "rounded-lg",
