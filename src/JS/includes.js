@@ -803,7 +803,7 @@ const _emptyState = `
   </div>
 `;
 
-// --- Featured animation helpers (GLOBAL, used by renderFeatured + rotator) ---
+// --- Featured animation helpers — Tailwind version (no custom CSS) ---
 let _featuredAnim = window._featuredAnim || {
   first: true,
   stack: null,
@@ -813,57 +813,41 @@ let _featuredAnim = window._featuredAnim || {
 };
 window._featuredAnim = _featuredAnim;
 
-function _ensureFeaturedAnimStyles() {
-  if (document.getElementById("featured-anim-styles")) return;
-  const css = `
-  #featuredSection{position:relative; overflow:hidden;}
-  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0;}
-  #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
-    filter:brightness(1.06); opacity:0; transform:scale(1.04);
-    transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
-  #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
-  #featuredSection .featured-gradient{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.20) 60%, rgba(0,0,0,.30) 100%);
-    pointer-events:none; z-index:1;}
-  #featuredSection .featured-content{position:relative; z-index:2;}
-
-  ._fade-swap{
-    transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
-               transform 420ms cubic-bezier(.22,.61,.36,1);
-    will-change:opacity,transform;
-  }
-  ._fade-swap._out{opacity:0; transform:translateY(-6px);}
-  ._fade-swap._in{opacity:1; transform:translateY(0);}
-  `;
-  const style = document.createElement("style");
-  style.id = "featured-anim-styles";
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
 function _ensureFeaturedLayers() {
-  _ensureFeaturedAnimStyles();
   const sec = document.getElementById("featuredSection");
   if (!sec) return null;
 
+  // Make sure section can layer children
+  sec.classList.add("relative", "overflow-hidden");
+
   if (!_featuredAnim.stack) {
     const stack = document.createElement("div");
-    stack.className = "featured-bg-stack";
-    const a = document.createElement("div");
-    const b = document.createElement("div");
-    a.className = "featured-bg-layer";
-    b.className = "featured-bg-layer";
+    stack.className = "absolute inset-0 pointer-events-none z-0";
+
+    const mkLayer = () =>
+      Object.assign(document.createElement("div"), {
+        className: [
+          "absolute inset-0 bg-cover bg-center bg-no-repeat",
+          "opacity-0 scale-105 filter",
+          "transition-all duration-700 ease-out",
+          "[will-change:opacity,transform]",
+        ].join(" "),
+      });
+
+    const a = mkLayer();
+    const b = mkLayer();
 
     const grad = document.createElement("div");
-    grad.className = "featured-gradient";
+    grad.className =
+      "absolute inset-0 pointer-events-none z-10 " +
+      "bg-gradient-to-b from-black/10 via-black/20 to-black/30";
 
     stack.append(a, b, grad);
     sec.prepend(stack);
 
-    // Make existing children sit above backgrounds
-    sec.querySelectorAll(":scope > *:not(.featured-bg-stack)").forEach((el) => {
-      if (!el.classList.contains("featured-content"))
-        el.classList.add("featured-content");
+    // Ensure the rest of the section content sits above backgrounds
+    sec.querySelectorAll(":scope > *:not(:first-child)").forEach((el) => {
+      el.classList.add("relative", "z-20");
     });
 
     _featuredAnim.stack = stack;
@@ -883,28 +867,83 @@ function _swapFeaturedBackground(imgUrl) {
 
   showNext.style.backgroundImage = `url('${imgUrl}')`;
 
-  // Reset then animate
-  showNext.classList.remove("is-active");
+  // Reset -> animate in
+  showNext.classList.remove("opacity-100", "scale-100", "brightness-105");
   void showNext.offsetWidth; // reflow
-  hideCur.classList.remove("is-active");
-  showNext.classList.add("is-active");
+
+  hideCur.classList.remove("opacity-100", "scale-100", "brightness-105");
+  showNext.classList.add("opacity-100", "scale-100", "brightness-105");
 
   _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
 }
 
+// Create a mobile-first text panel (solid card on phones, overlay on md+)
+function _ensureFeaturedTextContainer() {
+  const sec = document.getElementById("featuredSection");
+  if (!sec) return null;
+  if (sec.__textWrap) return sec.__textWrap;
+
+  const title = document.getElementById("featuredTitle");
+  const desc = document.getElementById("featuredDesc");
+  const tags = document.getElementById("featuredTags");
+  const link = document.getElementById("featuredLink");
+  if (!title && !desc && !tags && !link) return null;
+
+  // Wrap existing bits into a single container (once)
+  const wrap = document.createElement("div");
+  wrap.id = "featuredTextWrap";
+  wrap.className = [
+    "relative z-20 w-full md:w-auto md:max-w-xl",
+    // Mobile = solid card; md+ = transparent overlay
+    "bg-white/90 md:bg-transparent",
+    "text-slate-900 md:text-white",
+    "rounded-xl md:rounded-none",
+    "shadow-lg md:shadow-none",
+    "p-4 md:p-0",
+  ].join(" ");
+
+  // Move known elements into the wrap in logical order
+  [link, title, desc, tags].forEach((el) => el && wrap.appendChild(el));
+  sec.appendChild(wrap);
+  sec.__textWrap = wrap;
+
+  // Tighten spacing/typography with Tailwind
+  title?.classList.add("text-2xl", "md:text-4xl", "font-bold", "mb-2");
+  desc?.classList.add("text-sm", "md:text-base", "opacity-90", "mb-2");
+  tags?.classList.add("flex", "flex-wrap", "gap-2", "mt-2");
+  link?.classList.add(
+    "inline-block",
+    "mt-3",
+    "px-5",
+    "py-2",
+    "rounded-lg",
+    "bg-yellow-400",
+    "text-white",
+    "font-semibold",
+    "hover:bg-yellow-300",
+    "transition"
+  );
+
+  return wrap;
+}
+
+// Tailwind-based text fade/slide
 function _swapText(el, newHTML, { asHTML = false } = {}) {
   if (!el) return;
 
-  // First paint: no outgoing transition
+  // Ensure base transition classes exist
+  el.classList.add("transition-all", "duration-300", "ease-out");
+
   if (_featuredAnim.first) {
     if (asHTML) el.innerHTML = newHTML;
     else el.textContent = newHTML;
-    el.classList.add("_fade-swap", "_in");
+    el.classList.remove("opacity-0", "-translate-y-1");
+    el.classList.add("opacity-100", "translate-y-0");
     return;
   }
 
-  el.classList.add("_fade-swap", "_out");
-
+  // Animate out
+  el.classList.add("opacity-0", "-translate-y-1");
   const doSwap = () => {
     el.removeEventListener("transitionend", doSwap);
     if (asHTML) el.innerHTML = newHTML;
@@ -912,16 +951,16 @@ function _swapText(el, newHTML, { asHTML = false } = {}) {
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        el.classList.remove("_out");
-        el.classList.add("_in");
+        el.classList.remove("opacity-0", "-translate-y-1");
+        el.classList.add("opacity-100", "translate-y-0");
       });
     });
   };
-
   el.addEventListener("transitionend", doSwap, { once: true });
-  // Safety fallback
+
+  // Fallback
   setTimeout(() => {
-    if (el.classList.contains("_out")) doSwap();
+    if (el.classList.contains("opacity-0")) doSwap();
   }, 180);
 }
 
@@ -965,7 +1004,6 @@ function tripCardHTML(t) {
   </a>`;
 }
 
-// Update the Featured Destination section with animations
 function renderFeatured(trip) {
   if (!trip) return;
 
@@ -976,40 +1014,31 @@ function renderFeatured(trip) {
   const tags = document.getElementById("featuredTags");
   if (!sec) return;
 
-  // --- background (animated crossfade + subtle zoom) ---
-  const imgUrl = _esc(_safeImg(trip.mainImageURL));
+  // Layers + mobile text panel
   _ensureFeaturedLayers();
+  _ensureFeaturedTextContainer();
+
+  // Background crossfade (with slight zoom + brightness)
+  const imgUrl = _esc(_safeImg(trip.mainImageURL));
   if (_featuredAnim.first) {
-    // Prime both layers on first render = no flash
     _featuredAnim.a.style.backgroundImage = `url('${imgUrl}')`;
-    _featuredAnim.a.classList.add("is-active");
+    _featuredAnim.a.classList.add("opacity-100", "scale-100", "brightness-105");
     _featuredAnim.b.style.backgroundImage = `url('${imgUrl}')`;
   } else {
     _swapFeaturedBackground(imgUrl);
   }
 
-  // --- robust details URL (works on / and on /pages/) ---
+  // Link
   const onPages = window.location.pathname.includes("/pages/");
   const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
   const detailsURL = new URL(baseHref, window.location.href);
   detailsURL.searchParams.set("id", String(trip.id ?? ""));
-
   if (link) {
     link.href = detailsURL.pathname + detailsURL.search;
     link.dataset.featuredId = String(trip.id ?? "");
-    link.addEventListener(
-      "click",
-      (e) => {
-        if (!link.href.includes("id=")) {
-          e.preventDefault();
-          window.location.href = detailsURL.pathname + detailsURL.search;
-        }
-      },
-      { once: true }
-    );
   }
 
-  // Make the whole section clickable
+  // Whole section clickable (but don't hijack actual link clicks)
   sec.style.cursor = "pointer";
   sec.onclick = (ev) => {
     const a = ev.target?.closest?.("#featuredLink");
@@ -1017,9 +1046,8 @@ function renderFeatured(trip) {
     if (link?.href) window.location.href = link.href;
   };
 
-  // --- text bits (animated swaps) ---
+  // Text content (animated)
   _swapText(title, trip.name || "Featured Trip");
-
   const descText =
     _activitiesPreview(trip.activities, 200) ||
     "Explore this experience in Hurghada.";
