@@ -310,15 +310,15 @@
             return;
           }
 
-          // UI lock
+          // UI lock + show spinner without nuking innerHTML
           editSaveBtn.disabled = true;
-          const prevHtml = editSaveBtn.innerHTML;
-          editSaveBtn.innerHTML =
-            '<i class="fas fa-circle-notch fa-spin mr-2"></i><span>Saving…</span>';
+          const icon = editSaveBtn.querySelector("i");
+          const label = editSaveBtn.querySelector("span");
+          icon.className = "fas fa-circle-notch fa-spin mr-2";
+          label.textContent = "Saving…";
 
           try {
             const res = await callUpdateEndpoint(name, phone, country);
-
             if (!res.ok) {
               let errorMsg = res.statusText;
               try {
@@ -346,14 +346,21 @@
             }
 
             snapshotValues(); // new baseline
-            setEditingState(false);
+            setEditingState(false); // switches to yellow + "Edit"
             showToast("Profile updated successfully.");
           } catch (ex) {
             console.error(ex);
             showToast(ex.message || "Could not update profile.", "error");
           } finally {
             editSaveBtn.disabled = false;
-            editSaveBtn.innerHTML = prevHtml;
+            // Ensure label/icon match the current state (editing may be false now)
+            if (editing) {
+              icon.className = "fas fa-save mr-2";
+              label.textContent = "Save changes";
+            } else {
+              icon.className = "fas fa-pen mr-2";
+              label.textContent = "Edit";
+            }
           }
         }
 

@@ -95,6 +95,7 @@ function checkAuthAndIncludeHeader() {
 
       if (data?.succeeded && data?.data?.email) {
         window.currentUser = data.data;
+        localStorage.setItem("accessToken", data.data.accessToken);
         includeHTML(
           "header-placeholder",
           "pages/header-auth.html",
