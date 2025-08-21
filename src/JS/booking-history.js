@@ -43,10 +43,17 @@
     }
   };
 
+  function parseISOGuessTZ(iso) {
+    if (!iso) return null;
+    const hasTZ = /[zZ]|[+\-]\d{2}:\d{2}$/.test(iso);
+    const fixed = hasTZ ? iso : iso + "Z";
+    const d = new Date(fixed);
+    return isNaN(d) ? null : d;
+  }
+
   function formatDateLocal(iso) {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "-";
+    const d = parseISOGuessTZ(iso);
+    if (!d) return "-";
     try {
       return new Intl.DateTimeFormat("en-GB", {
         timeZone: "Africa/Cairo",
@@ -57,8 +64,8 @@
         minute: "2-digit",
         hour12: true,
       }).format(d);
-    } catch (_) {
-      return d.toLocaleString();
+    } catch {
+      return d.toLocaleString("en-GB");
     }
   }
 
@@ -278,9 +285,7 @@
     const overlay = buildModalSkeleton();
     document.body.appendChild(overlay);
     document.documentElement.style.overflow = "hidden";
-    document
-      .getElementById("bookingModalClose")
-      .addEventListener("click", closeBookingModal);
+
     overlay.addEventListener("click", (e) => {
       const card = overlay.firstElementChild;
       if (!card.contains(e.target)) {

@@ -3,7 +3,7 @@ function showToast(msg, type = "success") {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.className =
-    "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-white shadow-lg " +
+    "fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white shadow-lg " +
     (type === "success" ? "bg-green-600" : "bg-red-600");
   t.classList.remove("hidden");
   setTimeout(() => t.classList.add("hidden"), 2500);
