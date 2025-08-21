@@ -102,9 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!name.trim() || !country.trim() || !phone.trim()) {
       return "Name, Phone, and Country are required.";
     }
-    if (!/^[\\d+\\-\\s()]{6,}$/.test(phone.trim())) {
-      return "Please enter a valid phone number.";
-    }
+
     return null;
   }
 
