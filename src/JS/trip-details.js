@@ -759,7 +759,7 @@
     }
 
     $("tripDescription") &&
-      ($("tripDescription").textContent = t.description || "");
+      ($("tripDescription").textContent = `${t.description}` || "");
 
     if ($("tripActivities")) {
       $("tripActivities").innerHTML = (t.activities || [])
