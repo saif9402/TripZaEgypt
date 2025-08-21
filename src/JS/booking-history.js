@@ -4,6 +4,8 @@
   const empty = () => document.getElementById("bookingsEmpty");
   const errorBox = () => document.getElementById("bookingsError");
 
+  const langCode = localStorage.getItem("lang") || "en";
+
   let bookingsCache = null; // cache after first fetch
   let loadedOnce = false;
 
