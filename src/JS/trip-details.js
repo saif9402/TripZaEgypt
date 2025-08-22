@@ -288,64 +288,6 @@
     );
   }
 
-  function updateReviewStatsUI(newRating) {
-    // Read current average & count (we keep it resilient to missing DOM)
-    const avgEl = $("avgRating");
-    const avgStarsEl = $("avgStars");
-    const countEl = $("reviewsCount");
-    const hdrAvgEl = $("reviewsAverageText");
-    const hdrStarsEl = $("reviewsHeaderStars");
-    const hdrCountEl = $("reviewsCountHeader");
-
-    // Parse existing values
-    const currentAvg =
-      parseFloat(avgEl?.textContent || hdrAvgEl?.textContent || "0") || 0;
-    const currentCount =
-      parseInt(
-        (countEl?.textContent || hdrCountEl?.textContent || "0").replace(
-          /\D+/g,
-          ""
-        ) || "0",
-        10
-      ) || 0;
-
-    const nextCount = currentCount + 1;
-    const nextAvg =
-      (currentAvg * currentCount + Number(newRating || 0)) / nextCount;
-
-    // Update summary card
-    if (avgEl) avgEl.textContent = nextAvg.toFixed(1);
-    if (avgStarsEl) avgStarsEl.innerHTML = faStarsHTML(nextAvg);
-    if (countEl) countEl.textContent = pluralize(nextCount);
-
-    // Update header row
-    if (hdrAvgEl) hdrAvgEl.textContent = nextAvg.toFixed(1);
-    if (hdrStarsEl) hdrStarsEl.innerHTML = faStarsHTML(nextAvg);
-    if (hdrCountEl) hdrCountEl.textContent = pluralize(nextCount);
-  }
-
-  function prependReviewToList({ name, rating, comment }) {
-    const list = $("reviewsList");
-    if (!list) return;
-
-    const item = document.createElement("div");
-    item.className = "bg-white rounded-xl shadow p-4";
-    const safeName = esc(name || "You");
-    const safeComment = esc(comment || "");
-    const starsHtml = faStarsHTML(rating);
-
-    item.innerHTML = `
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-yellow-400">${starsHtml}</div>
-        <span class="text-xs text-gray-400">Just now</span>
-      </div>
-      <p class="text-gray-700 whitespace-pre-line">${safeComment}</p>
-      <div class="mt-3 text-sm text-gray-500">— ${safeName}</div>
-    `;
-
-    list.prepend(item);
-  }
-
   function wireReviewsForm() {
     const form = $("writeReviewForm");
     if (!form) return;
@@ -358,7 +300,6 @@
       const comment = ($("rvComment")?.value || "").trim();
       const name = ($("rvName")?.value || "").trim();
 
-      // basic validation
       if (!(rating >= 1 && rating <= 5)) {
         toast("warning", "Pick a rating", "Please choose from 1 to 5 stars.");
         return;
@@ -372,11 +313,9 @@
         return;
       }
 
-      // ensure logged in (and refresh token)
       const ok = await ensureLoggedInOrRedirect();
       if (!ok) return;
 
-      // disable submit
       const submitBtn = form.querySelector('button[type="submit"]');
       const original = submitBtn?.textContent;
       if (submitBtn) {
@@ -386,25 +325,22 @@
 
       try {
         await addReview({ tripId, rating, comment });
+        await fetchReviews(tripId); // refresh list + stats
 
-        // UX: show toast, update UI, reset form fields
         toast("success", "Review added", "Thanks for sharing your experience!");
-        updateReviewStatsUI(rating);
-        prependReviewToList({ name, rating, comment });
 
-        // reset form
+        // Reset UI
         form.reset();
-        // try to visually reset FA stars (in case Alpine keeps the fill)
         form.querySelectorAll(".fa-star, .fa-star-half-stroke").forEach((i) => {
           i.classList.remove("fa-solid", "text-yellow-400");
           i.classList.add("fa-regular", "text-gray-300");
         });
 
-        // show inline “thanks” label if present
-        const inlineOk = $("rvToast");
-        if (inlineOk) {
-          inlineOk.classList.remove("hidden");
-          setTimeout(() => inlineOk.classList.add("hidden"), 3000);
+        // Show inline “thanks” message
+        const rvToastEl = $("rvToast");
+        if (rvToastEl) {
+          rvToastEl.classList.remove("hidden");
+          setTimeout(() => rvToastEl.classList.add("hidden"), 3000);
         }
       } catch (err) {
         console.error("Add review error:", err);
@@ -425,6 +361,474 @@
         }
       }
     });
+  }
+
+  // ---------------- Reviews state + fetch ----------------
+  const reviewState = {
+    all: [],
+    userId: null,
+    pageSize: 6,
+    visible: 0,
+    filter: "all",
+    sort: "newest",
+  };
+
+  function normalizeReview(r) {
+    return {
+      id:
+        r.id ??
+        r.reviewId ??
+        `${r.userId || r.appUserId || "u"}-${r.tripId || r.tripID || "t"}`,
+      userId: r.userId ?? r.appUserId ?? r.user?.id ?? null,
+      userName: r.userName ?? r.fullName ?? r.user?.fullName ?? "Anonymous",
+      avatar: r.user?.profilePictureURL ?? r.profilePictureURL ?? "",
+      rating: Number(r.rating ?? r.stars ?? r.rate ?? 0),
+      comment: r.comment ?? r.text ?? "",
+      createdAt: r.createdAt ?? r.createdOn ?? r.date ?? r.reviewDate ?? null,
+    };
+  }
+
+  async function fetchReviews(tripId) {
+    // Try to know who is signed in (without forcing login)
+    let userId = null;
+    try {
+      await getFreshAccessToken(); // sets window.currentUser if signed in
+      userId = window.currentUser?.id ?? null;
+    } catch (_) {
+      /* not signed in is fine */
+    }
+    reviewState.userId = userId;
+
+    const params = new URLSearchParams({ TripId: String(tripId) });
+    if (userId != null) params.append("UserId", String(userId));
+
+    // loading skeleton
+    const listEl = $("reviewsList");
+    if (listEl) {
+      listEl.innerHTML = Array.from({ length: 3 })
+        .map(
+          () => `<div class="bg-white rounded-xl shadow p-4 animate-pulse">
+                   <div class="h-5 bg-gray-200 rounded w-32 mb-3"></div>
+                   <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                   <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                 </div>`
+        )
+        .join("");
+    }
+
+    let list = [];
+    try {
+      const res = await fetch(`/api/Reviews/GetReviews?${params.toString()}`, {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      const arr = Array.isArray(json)
+        ? json
+        : Array.isArray(json?.data?.data)
+        ? json.data.data
+        : Array.isArray(json?.data)
+        ? json.data
+        : [];
+      list = arr.map(normalizeReview);
+    } catch (e) {
+      console.error("GetReviews error:", e);
+      toast("error", "Couldn't load reviews", "Please try again later.");
+      list = [];
+    }
+
+    reviewState.all = list;
+    reviewState.visible = Math.min(reviewState.pageSize, list.length);
+    applyReviewsUI();
+  }
+
+  // ---------------- Reviews stats + breakdown ----------------
+  function renderReviewStats(list) {
+    const total = list.length;
+    const sum = list.reduce((s, r) => s + (Number(r.rating) || 0), 0);
+    const avg = total ? sum / total : 0;
+
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    list.forEach((r) => {
+      const rr = Math.max(1, Math.min(5, Math.round(Number(r.rating) || 0)));
+      counts[rr]++;
+    });
+
+    // Summary card
+    const avgEl = $("avgRating");
+    const avgStarsEl = $("avgStars");
+    const countEl = $("reviewsCount");
+    if (avgEl) avgEl.textContent = avg ? avg.toFixed(1) : "—";
+    if (avgStarsEl) avgStarsEl.innerHTML = faStarsHTML(avg);
+    if (countEl) countEl.textContent = pluralize(total);
+
+    // Header row
+    const hdrAvgEl = $("reviewsAverageText");
+    const hdrStarsEl = $("reviewsHeaderStars");
+    const hdrCountEl = $("reviewsCountHeader");
+    if (hdrAvgEl) hdrAvgEl.textContent = avg ? avg.toFixed(1) : "—";
+    if (hdrStarsEl) hdrStarsEl.innerHTML = faStarsHTML(avg);
+    if (hdrCountEl)
+      hdrCountEl.textContent = `${total} ${total === 1 ? "review" : "reviews"}`;
+
+    // Breakdown bars 5..1 using the provided template
+    const container = $("breakdownRows");
+    const tpl = $("ratingRowTemplate");
+    if (container && tpl) {
+      container.innerHTML = "";
+      const max = total || 1;
+      for (let i = 5; i >= 1; i--) {
+        const node = tpl.content.cloneNode(true);
+        node.querySelector(".starLabel").textContent = i;
+        node.querySelector(".bar").style.width = `${(counts[i] / max) * 100}%`;
+        node.querySelector(".count").textContent = String(counts[i]);
+        container.appendChild(node);
+      }
+    }
+  }
+
+  // ---------------- Render reviews list ----------------
+  function renderReviewsList(list) {
+    const wrap = $("reviewsList");
+    if (!wrap) return;
+
+    const isMine = (r) =>
+      reviewState.userId != null &&
+      String(r.userId) === String(reviewState.userId);
+
+    if (!list.length) {
+      wrap.innerHTML = `<div class="text-center text-gray-500 py-6">No reviews yet. Be the first to review!</div>`;
+      return;
+    }
+
+    const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
+
+    wrap.innerHTML = list
+      .map((r) => {
+        const when = r.createdAt ? new Date(r.createdAt) : null;
+        const dateStr =
+          when && !isNaN(when)
+            ? when.toLocaleDateString(lang, {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+              })
+            : "";
+        const actions = isMine(r)
+          ? `<div class="flex gap-2 mt-1">
+               <button class="rv-edit px-3 py-1.5 rounded bg-yellow-500 hover:bg-yellow-600 text-white text-xs" data-id="${esc(
+                 r.id
+               )}">Edit</button>
+               <button class="rv-del px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-xs" data-id="${esc(
+                 r.id
+               )}">Delete</button>
+             </div>`
+          : "";
+        const avatar = r.avatar
+          ? `<img src="${esc(
+              safeImg(r.avatar)
+            )}" class="w-9 h-9 rounded-full object-cover" onerror="this.src='${FALLBACK_DATA_IMG}'" />`
+          : `<div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">${esc(
+              (r.userName || "A")[0]
+            ).toUpperCase()}</div>`;
+
+        return `
+        <div class="bg-white rounded-xl shadow p-4" data-rid="${esc(r.id)}">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              ${avatar}
+              <div>
+                <div class="font-medium">${esc(r.userName || "Anonymous")}</div>
+                <div class="text-xs text-gray-400">${dateStr}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-yellow-400">${faStarsHTML(r.rating)}</div>
+              ${actions}
+            </div>
+          </div>
+          <p class="mt-3 text-gray-700 whitespace-pre-line">${esc(
+            r.comment || ""
+          )}</p>
+        </div>`;
+      })
+      .join("");
+
+    // Wire actions
+    wrap.querySelectorAll(".rv-edit").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        enterEditMode(btn.getAttribute("data-id"))
+      );
+    });
+    wrap.querySelectorAll(".rv-del").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        confirmDelete(btn.getAttribute("data-id"))
+      );
+    });
+  }
+
+  // ---------------- Apply filter/sort/pagination ----------------
+  function applyReviewsUI() {
+    const { all, filter, sort, visible } = reviewState;
+
+    // Stats first
+    renderReviewStats(all);
+
+    // If the user already reviewed, hide the write form
+    const hasMine =
+      reviewState.userId != null &&
+      all.some((r) => String(r.userId) === String(reviewState.userId));
+    const formCard = $("writeReviewCard");
+    if (formCard) formCard.classList.toggle("hidden", hasMine);
+
+    // Filter by exact star value if picked
+    let list = all.slice();
+    if (filter !== "all") {
+      const n = Number(filter);
+      list = list.filter((r) => Math.round(r.rating) === n);
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      if (sort === "highest") return b.rating - a.rating;
+      if (sort === "lowest") return a.rating - b.rating;
+      // newest by createdAt desc
+      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return db - da || (b.id > a.id ? 1 : -1);
+    });
+
+    // Render current page
+    renderReviewsList(list.slice(0, visible));
+
+    // Load more button
+    const btn = $("reviewsLoadMore");
+    if (btn) {
+      btn.classList.toggle("hidden", list.length <= visible);
+      btn.onclick = () => {
+        reviewState.visible = Math.min(
+          list.length,
+          reviewState.visible + reviewState.pageSize
+        );
+        renderReviewsList(list.slice(0, reviewState.visible));
+        btn.classList.toggle("hidden", list.length <= reviewState.visible);
+      };
+    }
+  }
+
+  function wireReviewsSection() {
+    $("reviewsFilter")?.addEventListener("change", (e) => {
+      reviewState.filter = e.target.value;
+      reviewState.visible = reviewState.pageSize;
+      applyReviewsUI();
+    });
+    $("reviewsSort")?.addEventListener("change", (e) => {
+      reviewState.sort = e.target.value;
+      applyReviewsUI();
+    });
+
+    wireReviewsForm(); // keep the create flow from previous step
+
+    const id = getTripIdFromUrl();
+    if (id) fetchReviews(id);
+  }
+
+  // ---------------- Edit / Delete ----------------
+  async function updateReview({ tripId, rating, comment }) {
+    const token = await getFreshAccessToken();
+    const res = await fetch("/api/Reviews/UpdateReview", {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        Accept: "application/json, text/plain",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        tripId: Number(tripId),
+        rating: Number(rating),
+        comment: String(comment || "").trim(),
+      }),
+    });
+    const payload = await parseMaybeTextJSON(res);
+    if (!res.ok || payload?.succeeded === false) {
+      const msg =
+        payload?.message ||
+        (Array.isArray(payload?.errors) && payload.errors[0]) ||
+        `Update review failed (${res.status})`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.details = payload;
+      throw err;
+    }
+    return payload;
+  }
+
+  async function deleteReview({ tripId, userId }) {
+    // Token likely required; try to refresh but don't crash if missing
+    const token = await getFreshAccessToken().catch(() => null);
+    const params = new URLSearchParams();
+    if (userId != null) params.append("UserId", String(userId));
+
+    const res = await fetch(
+      `/api/Reviews/DeleteReview/${encodeURIComponent(
+        tripId
+      )}?${params.toString()}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json, text/plain",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+    const payload = await parseMaybeTextJSON(res);
+    if (!res.ok || payload?.succeeded === false) {
+      const msg =
+        payload?.message ||
+        (Array.isArray(payload?.errors) && payload.errors[0]) ||
+        `Delete review failed (${res.status})`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.details = payload;
+      throw err;
+    }
+    return payload;
+  }
+
+  function enterEditMode(id) {
+    const card = document.querySelector(
+      `[data-rid="${CSS.escape(String(id))}"]`
+    );
+    const r = reviewState.all.find((x) => String(x.id) === String(id));
+    if (!card || !r) return;
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="font-medium">Edit your review</div>
+        <button class="rv-cancel text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+      </div>
+      <div class="mt-3">
+        <div class="mb-2 flex items-center gap-1" id="rvEditStars"></div>
+        <textarea id="rvEditComment" rows="4" class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500">${esc(
+          r.comment || ""
+        )}</textarea>
+        <div class="mt-3 flex gap-2">
+          <button class="rv-save bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">Save</button>
+          <button class="rv-cancel border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-4 py-2 rounded">Cancel</button>
+        </div>
+      </div>`;
+
+    // Star input
+    const starsWrap = card.querySelector("#rvEditStars");
+    let current = Math.round(Number(r.rating) || 0);
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = `<i class="${
+        i <= current ? "fa-solid" : "fa-regular"
+      } fa-star text-xl ${
+        i <= current ? "text-yellow-400" : "text-gray-300"
+      }"></i>`;
+      b.className = "p-1";
+      b.addEventListener("mouseenter", () => paint(i));
+      b.addEventListener("mouseleave", () => paint(current));
+      b.addEventListener("click", () => {
+        current = i;
+        paint(current);
+      });
+      starsWrap.appendChild(b);
+    }
+    function paint(v) {
+      starsWrap.querySelectorAll("i").forEach((iEl, idx) => {
+        const k = idx + 1;
+        iEl.classList.toggle("fa-solid", k <= v);
+        iEl.classList.toggle("fa-regular", k > v);
+        iEl.classList.toggle("text-yellow-400", k <= v);
+        iEl.classList.toggle("text-gray-300", k > v);
+      });
+    }
+
+    // Cancel/Save
+    card
+      .querySelectorAll(".rv-cancel")
+      .forEach((b) => b.addEventListener("click", () => applyReviewsUI()));
+    card.querySelector(".rv-save")?.addEventListener("click", async () => {
+      const comment = (
+        card.querySelector("#rvEditComment")?.value || ""
+      ).trim();
+      if (comment.length < 10) {
+        toast(
+          "warning",
+          "Comment too short",
+          "Please write at least 10 characters."
+        );
+        return;
+      }
+      try {
+        await updateReview({
+          tripId: getTripIdFromUrl(),
+          rating: current,
+          comment,
+        });
+        // mutate in-memory and re-apply UI
+        r.rating = current;
+        r.comment = comment;
+        toast("success", "Review updated", "Your changes were saved.");
+        applyReviewsUI();
+      } catch (e) {
+        console.error("UpdateReview error:", e);
+        if (e?.status === 401 || e?.status === 403) {
+          toast(
+            "info",
+            "Sign in required",
+            "Please sign in to update your review."
+          );
+          redirectToLogin();
+        } else {
+          toast(
+            "error",
+            "Couldn't update review",
+            e?.message || "Please try again."
+          );
+        }
+      }
+    });
+  }
+
+  function confirmDelete(id) {
+    const r = reviewState.all.find((x) => String(x.id) === String(id));
+    if (!r) return;
+    const ok = window.confirm(
+      "Delete your review? This action cannot be undone."
+    );
+    if (!ok) return;
+
+    deleteReview({ tripId: getTripIdFromUrl(), userId: reviewState.userId })
+      .then(() => {
+        reviewState.all = reviewState.all.filter(
+          (x) => String(x.id) !== String(id)
+        );
+        toast("success", "Review deleted", "Your review was removed.");
+        applyReviewsUI();
+      })
+      .catch((e) => {
+        console.error("DeleteReview error:", e);
+        if (e?.status === 401 || e?.status === 403) {
+          toast(
+            "info",
+            "Sign in required",
+            "Please sign in to delete your review."
+          );
+          redirectToLogin();
+        } else {
+          toast(
+            "error",
+            "Couldn't delete review",
+            e?.message || "Please try again."
+          );
+        }
+      });
   }
 
   // ---------------- Availability (dates + times) ----------------
@@ -1176,7 +1580,7 @@
   window.addEventListener("DOMContentLoaded", () => {
     ensureRelatedDOM();
     wireRelatedNav();
-    wireReviewsForm();
+    wireReviewsSection();
     loadTrip();
   });
 })();
