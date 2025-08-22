@@ -367,7 +367,7 @@
   const reviewState = {
     all: [],
     userId: null,
-    pageSize: 6,
+    pageSize: 3,
     visible: 0,
     filter: "all",
     sort: "newest",
