@@ -419,7 +419,6 @@
     // Try to know who is signed in (without forcing login)
     let userId = null;
     try {
-      await getFreshAccessToken(); // sets window.currentUser if signed in
       userId = window.currentUser?.id ?? null;
     } catch (_) {
       /* not signed in is fine */
