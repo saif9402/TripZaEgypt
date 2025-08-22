@@ -262,6 +262,21 @@
   }
 
   // ---------------- Add Review ----------------
+  // Map UI <select> value -> API Sort value
+  function mapSortToQuery(mode) {
+    switch ((mode || "").toLowerCase()) {
+      case "highest":
+        return "rating:desc";
+      case "lowest":
+        return "rating:asc";
+      // if you ever add "oldest" to the UI:
+      case "oldest":
+        return "date:asc";
+      default:
+        return "date:desc"; // "newest"
+    }
+  }
+
   async function addReview({ tripId, rating, comment }) {
     const token = await getFreshAccessToken(); // <- refresh before action
 
@@ -426,6 +441,7 @@
     visible: 0,
     filter: "all",
     sort: "newest",
+    serverSorted: false,
   };
 
   function normalizeReview(r) {
@@ -448,24 +464,28 @@
     let userId = null;
     try {
       userId = window.currentUser?.id ?? null;
-    } catch (_) {
-      /* not signed in is fine */
-    }
+    } catch (_) {}
     reviewState.userId = userId;
 
+    // Build API params
     const params = new URLSearchParams({ TripId: String(tripId) });
     if (userId != null) params.append("UserId", String(userId));
+
+    // ⬇️ tell the backend how to sort
+    params.append("Sort", mapSortToQuery(reviewState.sort));
 
     // loading skeleton
     const listEl = $("reviewsList");
     if (listEl) {
       listEl.innerHTML = Array.from({ length: 3 })
         .map(
-          () => `<div class="bg-white rounded-xl shadow p-4 animate-pulse">
-                   <div class="h-5 bg-gray-200 rounded w-32 mb-3"></div>
-                   <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                   <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-                 </div>`
+          () => `
+      <div class="bg-white rounded-xl shadow p-4 animate-pulse">
+        <div class="h-5 bg-gray-200 rounded w-32 mb-3"></div>
+        <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+      </div>
+    `
         )
         .join("");
     }
@@ -484,10 +504,9 @@
         ? json.data
         : [];
 
-      // Map with a stable fallback id + keep original index
       list = arr.map((r, idx) => {
         const base = normalizeReview(r);
-        if (!base.id) base.id = `rv-${idx}`; // ensure unique DOM id
+        if (!base.id) base.id = `rv-${idx}`;
         base._origIndex = idx;
         return base;
       });
@@ -498,27 +517,24 @@
         const myName = (window.currentUser?.fullName || "")
           .trim()
           .toLowerCase();
-
-        // Prefer an exact name match (case-insensitive)
         if (myName) {
           const mineByName = list.find(
             (x) => (x.userName || "").trim().toLowerCase() === myName
           );
           if (mineByName) {
-            mineByName.userId = reviewState.userId; // memoize for future
+            mineByName.userId = reviewState.userId;
             reviewState.mineKey = mineByName.id;
           }
         }
-
-        // If still unknown, rely on backend guarantee: mine is first
-        if (!reviewState.mineKey) {
-          reviewState.mineKey = list[0].id;
-        }
+        if (!reviewState.mineKey) reviewState.mineKey = list[0].id;
       }
+
+      reviewState.serverSorted = true; // ✅ backend respected Sort
     } catch (e) {
       console.error("GetReviews error:", e);
       toast("error", "Couldn't load reviews", "Please try again later.");
       list = [];
+      reviewState.serverSorted = false; // fallback to client sorting
     }
 
     reviewState.all = list;
@@ -684,15 +700,17 @@
       list = list.filter((r) => Math.round(r.rating) === n);
     }
 
-    // Sort others by the selected mode
-    list.sort((a, b) => {
-      if (sort === "highest") return b.rating - a.rating;
-      if (sort === "lowest") return a.rating - b.rating;
-      // newest
-      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return db - da || (b.id > a.id ? 1 : -1);
-    });
+    // Keep server order. If server didn't sort (e.g., error), fallback to client sort.
+    if (!reviewState.serverSorted) {
+      list.sort((a, b) => {
+        if (reviewState.sort === "highest") return b.rating - a.rating;
+        if (reviewState.sort === "lowest") return a.rating - b.rating;
+        // newest
+        const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return db - da || (b.id > a.id ? 1 : -1);
+      });
+    }
 
     // ⬇️ Ensure the signed-in user's review stays first (if present)
     list = moveMineFirst(list);
@@ -719,14 +737,17 @@
     $("reviewsFilter")?.addEventListener("change", (e) => {
       reviewState.filter = e.target.value;
       reviewState.visible = reviewState.pageSize;
-      applyReviewsUI();
-    });
-    $("reviewsSort")?.addEventListener("change", (e) => {
-      reviewState.sort = e.target.value;
-      applyReviewsUI();
+      applyReviewsUI(); // filter is client-side, keep current data
     });
 
-    wireReviewsForm(); // keep the create flow from previous step
+    $("reviewsSort")?.addEventListener("change", (e) => {
+      reviewState.sort = e.target.value;
+      reviewState.visible = reviewState.pageSize;
+      const id = getTripIdFromUrl();
+      if (id) fetchReviews(id); // 🔁 ask backend to return already-sorted data
+    });
+
+    wireReviewsForm();
 
     const id = getTripIdFromUrl();
     if (id) fetchReviews(id);
