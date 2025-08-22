@@ -233,6 +233,200 @@
     return payload;
   }
 
+  // ---------------- Add Review ----------------
+  async function addReview({ tripId, rating, comment }) {
+    const token = await getFreshAccessToken(); // <- refresh before action
+
+    const res = await fetch("/api/Reviews/AddReview", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        Accept: "application/json, text/plain",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        tripId: Number(tripId),
+        rating: Number(rating),
+        comment: String(comment || "").trim(),
+      }),
+    });
+
+    const payload = await parseMaybeTextJSON(res);
+
+    if (!res.ok || payload?.succeeded === false) {
+      const msg =
+        payload?.message ||
+        (Array.isArray(payload?.errors) && payload.errors[0]) ||
+        `Add review failed (${res.status})`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.details = payload;
+      throw err;
+    }
+
+    return payload;
+  }
+
+  // ---------------- Reviews UI helpers ----------------
+  function pluralize(n, one = "review", many = "reviews") {
+    return `${n} ${n === 1 ? one : many}`;
+  }
+
+  function faStarsHTML(value) {
+    // full/half/empty FontAwesome stars for any 0..5 value
+    const v = Math.max(0, Math.min(5, Number(value) || 0));
+    const full = Math.floor(v);
+    const half = v - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return (
+      '<i class="fa-solid fa-star text-yellow-400"></i>'.repeat(full) +
+      (half
+        ? '<i class="fa-solid fa-star-half-stroke text-yellow-400"></i>'
+        : "") +
+      '<i class="fa-regular fa-star text-gray-300"></i>'.repeat(empty)
+    );
+  }
+
+  function updateReviewStatsUI(newRating) {
+    // Read current average & count (we keep it resilient to missing DOM)
+    const avgEl = $("avgRating");
+    const avgStarsEl = $("avgStars");
+    const countEl = $("reviewsCount");
+    const hdrAvgEl = $("reviewsAverageText");
+    const hdrStarsEl = $("reviewsHeaderStars");
+    const hdrCountEl = $("reviewsCountHeader");
+
+    // Parse existing values
+    const currentAvg =
+      parseFloat(avgEl?.textContent || hdrAvgEl?.textContent || "0") || 0;
+    const currentCount =
+      parseInt(
+        (countEl?.textContent || hdrCountEl?.textContent || "0").replace(
+          /\D+/g,
+          ""
+        ) || "0",
+        10
+      ) || 0;
+
+    const nextCount = currentCount + 1;
+    const nextAvg =
+      (currentAvg * currentCount + Number(newRating || 0)) / nextCount;
+
+    // Update summary card
+    if (avgEl) avgEl.textContent = nextAvg.toFixed(1);
+    if (avgStarsEl) avgStarsEl.innerHTML = faStarsHTML(nextAvg);
+    if (countEl) countEl.textContent = pluralize(nextCount);
+
+    // Update header row
+    if (hdrAvgEl) hdrAvgEl.textContent = nextAvg.toFixed(1);
+    if (hdrStarsEl) hdrStarsEl.innerHTML = faStarsHTML(nextAvg);
+    if (hdrCountEl) hdrCountEl.textContent = pluralize(nextCount);
+  }
+
+  function prependReviewToList({ name, rating, comment }) {
+    const list = $("reviewsList");
+    if (!list) return;
+
+    const item = document.createElement("div");
+    item.className = "bg-white rounded-xl shadow p-4";
+    const safeName = esc(name || "You");
+    const safeComment = esc(comment || "");
+    const starsHtml = faStarsHTML(rating);
+
+    item.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-yellow-400">${starsHtml}</div>
+        <span class="text-xs text-gray-400">Just now</span>
+      </div>
+      <p class="text-gray-700 whitespace-pre-line">${safeComment}</p>
+      <div class="mt-3 text-sm text-gray-500">— ${safeName}</div>
+    `;
+
+    list.prepend(item);
+  }
+
+  function wireReviewsForm() {
+    const form = $("writeReviewForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const tripId = getTripIdFromUrl();
+      const rating = Number($("rvRating")?.value || 0);
+      const comment = ($("rvComment")?.value || "").trim();
+      const name = ($("rvName")?.value || "").trim();
+
+      // basic validation
+      if (!(rating >= 1 && rating <= 5)) {
+        toast("warning", "Pick a rating", "Please choose from 1 to 5 stars.");
+        return;
+      }
+      if (comment.length < 10) {
+        toast(
+          "warning",
+          "Comment too short",
+          "Please write at least 10 characters."
+        );
+        return;
+      }
+
+      // ensure logged in (and refresh token)
+      const ok = await ensureLoggedInOrRedirect();
+      if (!ok) return;
+
+      // disable submit
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const original = submitBtn?.textContent;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting…";
+      }
+
+      try {
+        await addReview({ tripId, rating, comment });
+
+        // UX: show toast, update UI, reset form fields
+        toast("success", "Review added", "Thanks for sharing your experience!");
+        updateReviewStatsUI(rating);
+        prependReviewToList({ name, rating, comment });
+
+        // reset form
+        form.reset();
+        // try to visually reset FA stars (in case Alpine keeps the fill)
+        form.querySelectorAll(".fa-star, .fa-star-half-stroke").forEach((i) => {
+          i.classList.remove("fa-solid", "text-yellow-400");
+          i.classList.add("fa-regular", "text-gray-300");
+        });
+
+        // show inline “thanks” label if present
+        const inlineOk = $("rvToast");
+        if (inlineOk) {
+          inlineOk.classList.remove("hidden");
+          setTimeout(() => inlineOk.classList.add("hidden"), 3000);
+        }
+      } catch (err) {
+        console.error("Add review error:", err);
+        if (err?.status === 401 || err?.status === 403) {
+          toast("info", "Sign in required", "Please sign in to add a review.");
+          redirectToLogin();
+        } else {
+          toast(
+            "error",
+            "Couldn't add review",
+            err?.message || "Please try again."
+          );
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = original || "Submit review";
+        }
+      }
+    });
+  }
+
   // ---------------- Availability (dates + times) ----------------
   const fmtDateKey = (d) => {
     const y = d.getFullYear();
@@ -979,10 +1173,10 @@
     }
   });
 
-  // ---------------- Init ----------------
   window.addEventListener("DOMContentLoaded", () => {
-    ensureRelatedDOM(); // ensure IDs exist even if HTML lacked them
-    wireRelatedNav(); // wire Next/Prev
-    loadTrip(); // fetch trip + related
+    ensureRelatedDOM();
+    wireRelatedNav();
+    wireReviewsForm();
+    loadTrip();
   });
 })();
