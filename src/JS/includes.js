@@ -99,7 +99,7 @@ function checkAuthAndIncludeHeader() {
       const data = ct.includes("application/json")
         ? await res.json()
         : JSON.parse(await res.text());
-      console.log(res);
+      console.log(data);
 
       if (res.ok && data?.succeeded && data?.data?.accessToken) {
         // Logged in
