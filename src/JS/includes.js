@@ -62,47 +62,60 @@ if (!window.logout) {
   };
 }
 
-// ------- Auth-aware header include (boot trending ASAP after header) -------
+// ------- Auth-aware header include (no race, single include) -------
 function checkAuthAndIncludeHeader() {
-  const token = localStorage.getItem("accessToken");
-
   const bootTrendingIfNeeded = () => {
     // Start trending ASAP (don’t wait for footer). Guard to avoid double-boot.
     const tr = document.getElementById("trending-root");
     if (tr && !tr.__cleanup) initTopRatedSlider();
-    checkAllIncludesLoaded();
+    checkAllIncludesLoaded(); // counts as the "header" load
   };
 
-  if (!token) {
-    // Not logged in
-    includeHTML(
-      "header-placeholder",
-      "pages/header.html",
-      bootTrendingIfNeeded
-    );
-    return;
+  // Optional tiny skeleton so layout doesn't jump while we check auth
+  const ph = document.getElementById("header-placeholder");
+  if (ph && !ph.dataset.skeleton) {
+    ph.dataset.skeleton = "1";
+    ph.innerHTML = `
+      <header class="w-full border-b bg-white">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div class="h-6 w-28 bg-gray-200 rounded"></div>
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-20 bg-gray-200 rounded"></div>
+            <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+      </header>`;
   }
 
+  // Always ask the server: cookie tells the truth about auth state
   fetch("/api/Auth/GetToken", {
     method: "POST",
     credentials: "include",
+    headers: { Accept: "application/json, text/plain" },
   })
     .then(async (res) => {
-      if (!res.ok) throw new Error("Response not OK");
+      // Some backends return text/plain; parse robustly
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      const data = ct.includes("application/json")
+        ? await res.json()
+        : JSON.parse(await res.text());
 
-      const text = await res.text(); // because response is text/plain
-      const data = JSON.parse(text); // manually parse JSON string
-
-      if (data?.succeeded && data?.data?.email) {
+      if (res.ok && data?.succeeded && data?.data?.accessToken) {
+        // Logged in
         window.currentUser = data.data;
-        localStorage.setItem("accessToken", data.data.accessToken);
+        try {
+          localStorage.setItem("accessToken", data.data.accessToken);
+        } catch {}
         includeHTML(
           "header-placeholder",
           "pages/header-auth.html",
           bootTrendingIfNeeded
         );
       } else {
-        localStorage.removeItem("accessToken");
+        // Not logged in
+        try {
+          localStorage.removeItem("accessToken");
+        } catch {}
         includeHTML(
           "header-placeholder",
           "pages/header.html",
@@ -112,6 +125,9 @@ function checkAuthAndIncludeHeader() {
     })
     .catch((err) => {
       console.error("Auth check failed:", err);
+      try {
+        localStorage.removeItem("accessToken");
+      } catch {}
       includeHTML(
         "header-placeholder",
         "pages/header.html",
