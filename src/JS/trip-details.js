@@ -270,10 +270,25 @@
 
   // ---------------- Reviews UI helpers ----------------
   function moveMineFirst(list) {
-    const uid = reviewState.userId;
-    if (uid == null) return list; // guest: leave order as-is
+    if (!Array.isArray(list) || !list.length) return list;
 
-    const idx = list.findIndex((r) => String(r.userId) === String(uid));
+    const uid = reviewState.userId;
+    let idx = -1;
+
+    if (uid != null) {
+      idx = list.findIndex((r) => String(r.userId) === String(uid));
+    }
+    if (idx < 0 && reviewState.mineKey != null) {
+      idx = list.findIndex((r) => String(r.id) === String(reviewState.mineKey));
+    }
+    if (idx < 0 && uid != null && window.currentUser?.fullName) {
+      const me = window.currentUser.fullName.trim().toLowerCase();
+      idx = list.findIndex(
+        (r) => (r.userName || "").trim().toLowerCase() === me
+      );
+      if (idx >= 0) list[idx].userId = uid; // memoize
+    }
+
     if (idx > 0) {
       const [mine] = list.splice(idx, 1);
       list.unshift(mine);
@@ -441,7 +456,38 @@
         : Array.isArray(json?.data)
         ? json.data
         : [];
-      list = arr.map(normalizeReview);
+
+      // Map with a stable fallback id + keep original index
+      list = arr.map((r, idx) => {
+        const base = normalizeReview(r);
+        if (!base.id) base.id = `rv-${idx}`; // ensure unique DOM id
+        base._origIndex = idx;
+        return base;
+      });
+
+      // Figure out which one is "mine" even if userId is missing
+      reviewState.mineKey = null;
+      if (reviewState.userId != null && list.length) {
+        const myName = (window.currentUser?.fullName || "")
+          .trim()
+          .toLowerCase();
+
+        // Prefer an exact name match (case-insensitive)
+        if (myName) {
+          const mineByName = list.find(
+            (x) => (x.userName || "").trim().toLowerCase() === myName
+          );
+          if (mineByName) {
+            mineByName.userId = reviewState.userId; // memoize for future
+            reviewState.mineKey = mineByName.id;
+          }
+        }
+
+        // If still unknown, rely on backend guarantee: mine is first
+        if (!reviewState.mineKey) {
+          reviewState.mineKey = list[0].id;
+        }
+      }
     } catch (e) {
       console.error("GetReviews error:", e);
       toast("error", "Couldn't load reviews", "Please try again later.");
@@ -588,7 +634,19 @@
     // Hide write form if the user already reviewed
     const hasMine =
       reviewState.userId != null &&
-      all.some((r) => String(r.userId) === String(reviewState.userId));
+      // direct userId match
+      (all.some((r) => String(r.userId) === String(reviewState.userId)) ||
+        // or the remembered "mine" item
+        (reviewState.mineKey != null &&
+          all.some((r) => String(r.id) === String(reviewState.mineKey))) ||
+        // or a name match fallback
+        (window.currentUser?.fullName &&
+          all.some(
+            (r) =>
+              (r.userName || "").trim().toLowerCase() ===
+              window.currentUser.fullName.trim().toLowerCase()
+          )));
+
     const formCard = $("writeReviewCard");
     if (formCard) formCard.classList.toggle("hidden", hasMine);
 
