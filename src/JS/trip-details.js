@@ -35,6 +35,34 @@
     });
   }
 
+  // --- Small, safe wait for includes.js to finish auth ---
+  const _sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function _waitForHeaderAuth({ maxMs = 1200, stepMs = 60 } = {}) {
+    // capture current token snapshot; includes.js will set/remove it
+    let initialToken = null;
+    try {
+      initialToken = localStorage.getItem("accessToken");
+    } catch {}
+    const t0 = performance.now();
+
+    while (performance.now() - t0 < maxMs) {
+      // includes.js sets window.currentUser on success, and also explicitly
+      // clears localStorage token on logout.
+      if (window.currentUser !== undefined) return; // logged in or logged out; header finished
+
+      // token changed? then header likely ran
+      let nowTok = null;
+      try {
+        nowTok = localStorage.getItem("accessToken");
+      } catch {}
+      if (nowTok !== initialToken) return;
+
+      await _sleep(stepMs);
+    }
+    // timeout: proceed without blocking; we'll just not pass UserId
+  }
+
   // ---------- Utils ----------
   const esc = (s) =>
     (s ?? "").toString().replace(
@@ -1649,10 +1677,11 @@
     }
   });
 
-  window.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener("DOMContentLoaded", async () => {
+    await _waitForHeaderAuth(); // <= adaptive, fast when already ready
     ensureRelatedDOM();
     wireRelatedNav();
-    wireReviewsSection();
+    wireReviewsSection(); // this will call fetchReviews(...)
     loadTrip();
   });
 })();
