@@ -107,9 +107,6 @@ function checkAuthAndIncludeHeader() {
         try {
           localStorage.setItem("accessToken", data.data.accessToken);
         } catch {}
-        window.dispatchEvent(
-          new CustomEvent("auth:state", { detail: { user: data.data } })
-        );
         includeHTML(
           "header-placeholder",
           "pages/header-auth.html",
@@ -120,9 +117,6 @@ function checkAuthAndIncludeHeader() {
         try {
           localStorage.removeItem("accessToken");
         } catch {}
-        window.dispatchEvent(
-          new CustomEvent("auth:state", { detail: { user: null } })
-        );
         includeHTML(
           "header-placeholder",
           "pages/header.html",

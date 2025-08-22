@@ -79,28 +79,6 @@
     }
   };
 
-  // --- "my review" persistence (keyed by trip + user) ---
-  const MY_REVIEW_LS_PREFIX = "rv:mine:";
-  const myReviewKey = (tripId, uid) => `${MY_REVIEW_LS_PREFIX}${tripId}:${uid}`;
-  const loadMineFromLS = (tripId, uid) => {
-    try {
-      return localStorage.getItem(myReviewKey(tripId, uid));
-    } catch {
-      return null;
-    }
-  };
-  const saveMineToLS = (tripId, uid, reviewId) => {
-    if (!tripId || !uid || !reviewId) return;
-    try {
-      localStorage.setItem(myReviewKey(tripId, uid), String(reviewId));
-    } catch {}
-  };
-  const clearMineFromLS = (tripId, uid) => {
-    try {
-      localStorage.removeItem(myReviewKey(tripId, uid));
-    } catch {}
-  };
-
   const getLangId = () => (localStorage.getItem("lang") === "deu" ? 1 : 2);
   const getTripIdFromUrl = () =>
     new URL(window.location.href).searchParams.get("id");
@@ -291,20 +269,26 @@
   }
 
   // ---------------- Reviews UI helpers ----------------
-  function isMyReview(r) {
-    const uid = reviewState.userId;
-    if (uid == null) return false;
-    const name = (window.currentUser?.fullName || "").trim().toLowerCase();
-    return (
-      String(r.userId) === String(uid) ||
-      String(r.id) === String(reviewState.mineKey) ||
-      (!!name && (r.userName || "").trim().toLowerCase() === name)
-    );
-  }
-
   function moveMineFirst(list) {
     if (!Array.isArray(list) || !list.length) return list;
-    const idx = list.findIndex(isMyReview);
+
+    const uid = reviewState.userId;
+    let idx = -1;
+
+    if (uid != null) {
+      idx = list.findIndex((r) => String(r.userId) === String(uid));
+    }
+    if (idx < 0 && reviewState.mineKey != null) {
+      idx = list.findIndex((r) => String(r.id) === String(reviewState.mineKey));
+    }
+    if (idx < 0 && uid != null && window.currentUser?.fullName) {
+      const me = window.currentUser.fullName.trim().toLowerCase();
+      idx = list.findIndex(
+        (r) => (r.userName || "").trim().toLowerCase() === me
+      );
+      if (idx >= 0) list[idx].userId = uid; // memoize
+    }
+
     if (idx > 0) {
       const [mine] = list.splice(idx, 1);
       list.unshift(mine);
@@ -473,42 +457,35 @@
         ? json.data
         : [];
 
+      // Map with a stable fallback id + keep original index
       list = arr.map((r, idx) => {
         const base = normalizeReview(r);
-        if (!base.id) base.id = `rv-${idx}`;
+        if (!base.id) base.id = `rv-${idx}`; // ensure unique DOM id
         base._origIndex = idx;
         return base;
       });
 
-      // Work out "mine" robustly (no more "first item" assumption)
+      // Figure out which one is "mine" even if userId is missing
       reviewState.mineKey = null;
-      const tripKey = String(tripId);
-
       if (reviewState.userId != null && list.length) {
-        const uid = String(reviewState.userId);
+        const myName = (window.currentUser?.fullName || "")
+          .trim()
+          .toLowerCase();
 
-        // 1) exact userId present in payload
-        let mine = list.find((x) => String(x.userId) === uid);
-
-        // 2) stored id from previous session
-        if (!mine) {
-          const storedId = loadMineFromLS(tripKey, uid);
-          if (storedId)
-            mine = list.find((x) => String(x.id) === String(storedId));
-        }
-
-        // 3) name match fallback
-        if (!mine && window.currentUser?.fullName) {
-          const me = window.currentUser.fullName.trim().toLowerCase();
-          mine = list.find(
-            (x) => (x.userName || "").trim().toLowerCase() === me
+        // Prefer an exact name match (case-insensitive)
+        if (myName) {
+          const mineByName = list.find(
+            (x) => (x.userName || "").trim().toLowerCase() === myName
           );
+          if (mineByName) {
+            mineByName.userId = reviewState.userId; // memoize for future
+            reviewState.mineKey = mineByName.id;
+          }
         }
 
-        if (mine) {
-          reviewState.mineKey = mine.id;
-          mine.userId = reviewState.userId; // memoize for action buttons
-          saveMineToLS(tripKey, uid, mine.id); // persist for future loads
+        // If still unknown, rely on backend guarantee: mine is first
+        if (!reviewState.mineKey) {
+          reviewState.mineKey = list[0].id;
         }
       }
     } catch (e) {
@@ -572,6 +549,15 @@
     const wrap = $("reviewsList");
     if (!wrap) return;
 
+    const isMine = (r) =>
+      reviewState.userId != null &&
+      String(r.userId) === String(reviewState.userId);
+
+    if (!list.length) {
+      wrap.innerHTML = `<div class="text-center text-gray-500 py-6">No reviews yet. Be the first to review!</div>`;
+      return;
+    }
+
     const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
 
     wrap.innerHTML = list
@@ -585,7 +571,7 @@
                 day: "2-digit",
               })
             : "";
-        const actions = isMyReview(r)
+        const actions = isMine(r)
           ? `<div class="flex gap-2 mt-1">
                <button class="rv-edit px-3 py-1.5 rounded bg-yellow-500 hover:bg-yellow-600 text-white text-xs" data-id="${esc(
                  r.id
@@ -645,7 +631,21 @@
     // Stats first (uses all reviews)
     renderReviewStats(all);
 
-    const hasMine = reviewState.userId != null && all.some(isMyReview);
+    // Hide write form if the user already reviewed
+    const hasMine =
+      reviewState.userId != null &&
+      // direct userId match
+      (all.some((r) => String(r.userId) === String(reviewState.userId)) ||
+        // or the remembered "mine" item
+        (reviewState.mineKey != null &&
+          all.some((r) => String(r.id) === String(reviewState.mineKey))) ||
+        // or a name match fallback
+        (window.currentUser?.fullName &&
+          all.some(
+            (r) =>
+              (r.userName || "").trim().toLowerCase() ===
+              window.currentUser.fullName.trim().toLowerCase()
+          )));
 
     const formCard = $("writeReviewCard");
     if (formCard) formCard.classList.toggle("hidden", hasMine);
@@ -847,7 +847,6 @@
         // mutate in-memory and re-apply UI
         r.rating = current;
         r.comment = comment;
-        saveMineToLS(getTripIdFromUrl(), reviewState.userId, r.id);
         toast("success", "Review updated", "Your changes were saved.");
         applyReviewsUI();
       } catch (e) {
@@ -883,8 +882,6 @@
         reviewState.all = reviewState.all.filter(
           (x) => String(x.id) !== String(id)
         );
-        clearMineFromLS(getTripIdFromUrl(), reviewState.userId);
-        reviewState.mineKey = null;
         toast("success", "Review deleted", "Your review was removed.");
         applyReviewsUI();
       })
@@ -1650,16 +1647,6 @@
     } finally {
       bConfirm.disabled = false;
       bConfirm.textContent = originalText;
-    }
-  });
-
-  // When includes.js finishes auth check and loads a header, it will emit this:
-  window.addEventListener("auth:state", (ev) => {
-    const newUid = ev?.detail?.user?.id ?? null;
-    if (newUid !== reviewState.userId) {
-      reviewState.userId = newUid;
-      const id = getTripIdFromUrl();
-      if (id) fetchReviews(id); // recompute mine & re-render
     }
   });
 
