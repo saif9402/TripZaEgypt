@@ -269,6 +269,18 @@
   }
 
   // ---------------- Reviews UI helpers ----------------
+  function moveMineFirst(list) {
+    const uid = reviewState.userId;
+    if (uid == null) return list; // guest: leave order as-is
+
+    const idx = list.findIndex((r) => String(r.userId) === String(uid));
+    if (idx > 0) {
+      const [mine] = list.splice(idx, 1);
+      list.unshift(mine);
+    }
+    return list;
+  }
+
   function pluralize(n, one = "review", many = "reviews") {
     return `${n} ${n === 1 ? one : many}`;
   }
@@ -570,32 +582,35 @@
   function applyReviewsUI() {
     const { all, filter, sort, visible } = reviewState;
 
-    // Stats first
+    // Stats first (uses all reviews)
     renderReviewStats(all);
 
-    // If the user already reviewed, hide the write form
+    // Hide write form if the user already reviewed
     const hasMine =
       reviewState.userId != null &&
       all.some((r) => String(r.userId) === String(reviewState.userId));
     const formCard = $("writeReviewCard");
     if (formCard) formCard.classList.toggle("hidden", hasMine);
 
-    // Filter by exact star value if picked
+    // Filter by star if needed
     let list = all.slice();
     if (filter !== "all") {
       const n = Number(filter);
       list = list.filter((r) => Math.round(r.rating) === n);
     }
 
-    // Sort
+    // Sort others by the selected mode
     list.sort((a, b) => {
       if (sort === "highest") return b.rating - a.rating;
       if (sort === "lowest") return a.rating - b.rating;
-      // newest by createdAt desc
+      // newest
       const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return db - da || (b.id > a.id ? 1 : -1);
     });
+
+    // ⬇️ Ensure the signed-in user's review stays first (if present)
+    list = moveMineFirst(list);
 
     // Render current page
     renderReviewsList(list.slice(0, visible));
