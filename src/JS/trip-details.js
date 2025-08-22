@@ -324,13 +324,6 @@
     if (idx < 0 && reviewState.mineKey != null) {
       idx = list.findIndex((r) => String(r.id) === String(reviewState.mineKey));
     }
-    if (idx < 0 && uid != null && window.currentUser?.fullName) {
-      const me = window.currentUser.fullName.trim().toLowerCase();
-      idx = list.findIndex(
-        (r) => (r.userName || "").trim().toLowerCase() === me
-      );
-      if (idx >= 0) list[idx].userId = uid; // memoize
-    }
 
     if (idx > 0) {
       const [mine] = list.splice(idx, 1);
@@ -511,22 +504,17 @@
         return base;
       });
 
-      // Figure out which one is "mine" even if userId is missing
       reviewState.mineKey = null;
+
       if (reviewState.userId != null && list.length) {
-        const myName = (window.currentUser?.fullName || "")
-          .trim()
-          .toLowerCase();
-        if (myName) {
-          const mineByName = list.find(
-            (x) => (x.userName || "").trim().toLowerCase() === myName
-          );
-          if (mineByName) {
-            mineByName.userId = reviewState.userId;
-            reviewState.mineKey = mineByName.id;
-          }
+        const mineById = list.find(
+          (x) => String(x.userId) === String(reviewState.userId)
+        );
+        if (mineById) {
+          reviewState.mineKey = mineById.id;
+        } else {
+          reviewState.mineKey = list[0]?.id ?? null;
         }
-        if (!reviewState.mineKey) reviewState.mineKey = list[0].id;
       }
 
       reviewState.serverSorted = true; // ✅ backend respected Sort
@@ -588,13 +576,22 @@
   }
 
   // ---------------- Render reviews list ----------------
+  function isMineReview(r) {
+    // Trust userId if present; otherwise trust mineKey (set from server order)
+    const byUser =
+      reviewState.userId != null &&
+      String(r.userId) === String(reviewState.userId);
+    const byKey =
+      reviewState.mineKey != null &&
+      String(r.id) === String(reviewState.mineKey);
+    return byUser || byKey;
+  }
+
   function renderReviewsList(list) {
     const wrap = $("reviewsList");
     if (!wrap) return;
 
-    const isMine = (r) =>
-      reviewState.userId != null &&
-      String(r.userId) === String(reviewState.userId);
+    const isMine = (r) => isMineReview(r);
 
     if (!list.length) {
       wrap.innerHTML = `<div class="text-center text-gray-500 py-6">No reviews yet. Be the first to review!</div>`;
@@ -614,16 +611,16 @@
                 day: "2-digit",
               })
             : "";
+        const pos = reviewState.all.indexOf(r); // position in master array
         const actions = isMine(r)
           ? `<div class="flex gap-2 mt-1">
-               <button class="rv-edit px-3 py-1.5 rounded bg-yellow-500 hover:bg-yellow-600 text-white text-xs" data-id="${esc(
-                 r.id
-               )}">Edit</button>
-               <button class="rv-del px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-xs" data-id="${esc(
-                 r.id
-               )}">Delete</button>
-             </div>`
+       <button class="rv-edit px-3 py-1.5 rounded bg-yellow-500 hover:bg-yellow-600 text-white text-xs"
+               data-id="${esc(r.id)}" data-pos="${pos}">Edit</button>
+       <button class="rv-del px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-xs"
+               data-id="${esc(r.id)}" data-pos="${pos}">Delete</button>
+     </div>`
           : "";
+
         const avatar = r.avatar
           ? `<img src="${esc(
               safeImg(r.avatar)
@@ -657,7 +654,10 @@
     // Wire actions
     wrap.querySelectorAll(".rv-edit").forEach((btn) => {
       btn.addEventListener("click", () =>
-        enterEditMode(btn.getAttribute("data-id"))
+        enterEditMode(
+          btn.getAttribute("data-id"),
+          Number(btn.getAttribute("data-pos"))
+        )
       );
     });
     wrap.querySelectorAll(".rv-del").forEach((btn) => {
@@ -676,19 +676,12 @@
 
     // Hide write form if the user already reviewed
     const hasMine =
-      reviewState.userId != null &&
-      // direct userId match
-      (all.some((r) => String(r.userId) === String(reviewState.userId)) ||
-        // or the remembered "mine" item
-        (reviewState.mineKey != null &&
-          all.some((r) => String(r.id) === String(reviewState.mineKey))) ||
-        // or a name match fallback
-        (window.currentUser?.fullName &&
-          all.some(
-            (r) =>
-              (r.userName || "").trim().toLowerCase() ===
-              window.currentUser.fullName.trim().toLowerCase()
-          )));
+      reviewState.userId != null
+        ? all.some((r) => String(r.userId) === String(reviewState.userId)) ||
+          (reviewState.mineKey != null &&
+            all.some((r) => String(r.id) === String(reviewState.mineKey)))
+        : reviewState.mineKey != null &&
+          all.some((r) => String(r.id) === String(reviewState.mineKey));
 
     const formCard = $("writeReviewCard");
     if (formCard) formCard.classList.toggle("hidden", hasMine);
@@ -821,8 +814,19 @@
     const card = document.querySelector(
       `[data-rid="${CSS.escape(String(id))}"]`
     );
-    const r = reviewState.all.find((x) => String(x.id) === String(id));
+
+    // Prefer the exact position we rendered to avoid mismatches
+    const r = Number.isInteger(pos)
+      ? reviewState.all[pos]
+      : reviewState.all.find((x) => String(x.id) === String(id));
+
     if (!card || !r) return;
+
+    // Safety: if somehow this isn't yours, bail out gracefully
+    if (!isMineReview(r)) {
+      toast("warning", "Not your review", "Please refresh and try again.");
+      return;
+    }
 
     card.innerHTML = `
       <div class="flex items-center justify-between">
