@@ -403,10 +403,6 @@
             const phone = overlay.querySelector("#cpPhone").value.trim();
             const country = overlay.querySelector("#cpCountry").value.trim();
 
-            if (!/^[\\d+\\-\\s()]{6,}$/.test(phone)) {
-              toast("Please enter a valid phone number.", false);
-              return;
-            }
             if (!country) {
               toast("Please choose your country.", false);
               return;

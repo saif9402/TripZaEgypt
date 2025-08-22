@@ -10,7 +10,7 @@
       // remember where they were going
       sessionStorage.setItem("afterProfile", location.href);
       // adjust the path if your pages folder differs
-      location.replace("/pages/profile.html");
+      location.replace("pages/profile.html");
     }
   }
 })();
