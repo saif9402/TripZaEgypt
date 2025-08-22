@@ -335,8 +335,6 @@ async function initTopRatedSlider(noCache = false) {
            class="trending-cta bg-yellow-400 hover:bg-yellow-300 text-white font-semibold px-6 py-3 shadow-lg transition">
            ${i18n.book}
         </a>
-        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🤍</button>
-        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur text-white flex items-center justify-center">🔗</button>
       </div>
     </div>
   `;
