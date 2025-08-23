@@ -43,6 +43,8 @@
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-purple-100: oklch(94.6% 0.033 307.174);
     --color-purple-600: oklch(55.8% 0.288 302.321);
+    --color-rose-300: oklch(81% 0.117 11.638);
+    --color-rose-400: oklch(71.2% 0.194 13.428);
     --color-rose-500: oklch(64.5% 0.246 16.439);
     --color-rose-600: oklch(58.6% 0.253 17.585);
     --color-rose-700: oklch(51.4% 0.222 16.935);
@@ -1850,6 +1852,20 @@
       }
     }
   }
+  .hover\:bg-rose-300 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-rose-300);
+      }
+    }
+  }
+  .hover\:bg-rose-400 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-rose-400);
+      }
+    }
+  }
   .hover\:bg-rose-700 {
     &:hover {
       @media (hover: hover) {
@@ -2085,6 +2101,16 @@
   .active\:bg-green-800 {
     &:active {
       background-color: var(--color-green-800);
+    }
+  }
+  .active\:bg-rose-500 {
+    &:active {
+      background-color: var(--color-rose-500);
+    }
+  }
+  .active\:bg-rose-600 {
+    &:active {
+      background-color: var(--color-rose-600);
     }
   }
   .active\:bg-rose-800 {
