@@ -1905,7 +1905,6 @@
     return true;
   }
 
-  // Note: I try two common patterns. If your API uses only one, keep that one.
   async function addWishlist(tripId) {
     const token = await getFreshAccessToken().catch(() => null);
     if (!token) {
@@ -1913,33 +1912,32 @@
       throw new Error("Not authenticated");
     }
 
-    // Attempt 1: query param
-    let res = await fetch(
-      `/api/Wishlist?TripId=${encodeURIComponent(tripId)}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const url = `/api/Wishlist/AddToWishlist/${encodeURIComponent(tripId)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
 
-    // Attempt 2: JSON body (fallback)
-    if (!res.ok) {
-      res = await fetch(`/api/Wishlist`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tripId: Number(tripId) }),
-      });
+    // Be nice to “already in wishlist” cases
+    let payload = null;
+    try {
+      payload = await res.json();
+    } catch {}
+
+    if (!res.ok || payload?.succeeded === false) {
+      // If backend signals “already exists”, treat as success
+      const msg = (payload?.message || "").toLowerCase();
+      if (res.status === 409 || /already/.test(msg)) return true;
+
+      const err = new Error(payload?.message || `Add failed (${res.status})`);
+      err.status = res.status;
+      throw err;
     }
 
-    if (!res.ok) throw new Error("Add failed");
     return true;
   }
 
