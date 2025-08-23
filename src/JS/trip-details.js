@@ -1,6 +1,13 @@
 // ../JS/trip-details.js
 (function () {
   const $ = (id) => document.getElementById(id);
+  // i18n helper (works with your translation.js)
+  const getLang = () =>
+    window.__currentLang || localStorage.getItem("lang") || "en";
+  const tr = (k) =>
+    typeof window.t === "function"
+      ? window.t(k)
+      : window.translations?.[getLang()]?.[k] || k;
 
   // ---------- Image fallbacks (no external DNS needed) ----------
   const FALLBACK_DATA_IMG =
@@ -111,19 +118,19 @@
   const getTripIdFromUrl = () =>
     new URL(window.location.href).searchParams.get("id");
 
-  const setUnavailableUI = (isAvailable) => {
+  function setUnavailableUI(isAvailable) {
     const btn = $("bookBtn");
     if (!btn) return;
     if (isAvailable) {
       btn.disabled = false;
       btn.classList.remove("opacity-50", "cursor-not-allowed");
-      btn.textContent = "Confirm Booking";
+      btn.textContent = tr("trip.booking.confirmBtn");
     } else {
       btn.disabled = true;
       btn.classList.add("opacity-50", "cursor-not-allowed");
-      btn.textContent = "Currently Unavailable";
+      btn.textContent = tr("trip.unavailable");
     }
-  };
+  }
 
   // ---------------- Toasts (Tailwind-ish) ----------------
   // ---------------- Modern Confirm Modal (Promise-based) ----------------
@@ -487,7 +494,9 @@
     return list;
   }
 
-  function pluralize(n, one = "review", many = "reviews") {
+  function pluralize(n) {
+    const one = tr("trip.reviews.one");
+    const many = tr("trip.reviews.many");
     return `${n} ${n === 1 ? one : many}`;
   }
 
@@ -519,15 +528,20 @@
       const name = ($("rvName")?.value || "").trim();
 
       if (!(rating >= 1 && rating <= 5)) {
-        toast("warning", "Pick a rating", "Please choose from 1 to 5 stars.");
+        toast(
+          "warning",
+          tr("trip.reviews.warn.pickRating.title"),
+          tr("trip.reviews.warn.pickRating.body")
+        );
         return;
       }
       if (comment.length < 10) {
         toast(
           "warning",
-          "Comment too short",
-          "Please write at least 10 characters."
+          tr("trip.reviews.warn.short.title"),
+          tr("trip.reviews.warn.short.body")
         );
+
         return;
       }
 
@@ -538,14 +552,18 @@
       const original = submitBtn?.textContent;
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting…";
+        submitBtn.textContent = tr("trip.reviews.submitting");
       }
 
       try {
         await addReview({ tripId, rating, comment });
         await fetchReviews(tripId); // refresh list + stats
 
-        toast("success", "Review added", "Thanks for sharing your experience!");
+        toast(
+          "success",
+          tr("trip.reviews.added.title"),
+          tr("trip.reviews.added.body")
+        );
 
         // Reset UI
         form.reset();
@@ -563,7 +581,7 @@
       } catch (err) {
         console.error("Add review error:", err);
         if (err?.status === 401 || err?.status === 403) {
-          toast("info", "Sign in required", "Please sign in to add a review.");
+          toast("info", tr("auth.requiredTitle"), tr("auth.requiredText"));
           redirectToLogin();
         } else {
           toast(
@@ -575,7 +593,7 @@
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = original || "Submit review";
+          submitBtn.textContent = original || tr("trip.reviews.submit");
         }
       }
     });
@@ -709,8 +727,7 @@
     const hdrCountEl = $("reviewsCountHeader");
     if (hdrAvgEl) hdrAvgEl.textContent = avg ? avg.toFixed(1) : "—";
     if (hdrStarsEl) hdrStarsEl.innerHTML = faStarsHTML(avg);
-    if (hdrCountEl)
-      hdrCountEl.textContent = `${total} ${total === 1 ? "review" : "reviews"}`;
+    if (hdrCountEl) hdrCountEl.textContent = pluralize(total);
 
     // Breakdown bars 5..1 using the provided template
     const container = $("breakdownRows");
@@ -738,7 +755,9 @@
       String(r.userId) === String(reviewState.userId);
 
     if (!list.length) {
-      wrap.innerHTML = `<div class="text-center text-gray-500 py-6">No reviews yet. Be the first to review!</div>`;
+      wrap.innerHTML = `<div class="text-center text-gray-500 py-6">${esc(
+        tr("trip.reviews.empty")
+      )}</div>`;
       return;
     }
 
@@ -1022,8 +1041,8 @@
       if (comment.length < 10) {
         toast(
           "warning",
-          "Comment too short",
-          "Please write at least 10 characters."
+          tr("trip.reviews.warn.short.title"),
+          tr("trip.reviews.warn.short.body")
         );
         return;
       }
@@ -1063,11 +1082,10 @@
     if (!r) return;
 
     const ok = await uiConfirm({
-      title: "Delete your review?",
-      message:
-        "This will permanently remove your review. You can write a new one later if you like.",
-      confirmText: "Delete",
-      cancelText: "Cancel",
+      title: tr("trip.reviews.delete.title"),
+      message: tr("trip.reviews.delete.message"),
+      confirmText: tr("common.delete"),
+      cancelText: tr("common.cancel"),
       tone: "danger",
     });
 
@@ -1157,7 +1175,7 @@
       options = options.filter((o) => o.date > now);
 
     if (!options.length) {
-      sel.innerHTML = `<option value="">No times available</option>`;
+      sel.innerHTML = `<option value="">${tr("trip.times.none")}</option>`;
       sel.disabled = true;
     } else {
       sel.disabled = false;
@@ -1179,9 +1197,11 @@
         datePickerInstance?.destroy?.();
       } catch {}
       dateInput.value = "";
-      dateInput.placeholder = "No available dates";
+      dateInput.placeholder = tr("trip.dates.none");
       dateInput.disabled = true;
-      timeSelect.innerHTML = `<option value="">No times available</option>`;
+      timeSelect.innerHTML = `<option value="">${tr(
+        "trip.times.none"
+      )}</option>`;
       timeSelect.disabled = true;
       return;
     }
@@ -1313,13 +1333,16 @@
                   )}</li>
                   <li><i class="fas fa-users mr-1"></i> ${
                     Number(t.reviews) || 0
-                  } reviews</li>
+                  } ${esc(pluralize(Number(t.reviews) || 0))}</li>
+
                 </ul>
                 <div class="flex justify-between items-center text-sm">
                   <div class="text-yellow-500">${esc(stars(t.rating))}</div>
                   <div class="text-green-600 font-semibold">
                     ${t.price != null ? esc(formatPrice(t.price, "EUR")) : ""}
-                    <span class="text-gray-400 text-xs">per person</span>
+                    <span class="text-gray-400 text-xs">${esc(
+                      tr("trip.perPerson")
+                    )}</span>
                   </div>
                 </div>
               </div>
@@ -1684,16 +1707,19 @@
       renderTrip(json.data || {});
     } catch (err) {
       console.error("Trip load error:", err);
-      $("tripTitle") && ($("tripTitle").textContent = "Trip not available");
+      $("tripTitle") &&
+        ($("tripTitle").textContent = tr("trip.load.failTitle"));
       $("tripDescription") &&
-        ($("tripDescription").textContent =
-          "We couldn't load this trip right now. Please try again later.");
+        ($("tripDescription").textContent = tr("trip.load.failBody"));
+
       setUnavailableUI(false);
       renderGallery([""]);
       setupAvailability([]);
       const grid = $("relatedGrid");
       if (grid)
-        grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8">No related trips.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-8">${esc(
+          tr("trip.related.none")
+        )}</div>`;
     }
   }
 
@@ -1747,9 +1773,10 @@
     if (!dateVal || !timeISO) {
       toast(
         "warning",
-        "Select date & time",
-        "Please choose an available date and time."
+        tr("trip.booking.warn.selectTitle"),
+        tr("trip.booking.warn.selectBody")
       );
+
       return;
     }
 
@@ -1804,7 +1831,7 @@
 
     const originalText = bConfirm.textContent;
     bConfirm.disabled = true;
-    bConfirm.textContent = "Booking…";
+    bConfirm.textContent = tr("trip.booking.progress");
 
     try {
       await addBooking({
@@ -1823,19 +1850,19 @@
         }) || "";
       toast(
         "success",
-        "Booking confirmed",
-        `Trip: ${payload.tripName} • ${
+        tr("trip.booking.successTitle"),
+        `${tr("trip.booking.successTrip")}: ${payload.tripName} • ${
           payload.date
-        } ${timeTxt}\nTotal: ${formatPrice(payload.total, "EUR")}`
+        } ${timeTxt}\n${tr("trip.booking.successTotal")}: ${formatPrice(
+          payload.total,
+          "EUR"
+        )}`
       );
     } catch (e) {
       console.error("Booking error:", e);
       if (e?.status === 401 || e?.status === 403 || e?.code === "AUTH") {
-        toast(
-          "info",
-          "Sign in required",
-          "Please sign in to complete your booking."
-        );
+        toast("info", tr("auth.requiredTitle"), tr("auth.requiredText"));
+
         redirectToLogin();
       } else {
         toast("error", "Booking failed", e.message || "Please try again.");
@@ -1876,15 +1903,14 @@
         }
       }
       if (text) {
-        // Keep short label on mobile; desktop has its own longer label element if present
         const label =
           text.getAttribute("id") === "wishlistText"
             ? saved
-              ? "Saved to Wishlist"
-              : "Save to Wishlist"
+              ? tr("trip.wishlist.savedFull")
+              : tr("trip.wishlist.saveFull")
             : saved
-            ? "Saved"
-            : "Wishlist";
+            ? tr("trip.wishlist.savedShort")
+            : tr("trip.wishlist.short");
         text.textContent = label;
       }
     });
@@ -2022,5 +2048,28 @@
     wireReviewsSection();
     loadTrip();
     initWishlistToggle();
+  });
+  document.addEventListener("i18n:change", () => {
+    // Re-apply availability placeholders
+    if (availability && $("tripDateInput") && $("tripTimeSelect")) {
+      setupAvailability(
+        availability.days.length
+          ? Object.values(availability.timesByDay)
+              .flat()
+              .map((x) => x.value)
+          : []
+      );
+    }
+    // Re-apply booking button label (available/unavailable)
+    setUnavailableUI(!!(currentTrip && currentTrip.isAvailable));
+
+    // Re-apply wishlist button texts based on saved state flags
+    const saved =
+      document.getElementById("wishlistToggleBtn")?.dataset.saved === "1" ||
+      document.getElementById("wishlistToggleBtnMobile")?.dataset.saved === "1";
+    setWishlistUI(!!saved, false);
+
+    // Re-apply review counts/labels
+    applyReviewsUI();
   });
 })();

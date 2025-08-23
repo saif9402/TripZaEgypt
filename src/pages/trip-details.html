@@ -23,22 +23,23 @@
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
     ></script>
-    <title>Trip</title>
+
+    <title data-i18n="trip.pageTitle">Trip</title>
   </head>
   <body class="text-gray-800 font-sans scroll-smooth">
-    <!-- Header (reuse your responsive header here) -->
     <div id="header-placeholder"></div>
 
-    <!-- Trip Header -->
     <section class="max-w-7xl mx-auto px-4 py-20">
       <div class="flex flex-col md:flex-row gap-8">
         <div class="md:w-2/3">
           <h1 id="tripTitle" class="text-3xl font-bold mb-2"></h1>
+
           <div class="text-sm text-gray-500 mb-4">
             <span id="tripCategory" class="text-gray-500"></span>
             <span id="tripRatingStars" class="text-yellow-500"></span>
             <span id="tripRatingText" class="text-gray-500"></span>
           </div>
+
           <img
             id="tripMainImage"
             src=""
@@ -48,109 +49,156 @@
 
           <div id="tripGallery" class="flex gap-2 overflow-x-auto mb-6"></div>
 
-          <!-- Enhanced Feature Details -->
+          <!-- Features -->
           <div
             class="grid grid-cols-1 md:grid-cols-2 gap-6 border rounded-lg p-6 mb-8 bg-white"
           >
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-ban text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Free Cancellation</h4>
-                <p class="text-sm text-gray-600">
+                <h4
+                  class="font-semibold"
+                  data-i18n="trip.features.freeCancel.title"
+                >
+                  Free Cancellation
+                </h4>
+                <p
+                  class="text-sm text-gray-600"
+                  data-i18n="trip.features.freeCancel.text"
+                >
                   Cancel up to 24 hours in advance to receive a full refund
                 </p>
               </div>
             </div>
 
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-shield-virus text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Health Precautions</h4>
-                <p class="text-sm text-gray-600">
+                <h4
+                  class="font-semibold"
+                  data-i18n="trip.features.health.title"
+                >
+                  Health Precautions
+                </h4>
+                <p
+                  class="text-sm text-gray-600"
+                  data-i18n="trip.features.health.text"
+                >
                   Special health and safety measures apply
                 </p>
               </div>
             </div>
 
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-mobile-alt text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Mobile Ticketing</h4>
-                <p class="text-sm text-gray-600">
+                <h4
+                  class="font-semibold"
+                  data-i18n="trip.features.mobile.title"
+                >
+                  Mobile Ticketing
+                </h4>
+                <p
+                  class="text-sm text-gray-600"
+                  data-i18n="trip.features.mobile.text"
+                >
                   Use your phone or print your voucher
                 </p>
               </div>
             </div>
 
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-clock text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 id="tripDurationLabel" class="font-semibold">Duration</h4>
-                <p class="text-sm text-gray-600">
+                <h4
+                  id="tripDurationLabel"
+                  class="font-semibold"
+                  data-i18n="trip.features.duration.title"
+                >
+                  Duration
+                </h4>
+                <p
+                  class="text-sm text-gray-600"
+                  data-i18n="trip.features.duration.text"
+                >
                   Check availability to see starting times.
                 </p>
               </div>
             </div>
 
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-bolt text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Instant Confirmation</h4>
-                <p class="text-sm text-gray-600">
+                <h4
+                  class="font-semibold"
+                  data-i18n="trip.features.instant.title"
+                >
+                  Instant Confirmation
+                </h4>
+                <p
+                  class="text-sm text-gray-600"
+                  data-i18n="trip.features.instant.text"
+                >
                   Don't wait for the confirmation!
                 </p>
               </div>
             </div>
 
-            <!-- Item -->
             <div class="flex items-start gap-4">
               <i class="fas fa-user-tie text-green-600 text-xl mt-1"></i>
               <div>
-                <h4 class="font-semibold">Live Tour Guide</h4>
+                <h4 class="font-semibold" data-i18n="trip.features.guide.title">
+                  Live Tour Guide
+                </h4>
                 <p id="tripLanguages" class="text-sm text-gray-600">—</p>
               </div>
             </div>
           </div>
 
-          <!-- Mobile-only actions -->
+          <!-- Mobile actions -->
           <div class="md:hidden flex gap-3 mb-5">
-            <!-- Book now (unchanged classes, just added flex-1 so they share width) -->
             <a
               href="#bookingPanel"
               class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-white font-semibold shadow-lg hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600"
               aria-label="Book now"
+              data-i18n-aria-label="trip.actions.bookNow"
             >
               <i class="fa-solid fa-ticket"></i>
-              Book now
+              <span data-i18n="trip.actions.bookNow">Book now</span>
             </a>
 
-            <!-- Mobile wishlist toggle -->
             <button
               id="wishlistToggleBtnMobile"
               type="button"
               class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-black font-semibold shadow-lg hover:bg-rose-400 active:bg-rose-500"
               aria-pressed="false"
               title="Save to Wishlist"
+              data-i18n-title="trip.wishlist.save"
             >
               <i id="wishlistIconMobile" class="fa-regular fa-heart"></i>
-              <span>Wishlist</span>
+              <span data-i18n="trip.wishlist.short">Wishlist</span>
             </button>
           </div>
 
           <!-- Description -->
           <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-2">Description</h2>
+            <h2
+              class="text-xl font-semibold mb-2"
+              data-i18n="trip.description.title"
+            >
+              Description
+            </h2>
             <p id="tripDescription" class="text-gray-600"></p>
           </div>
 
           <!-- Activity & Inclusions -->
           <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-2">Activity</h2>
+            <h2
+              class="text-xl font-semibold mb-2"
+              data-i18n="trip.activity.title"
+            >
+              Activity
+            </h2>
             <ul
               id="tripActivities"
               class="list-disc ml-6 text-gray-700 space-y-1"
@@ -158,19 +206,32 @@
           </div>
 
           <div class="mb-6">
-            <h2 class="text-xl font-semibold mb-2">
+            <h2
+              class="text-xl font-semibold mb-2"
+              data-i18n="trip.inclusions.title"
+            >
               What Is Included / Not Included
             </h2>
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <h4 class="font-semibold mb-1">Included</h4>
+                <h4
+                  class="font-semibold mb-1"
+                  data-i18n="trip.inclusions.included"
+                >
+                  Included
+                </h4>
                 <ul
                   id="tripIncluded"
                   class="list-disc ml-5 text-gray-700 space-y-1"
                 ></ul>
               </div>
               <div>
-                <h4 class="font-semibold mb-1">Not Included</h4>
+                <h4
+                  class="font-semibold mb-1"
+                  data-i18n="trip.inclusions.excluded"
+                >
+                  Not Included
+                </h4>
                 <ul
                   id="tripExcluded"
                   class="list-disc ml-5 text-gray-700 space-y-1"
@@ -184,12 +245,16 @@
             <div
               class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-6"
             >
-              <h2 class="text-xl sm:text-2xl font-bold">Reviews</h2>
+              <h2
+                class="text-xl sm:text-2xl font-bold"
+                data-i18n="trip.reviews.title"
+              >
+                Reviews
+              </h2>
 
               <div
                 class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm"
               >
-                <!-- Avg + stars as one compact group -->
                 <span class="inline-flex items-center gap-2">
                   <span
                     id="reviewsAverageText"
@@ -202,34 +267,36 @@
                   ></span>
                 </span>
 
-                <!-- dot separator (hidden if it wraps) -->
                 <span class="hidden sm:inline text-gray-300">•</span>
 
-                <!-- Count -->
                 <span
                   id="reviewsCountHeader"
                   class="text-gray-500 whitespace-nowrap"
                   >0 reviews</span
                 >
 
-                <!-- Spacer to push the button on larger screens -->
                 <span class="hidden sm:block flex-1"></span>
 
-                <!-- Action button -->
                 <a
                   href="#writeReviewCard"
                   class="inline-flex items-center gap-1 rounded-md bg-green-50 text-green-700 hover:bg-green-100 font-medium px-3 py-1.5 transition text-xs sm:text-sm"
                 >
                   <i class="fa-solid fa-pen text-[0.9em]"></i>
-                  <span class="sm:inline hidden">Write a review</span>
-                  <span class="sm:hidden inline">Review</span>
+                  <span
+                    class="sm:inline hidden"
+                    data-i18n="trip.reviews.write.full"
+                    >Write a review</span
+                  >
+                  <span
+                    class="sm:hidden inline"
+                    data-i18n="trip.reviews.write.short"
+                    >Review</span
+                  >
                 </a>
               </div>
             </div>
 
-            <!-- Summary + Breakdown -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <!-- Summary Card -->
               <div class="bg-white rounded-xl shadow p-6">
                 <div class="flex items-center gap-4">
                   <div>
@@ -242,10 +309,9 @@
                       0 reviews
                     </div>
                   </div>
+
                   <div class="flex-1">
-                    <!-- Rating bars -->
                     <div class="space-y-2">
-                      <!-- Repeat rows 5..1 -->
                       <template id="ratingRowTemplate">
                         <div class="flex items-center gap-3">
                           <span class="w-10 text-sm text-gray-600 font-medium"
@@ -266,21 +332,26 @@
                 </div>
               </div>
 
-              <!-- Write Review -->
               <div
                 id="writeReviewCard"
                 class="lg:col-span-2 bg-white rounded-xl shadow p-6"
               >
-                <h3 class="text-lg font-semibold mb-4">Write a review</h3>
+                <h3
+                  class="text-lg font-semibold mb-4"
+                  data-i18n="trip.reviews.write.full"
+                >
+                  Write a review
+                </h3>
 
                 <form
                   id="writeReviewForm"
                   class="space-y-4"
                   x-data="{ rating: 0, hover: 0 }"
                 >
-                  <!-- Star rating -->
                   <div>
-                    <label class="block text-sm font-medium mb-1"
+                    <label
+                      class="block text-sm font-medium mb-1"
+                      data-i18n="trip.reviews.yourRating"
                       >Your rating</label
                     >
                     <div class="flex items-center gap-1">
@@ -308,9 +379,11 @@
                     />
                   </div>
 
-                  <!-- Name (optional) -->
                   <div>
-                    <label for="rvName" class="block text-sm font-medium mb-1"
+                    <label
+                      for="rvName"
+                      class="block text-sm font-medium mb-1"
+                      data-i18n="trip.reviews.yourName"
                       >Your name (optional)</label
                     >
                     <input
@@ -318,14 +391,15 @@
                       type="text"
                       class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
                       placeholder="eg. Ahmed S."
+                      data-i18n-placeholder="trip.reviews.yourName.placeholder"
                     />
                   </div>
 
-                  <!-- Comment -->
                   <div>
                     <label
                       for="rvComment"
                       class="block text-sm font-medium mb-1"
+                      data-i18n="trip.reviews.comment"
                       >Comment</label
                     >
                     <textarea
@@ -333,22 +407,29 @@
                       rows="4"
                       class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
                       placeholder="Share details of your experience..."
+                      data-i18n-placeholder="trip.reviews.comment.placeholder"
                       required
                     ></textarea>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p
+                      class="text-xs text-gray-500 mt-1"
+                      data-i18n="trip.reviews.minChars"
+                    >
                       Minimum 10 characters.
                     </p>
                   </div>
 
-                  <!-- Submit -->
                   <div class="flex items-center gap-3">
                     <button
                       type="submit"
                       class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded"
+                      data-i18n="trip.reviews.submit"
                     >
                       Submit review
                     </button>
-                    <span id="rvToast" class="text-sm text-green-600 hidden"
+                    <span
+                      id="rvToast"
+                      class="text-sm text-green-600 hidden"
+                      data-i18n="trip.reviews.thanks"
                       >Thanks! Your review was added.</span
                     >
                   </div>
@@ -356,51 +437,69 @@
               </div>
             </div>
 
-            <!-- Filters -->
             <div class="flex flex-wrap items-center gap-3 mb-4">
               <select
                 id="reviewsFilter"
                 class="border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
               >
-                <option value="all">All ratings</option>
-                <option value="5">5 stars</option>
-                <option value="4">4 stars</option>
-                <option value="3">3 stars</option>
-                <option value="2">2 stars</option>
-                <option value="1">1 star</option>
+                <option value="all" data-i18n="trip.reviews.filter.all">
+                  All ratings
+                </option>
+                <option value="5" data-i18n="trip.reviews.filter.5">
+                  5 stars
+                </option>
+                <option value="4" data-i18n="trip.reviews.filter.4">
+                  4 stars
+                </option>
+                <option value="3" data-i18n="trip.reviews.filter.3">
+                  3 stars
+                </option>
+                <option value="2" data-i18n="trip.reviews.filter.2">
+                  2 stars
+                </option>
+                <option value="1" data-i18n="trip.reviews.filter.1">
+                  1 star
+                </option>
               </select>
               <select
                 id="reviewsSort"
                 class="border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
               >
-                <option value="newest">Newest</option>
-                <option value="highest">Highest rating</option>
-                <option value="lowest">Lowest rating</option>
+                <option value="newest" data-i18n="trip.reviews.sort.newest">
+                  Newest
+                </option>
+                <option value="highest" data-i18n="trip.reviews.sort.highest">
+                  Highest rating
+                </option>
+                <option value="lowest" data-i18n="trip.reviews.sort.lowest">
+                  Lowest rating
+                </option>
               </select>
             </div>
 
-            <!-- Reviews list -->
             <div id="reviewsList" class="space-y-4"></div>
 
-            <!-- Load more -->
             <div class="mt-6 text-center">
               <button
                 id="reviewsLoadMore"
                 class="hidden border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded"
+                data-i18n="trip.reviews.loadMore"
               >
                 Load more
               </button>
             </div>
           </section>
-          <!-- =================== /REVIEWS =================== -->
 
           <section id="relatedSection" class="max-w-7xl mx-auto px-4 py-12">
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-xl font-semibold">Related Tours In Today</h2>
+              <h2 class="text-xl font-semibold" data-i18n="trip.related.title">
+                Related Tours
+              </h2>
               <div class="flex space-x-2">
                 <button
                   id="relatedPrevBtn"
                   title="Previous"
+                  data-i18n-title="trip.nav.prev"
                   class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
                 >
                   <i class="fas fa-chevron-left"></i>
@@ -408,6 +507,7 @@
                 <button
                   id="relatedNextBtn"
                   title="Next"
+                  data-i18n-title="trip.nav.next"
                   class="w-8 h-8 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-white"
                 >
                   <i class="fas fa-chevron-right"></i>
@@ -418,25 +518,29 @@
             <div
               id="relatedGrid"
               class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            >
-              <!-- filled by JS -->
-            </div>
+            ></div>
           </section>
         </div>
-        <!-- Booking side panel (responsive) -->
+
+        <!-- Booking panel -->
         <div class="w-full md:w-1/2 lg:w-md md:pl-6 mt-6 md:mt-0">
           <aside
             id="bookingPanel"
             class="bg-white p-4 sm:p-5 md:p-6 rounded-lg shadow-md md:sticky md:top-20 lg:sticky lg:top-20 scroll-mt-24"
           >
-            <h3 class="font-bold text-lg sm:text-xl mb-3">Booking</h3>
+            <h3
+              class="font-bold text-lg sm:text-xl mb-3"
+              data-i18n="trip.booking.title"
+            >
+              Booking
+            </h3>
 
             <div class="space-y-3 sm:space-y-4">
-              <!-- Date -->
               <div>
                 <label
                   for="tripDateInput"
                   class="block text-sm font-medium mb-1"
+                  data-i18n="trip.booking.date"
                   >Date</label
                 >
                 <input
@@ -446,27 +550,32 @@
                 />
               </div>
 
-              <!-- Time -->
               <div>
                 <label
                   for="tripTimeSelect"
                   class="block text-sm font-medium mb-1"
+                  data-i18n="trip.booking.time"
                   >Time</label
                 >
                 <select
-                  title="Select Time"
                   id="tripTimeSelect"
                   class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500 disabled:opacity-50"
                   disabled
+                  title="Select Time"
+                  data-i18n-title="trip.booking.timeTitle"
                 >
-                  <option value="">Select time</option>
+                  <option value="" data-i18n="trip.booking.timeSelect">
+                    Select time
+                  </option>
                 </select>
               </div>
 
-              <!-- Counts -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label for="adultCount" class="block text-sm font-medium mb-1"
+                  <label
+                    for="adultCount"
+                    class="block text-sm font-medium mb-1"
+                    data-i18n="trip.booking.adults"
                     >Adults</label
                   >
                   <input
@@ -476,10 +585,14 @@
                     value="2"
                     class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
                     placeholder="Adults"
+                    data-i18n-placeholder="trip.booking.adults"
                   />
                 </div>
                 <div>
-                  <label for="childCount" class="block text-sm font-medium mb-1"
+                  <label
+                    for="childCount"
+                    class="block text-sm font-medium mb-1"
+                    data-i18n="trip.booking.children"
                     >Children</label
                   >
                   <input
@@ -489,38 +602,47 @@
                     value="0"
                     class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
                     placeholder="Children"
+                    data-i18n-placeholder="trip.booking.children"
                   />
                 </div>
               </div>
 
               <p class="text-xs text-gray-500">
-                Children under 2 years is <strong>Free</strong><br />
-                Children from 2 to 11 years are charged at
-                <strong>50% of the adult price</strong>.
+                <span data-i18n="trip.booking.policy.free"
+                  >Children under 2 years is <strong>Free</strong></span
+                ><br />
+                <span data-i18n="trip.booking.policy.child50"
+                  >Children from 2 to 11 years are charged at
+                  <strong>50% of the adult price</strong>.</span
+                >
               </p>
 
-              <!-- Price -->
               <div
                 id="tripPrice"
                 aria-live="polite"
                 class="text-xl sm:text-2xl font-bold"
               ></div>
 
-              <!-- Actions -->
               <button
                 id="bookBtn"
                 class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded transition"
+                data-i18n="trip.booking.confirmBtn"
               >
                 Confirm Booking
               </button>
+
               <button
                 id="wishlistToggleBtn"
                 class="w-full mt-1 sm:mt-2 text-sm font-medium text-gray-700 border border-gray-200 rounded flex items-center justify-center gap-2 hover:bg-gray-50"
                 type="button"
                 aria-pressed="false"
+                title="Save to Wishlist"
+                data-i18n-title="trip.wishlist.save"
               >
                 <i id="wishlistIcon" class="fa-regular fa-heart"></i>
-                <span id="wishlistText">Save to Wishlist</span>
+                <span id="wishlistText" data-i18n="trip.wishlist.saveFull"
+                  >Save to Wishlist</span
+                >
               </button>
             </div>
           </aside>
@@ -533,41 +655,39 @@
       id="imageModal"
       class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300"
     >
-      <!-- Click outside to close -->
       <div id="imageModalBackdrop" class="absolute inset-0"></div>
 
-      <!-- Prev -->
       <button
         id="modalPrevBtn"
         type="button"
         title="Previous"
+        data-i18n-title="trip.nav.prev"
         class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white text-3xl px-4 py-2 rounded-full shadow-lg transition"
       >
         ‹
       </button>
 
-      <!-- Image -->
       <img
         id="modalImage"
         alt="Preview"
         class="max-w-[92vw] max-h-[86vh] rounded-lg shadow-2xl transition-all duration-300 transform opacity-0 scale-90"
       />
 
-      <!-- Next -->
       <button
         id="modalNextBtn"
         type="button"
         title="Next"
+        data-i18n-title="trip.nav.next"
         class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white text-3xl px-4 py-2 rounded-full shadow-lg transition"
       >
         ›
       </button>
 
-      <!-- Close -->
       <button
         id="modalCloseBtn"
         type="button"
         title="Close"
+        data-i18n-title="trip.nav.close"
         class="absolute top-4 right-4 bg-black/40 hover:bg-black/70 text-white text-2xl px-4 py-2 rounded-full shadow-lg transition"
       >
         ✕
@@ -580,7 +700,6 @@
       class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300"
       aria-hidden="true"
     >
-      <!-- Click outside to close -->
       <div id="bookingBackdrop" class="absolute inset-0"></div>
 
       <div
@@ -589,55 +708,79 @@
         aria-modal="true"
         aria-labelledby="bookingModalTitle"
       >
-        <!-- Close -->
         <button
           id="bookingCloseBtn"
           type="button"
           title="Close"
+          data-i18n-title="trip.nav.close"
           class="absolute top-3 right-3 bg-black/10 hover:bg-black/20 text-gray-700 text-xl w-9 h-9 rounded-full flex items-center justify-center transition"
         >
           ✕
         </button>
 
-        <h3 id="bookingModalTitle" class="text-xl font-bold mb-4">
+        <h3
+          id="bookingModalTitle"
+          class="text-xl font-bold mb-4"
+          data-i18n="trip.booking.modal.title"
+        >
           Confirm your booking
         </h3>
 
         <div class="space-y-3 text-sm">
           <div class="flex justify-between">
-            <span class="text-gray-500">Trip</span>
+            <span class="text-gray-500" data-i18n="trip.booking.modal.trip"
+              >Trip</span
+            >
             <span id="bmTripName" class="font-medium"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Date</span>
+            <span class="text-gray-500" data-i18n="trip.booking.modal.date"
+              >Date</span
+            >
             <span id="bmDate" class="font-medium"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Time</span>
+            <span class="text-gray-500" data-i18n="trip.booking.modal.time"
+              >Time</span
+            >
             <span id="bmTime" class="font-medium"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Adults</span>
+            <span class="text-gray-500" data-i18n="trip.booking.modal.adults"
+              >Adults</span
+            >
             <span id="bmAdults" class="font-medium"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Children</span>
+            <span class="text-gray-500" data-i18n="trip.booking.modal.children"
+              >Children</span
+            >
             <span id="bmChildren" class="font-medium"></span>
           </div>
 
           <hr class="my-2" />
 
           <div class="flex justify-between">
-            <span class="text-gray-500">Price / Adult</span>
+            <span
+              class="text-gray-500"
+              data-i18n="trip.booking.modal.priceAdult"
+              >Price / Adult</span
+            >
             <span id="bmPriceAdult" class="font-medium"></span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Price / Child</span>
+            <span
+              class="text-gray-500"
+              data-i18n="trip.booking.modal.priceChild"
+              >Price / Child</span
+            >
             <span id="bmPriceChild" class="font-medium"></span>
           </div>
 
           <div class="flex justify-between text-base pt-2 border-t">
-            <span class="font-semibold">Total</span>
+            <span class="font-semibold" data-i18n="trip.booking.modal.total"
+              >Total</span
+            >
             <span id="bmTotal" class="font-bold text-green-600"></span>
           </div>
         </div>
@@ -647,6 +790,7 @@
             id="bookingEditBtn"
             type="button"
             class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 rounded transition"
+            data-i18n="trip.booking.modal.edit"
           >
             Edit details
           </button>
@@ -654,6 +798,7 @@
             id="bookingConfirmBtn"
             type="button"
             class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition"
+            data-i18n="trip.booking.modal.confirm"
           >
             Confirm & Continue
           </button>
@@ -661,7 +806,6 @@
       </div>
     </div>
 
-    <!-- Footer (reuse your site footer here) -->
     <div id="footer-placeholder"></div>
 
     <script>
@@ -669,7 +813,6 @@
         const btn = document.querySelector('a[href="#bookingPanel"]');
         const target = document.getElementById("bookingPanel");
         if (!btn || !target) return;
-
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           target.scrollIntoView({ behavior: "smooth", block: "start" });
