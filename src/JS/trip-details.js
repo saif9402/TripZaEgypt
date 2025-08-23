@@ -1847,9 +1847,6 @@
   });
 
   // --- Wishlist toggle (trip page) -------------------------------------------
-  function getTripIdFromUrl() {
-    return new URL(location.href).searchParams.get("id");
-  }
 
   // UI helpers
   function setWishlistUI(saved, loading = false) {
