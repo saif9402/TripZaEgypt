@@ -209,7 +209,7 @@ async function initTopRatedSlider(noCache = false) {
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
       }).format(value);
     } catch {
       return `${value} ${currency}`;
@@ -828,7 +828,7 @@ const _formatPrice = (value, currency = "EUR") => {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(value);
   } catch {
     return `${value} ${currency}`;

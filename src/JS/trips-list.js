@@ -169,7 +169,7 @@
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: "EUR",
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
       }).format(value);
     } catch {
       return `${value} EUR`;
