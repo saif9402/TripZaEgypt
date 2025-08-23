@@ -68,6 +68,30 @@ const translations = {
     "checkEmail.heading": "Please check your email…",
     "checkEmail.message": "We have sent you an email to verify your account.",
 
+    "forgot.pageTitle": "Forgot Password | Tour Guide",
+    "forgot.title": "Forgot your password?",
+    "forgot.subtitle": "Enter your email and we’ll send you a reset link.",
+    "forgot.email.placeholder": "you@example.com",
+    "forgot.submit": "Send Reset Link",
+    "forgot.cooldown": "Resend in {s}s",
+    "forgot.remembered": "Remembered it?",
+    "forgot.backToSignIn": "Back to sign in",
+    "forgot.tip":
+      "Tip: Check your spam/junk folder if you don’t see the email.",
+    "forgot.sending": "Sending…",
+    "forgot.successGeneric":
+      "If an account exists for that email, a reset link has been sent.",
+    "forgot.error.noEmail": "Please enter your email.",
+    "forgot.error.invalidEmail": "Please enter a valid email address.",
+    "forgot.error.generic": "Couldn't send reset link.",
+    "forgot.error.network": "Network error. Please try again.",
+
+    // small media/alt/copyright helpers
+    "img.bgBlurAlt": "blurred background",
+    "img.bgAlt": "background image",
+    "img.logoAlt": "main logo",
+    "footer.copy.tail": "Tour Guide. All rights reserved.",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -187,6 +211,31 @@ const translations = {
     "checkEmail.heading": "Bitte prüfe deine E-Mail…",
     "checkEmail.message":
       "Wir haben dir eine E-Mail gesendet, um dein Konto zu bestätigen.",
+
+    "forgot.pageTitle": "Passwort vergessen | Tour Guide",
+    "forgot.title": "Passwort vergessen?",
+    "forgot.subtitle":
+      "Gib deine E-Mail ein und wir senden dir einen Link zum Zurücksetzen.",
+    "forgot.email.placeholder": "du@beispiel.de",
+    "forgot.submit": "Link zum Zurücksetzen senden",
+    "forgot.cooldown": "Erneut senden in {s}s",
+    "forgot.remembered": "Wieder eingefallen?",
+    "forgot.backToSignIn": "Zur Anmeldung",
+    "forgot.tip":
+      "Tipp: Prüfe auch deinen Spam-/Junk-Ordner, falls die E-Mail nicht ankommt.",
+    "forgot.sending": "Senden…",
+    "forgot.successGeneric":
+      "Falls ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet.",
+    "forgot.error.noEmail": "Bitte gib deine E-Mail ein.",
+    "forgot.error.invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "forgot.error.generic":
+      "Link zum Zurücksetzen konnte nicht gesendet werden.",
+    "forgot.error.network": "Netzwerkfehler. Bitte versuche es erneut.",
+
+    "img.bgBlurAlt": "unscharfer Hintergrund",
+    "img.bgAlt": "Hintergrundbild",
+    "img.logoAlt": "Logo",
+    "footer.copy.tail": "Tour Guide. Alle Rechte vorbehalten.",
 
     "menu.name": "Menü",
     "menu.lang": "Sprache",
