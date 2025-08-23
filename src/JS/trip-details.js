@@ -445,11 +445,11 @@
   };
 
   function normalizeReview(r) {
+    // Only use explicit ids from backend if present
+    const explicitId = r.id ?? r.reviewId ?? null;
+
     return {
-      id:
-        r.id ??
-        r.reviewId ??
-        `${r.userId || r.appUserId || "u"}-${r.tripId || r.tripID || "t"}`,
+      id: explicitId || null, // we'll assign a unique one per fetch if still null
       userId: r.userId ?? r.appUserId ?? r.user?.id ?? null,
       userName: r.userName ?? r.fullName ?? r.user?.fullName ?? "Anonymous",
       avatar: r.user?.profilePictureURL ?? r.profilePictureURL ?? "",
@@ -460,18 +460,11 @@
   }
 
   async function fetchReviews(tripId) {
-    // Try to know who is signed in (without forcing login)
-    let userId = null;
-    try {
-      userId = window.currentUser?.id ?? null;
-    } catch (_) {}
-    reviewState.userId = userId;
+    // Who is signed in? (don’t force login)
+    reviewState.userId = window.currentUser?.id ?? null;
 
-    // Build API params
+    // Build API params – ⛔ no more UserId, backend uses token to sort
     const params = new URLSearchParams({ TripId: String(tripId) });
-    if (userId != null) params.append("UserId", String(userId));
-
-    // ⬇️ tell the backend how to sort
     params.append("Sort", mapSortToQuery(reviewState.sort));
 
     // loading skeleton
@@ -484,8 +477,7 @@
         <div class="h-5 bg-gray-200 rounded w-32 mb-3"></div>
         <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
         <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-      </div>
-    `
+      </div>`
         )
         .join("");
     }
@@ -496,6 +488,7 @@
         cache: "no-store",
       });
       const json = await res.json();
+
       const arr = Array.isArray(json)
         ? json
         : Array.isArray(json?.data?.data)
@@ -504,37 +497,37 @@
         ? json.data
         : [];
 
+      // Map + ensure per-fetch unique ids so buttons target the correct row
       list = arr.map((r, idx) => {
         const base = normalizeReview(r);
-        if (!base.id) base.id = `rv-${idx}`;
+        if (!base.id) base.id = `rv-${idx}`; // unique in this fetch
         base._origIndex = idx;
         return base;
       });
 
-      // Figure out which one is "mine" even if userId is missing
+      // Try to tag "my" review by name so edit/delete show up
       reviewState.mineKey = null;
       if (reviewState.userId != null && list.length) {
         const myName = (window.currentUser?.fullName || "")
           .trim()
           .toLowerCase();
         if (myName) {
-          const mineByName = list.find(
+          const mine = list.find(
             (x) => (x.userName || "").trim().toLowerCase() === myName
           );
-          if (mineByName) {
-            mineByName.userId = reviewState.userId;
-            reviewState.mineKey = mineByName.id;
+          if (mine) {
+            mine.userId = reviewState.userId; // memoize for isMine()
+            reviewState.mineKey = mine.id;
           }
         }
-        if (!reviewState.mineKey) reviewState.mineKey = list[0].id;
       }
 
-      reviewState.serverSorted = true; // ✅ backend respected Sort
+      reviewState.serverSorted = true; // backend respected Sort and token order
     } catch (e) {
       console.error("GetReviews error:", e);
       toast("error", "Couldn't load reviews", "Please try again later.");
       list = [];
-      reviewState.serverSorted = false; // fallback to client sorting
+      reviewState.serverSorted = false; // fallback to client
     }
 
     reviewState.all = list;
