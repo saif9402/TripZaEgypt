@@ -165,7 +165,7 @@
           <h3 class="font-semibold line-clamp-2">${name}</h3>
           <div class="flex items-center justify-between text-sm text-gray-600 mt-2">
             <span><i class="fas fa-star text-yellow-400"></i> ${rating}</span>
-            <span class="font-medium text-gray-800">$${price}</span>
+            <span class="font-medium text-gray-800">€${price}</span>
           </div>
         </div>
 
