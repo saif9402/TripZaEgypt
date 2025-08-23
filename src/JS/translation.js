@@ -280,6 +280,44 @@ const translations = {
     "signin.toast.server": "Server error. Please try again.",
     "signin.aria.showPwd": "Show password",
     "signin.aria.hidePwd": "Hide password",
+
+    "register.pageTitle": "Create Account | Tour Guide",
+
+    "register.fullName.label": "Full Name",
+    "register.fullName.placeholder": "Jane Doe",
+
+    "register.country.label": "Country",
+    "register.country.select": "Select Country",
+    "register.country.placeholder": "Select a country...",
+
+    "register.phone.label": "Phone Number",
+    "register.phone.placeholder": "+1234567890",
+
+    "register.email.label": "Email",
+    "register.email.placeholder": "you@example.com",
+
+    "register.password.label": "Password",
+    "register.password.placeholder": "••••••••",
+
+    "register.confirm.label": "Confirm Password",
+
+    "register.next": "Next",
+    "register.back": "Back",
+    "register.create": "Create Account",
+    "register.submitting": "Creating…",
+
+    "register.or": "Or continue with",
+    "register.google": "Sign up with Google",
+    "register.haveAccount": "Already have an account?",
+    "register.signIn": "Sign in",
+
+    "register.toast.mismatch": "Passwords do not match!",
+    "register.toast.success": "Registration successful!",
+    "register.toast.fail": "Registration failed.",
+    "register.toast.network": "Network error. Please try again.",
+
+    "a11y.showPwd": "Show password",
+    "a11y.hidePwd": "Hide password",
   },
   deu: {
     "nav.home": "Startseite",
@@ -572,6 +610,44 @@ const translations = {
     "signin.toast.server": "Serverfehler. Bitte erneut versuchen.",
     "signin.aria.showPwd": "Passwort anzeigen",
     "signin.aria.hidePwd": "Passwort verbergen",
+
+    "register.pageTitle": "Konto erstellen | Tour Guide",
+
+    "register.fullName.label": "Vollständiger Name",
+    "register.fullName.placeholder": "Max Mustermann",
+
+    "register.country.label": "Land",
+    "register.country.select": "Land auswählen",
+    "register.country.placeholder": "Wähle ein Land…",
+
+    "register.phone.label": "Telefonnummer",
+    "register.phone.placeholder": "+491234567890",
+
+    "register.email.label": "E-Mail",
+    "register.email.placeholder": "du@beispiel.de",
+
+    "register.password.label": "Passwort",
+    "register.password.placeholder": "••••••••",
+
+    "register.confirm.label": "Passwort bestätigen",
+
+    "register.next": "Weiter",
+    "register.back": "Zurück",
+    "register.create": "Konto erstellen",
+    "register.submitting": "Wird erstellt…",
+
+    "register.or": "Oder weiter mit",
+    "register.google": "Mit Google registrieren",
+    "register.haveAccount": "Bereits ein Konto?",
+    "register.signIn": "Anmelden",
+
+    "register.toast.mismatch": "Passwörter stimmen nicht überein!",
+    "register.toast.success": "Registrierung erfolgreich!",
+    "register.toast.fail": "Registrierung fehlgeschlagen.",
+    "register.toast.network": "Netzwerkfehler. Bitte erneut versuchen.",
+
+    "a11y.showPwd": "Passwort anzeigen",
+    "a11y.hidePwd": "Passwort verbergen",
   },
 };
 

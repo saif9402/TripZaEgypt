@@ -3,18 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Account | Tour Guide</title>
+    <title data-i18n="register.pageTitle">Create Account | Tour Guide</title>
+
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
+
     <link
       href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css"
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <!-- make sure the translator is available before inline scripts use it -->
+    <script src="../JS/translation.js"></script>
   </head>
   <body class="relative h-screen overflow-x-hidden overflow-y-auto">
     <!-- ✅ Toast Container -->
@@ -43,7 +48,7 @@
       class="relative z-10 flex items-center justify-center h-screen px-4 bg-black/40"
     >
       <div
-        class="bg-white rounded-2xl shadow-xl p-7 sm:p-7 md:p-7 max-w-md w-full max-h-[90vh] overflow-y-auto overflow-hidden justify-center items-center"
+        class="bg-white rounded-2xl shadow-xl p-7 sm:p-7 md:p-7 max-w-md w-full max-h=[90vh] overflow-y-auto overflow-hidden justify-center items-center"
       >
         <div class="p-6 flex items-center justify-center">
           <img src="../img/Vector.png" alt="main logo" />
@@ -59,15 +64,17 @@
                   <label
                     for="name"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.fullName.label"
                     >Full Name</label
                   >
                   <input
                     id="name"
                     name="FullName"
                     type="text"
-                    placeholder="Jane Doe"
                     class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
                     required
+                    placeholder="Jane Doe"
+                    data-i18n-placeholder="register.fullName.placeholder"
                   />
                 </div>
 
@@ -75,6 +82,7 @@
                   <label
                     for="country"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.country.label"
                     >Country</label
                   >
                   <select
@@ -82,8 +90,11 @@
                     name="Country"
                     required
                     class="w-full mt-1 px-2 py-1 bg-white text-sm focus:outline-none"
+                    aria-label="Country"
                   >
-                    <option value="">Select Country</option>
+                    <option value="" data-i18n="register.country.select">
+                      Select Country
+                    </option>
                   </select>
                 </div>
 
@@ -91,15 +102,17 @@
                   <label
                     for="phone"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.phone.label"
                     >Phone Number</label
                   >
                   <input
                     id="phone"
                     name="PhoneNumber"
                     type="text"
-                    placeholder="+1234567890"
                     class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
                     required
+                    placeholder="+1234567890"
+                    data-i18n-placeholder="register.phone.placeholder"
                   />
                 </div>
               </div>
@@ -108,6 +121,7 @@
                 <button
                   type="button"
                   class="next-step bg-yellow-400 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500"
+                  data-i18n="register.next"
                 >
                   Next
                 </button>
@@ -121,15 +135,17 @@
                   <label
                     for="email"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.email.label"
                     >Email</label
                   >
                   <input
                     id="email"
                     name="Email"
                     type="email"
-                    placeholder="you@example.com"
                     class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
                     required
+                    placeholder="you@example.com"
+                    data-i18n-placeholder="register.email.placeholder"
                   />
                 </div>
 
@@ -137,22 +153,27 @@
                   <label
                     for="password"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.password.label"
                     >Password</label
                   >
                   <input
                     id="password"
                     name="Password"
                     type="password"
-                    placeholder="••••••••"
                     class="w-full mt-1 px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
                     required
+                    placeholder="••••••••"
+                    data-i18n-placeholder="register.password.placeholder"
                   />
                   <button
-                    title="Password"
                     type="button"
                     onclick="togglePassword('password', this)"
                     class="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
                     tabindex="-1"
+                    aria-label="Show password"
+                    title="Show password"
+                    data-i18n-title="a11y.showPwd"
+                    data-i18n-aria-label="a11y.showPwd"
                   >
                     <i class="fa-solid fa-eye"></i>
                   </button>
@@ -162,21 +183,26 @@
                   <label
                     for="confirm-password"
                     class="block text-sm font-medium text-gray-600"
+                    data-i18n="register.confirm.label"
                     >Confirm Password</label
                   >
                   <input
                     id="confirm-password"
                     type="password"
-                    placeholder="••••••••"
                     class="w-full mt-1 px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 placeholder:italic placeholder-black/50"
                     required
+                    placeholder="••••••••"
+                    data-i18n-placeholder="register.password.placeholder"
                   />
                   <button
-                    title="Confirm password"
                     type="button"
                     onclick="togglePassword('confirm-password', this)"
                     class="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
                     tabindex="-1"
+                    aria-label="Show password"
+                    title="Show password"
+                    data-i18n-title="a11y.showPwd"
+                    data-i18n-aria-label="a11y.showPwd"
                   >
                     <i class="fa-solid fa-eye"></i>
                   </button>
@@ -188,11 +214,13 @@
                   type="button"
                   class="prev-step text-gray-600 hover:underline"
                 >
-                  ← Back
+                  ← <span data-i18n="register.back">Back</span>
                 </button>
                 <button
                   type="submit"
+                  id="submitBtn"
                   class="bg-yellow-400 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-500"
+                  data-i18n="register.create"
                 >
                   Create Account
                 </button>
@@ -207,7 +235,9 @@
             <div class="w-full border-t border-gray-300"></div>
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+            <span class="px-2 bg-white text-gray-500" data-i18n="register.or"
+              >Or continue with</span
+            >
           </div>
         </div>
 
@@ -221,20 +251,34 @@
             alt="Google logo"
             class="w-5 h-5"
           />
-          <span class="text-black">Sign up with Google</span>
+          <span class="text-black" data-i18n="register.google"
+            >Sign up with Google</span
+          >
         </a>
 
         <p class="text-center text-xs text-gray-400 mt-4">
-          Already have an account?
-          <a href="sign-in.html" class="text-yellow-500 hover:underline"
+          <span data-i18n="register.haveAccount">Already have an account?</span>
+          <a
+            href="sign-in.html"
+            class="text-yellow-500 hover:underline"
+            data-i18n="register.signIn"
             >Sign in</a
           >
         </p>
       </div>
     </div>
 
-    <!-- ✅ JS to Submit FormData and Show Toasts Based on Status -->
+    <!-- ✅ JS -->
     <script>
+      // Lightweight i18n accessor
+      const getLang = () =>
+        window.__currentLang || localStorage.getItem("lang") || "en";
+      const tr = (k) =>
+        typeof window.t === "function"
+          ? window.t(k)
+          : window.translations?.[getLang()]?.[k] || k;
+
+      // Country list (keep names as-is; only the placeholder and labels are translated)
       const countrySelect = document.getElementById("country");
       const countries = [
         "Afghanistan",
@@ -309,19 +353,21 @@
         "Yemen",
         "Zimbabwe",
       ];
-
       countries.forEach((country) => {
         const option = document.createElement("option");
         option.value = country;
         option.textContent = country;
         countrySelect.appendChild(option);
       });
-      new TomSelect("#country", {
+
+      // Tom Select
+      let ts = new TomSelect("#country", {
         create: false,
         sortField: "text",
-        placeholder: "Select a country...",
+        placeholder: tr("register.country.placeholder"),
       });
 
+      // toasts
       function showToast(message, type = "success") {
         const toastContainer = document.getElementById("toast-container");
         const toast = document.createElement("div");
@@ -337,6 +383,7 @@
         }, 5000);
       }
 
+      // Submit
       document
         .getElementById("registerForm")
         .addEventListener("submit", async function (e) {
@@ -348,7 +395,7 @@
             document.getElementById("confirm-password").value;
 
           if (password !== confirmPassword) {
-            showToast("Passwords do not match!", "error");
+            showToast(tr("register.toast.mismatch"), "error");
             return;
           }
 
@@ -359,43 +406,53 @@
           formData.append("Password", form.Password.value);
           formData.append("PhoneNumber", form.PhoneNumber.value);
 
+          const submitBtn = document.getElementById("submitBtn");
+          const original = submitBtn.textContent;
+          submitBtn.disabled = true;
+          submitBtn.textContent = tr("register.submitting");
+
           try {
             const response = await fetch("/api/Auth/Register", {
               method: "POST",
               body: formData,
             });
-
             const result = await response.json();
-            const toastType = result.succeeded ? "success" : "error";
-            console.log(result);
 
-            const message =
+            const ok = response.ok && (result.succeeded ?? false);
+            const msg =
               result.errors?.join(", ") ||
               result.message ||
-              (toastType === "success"
-                ? "Registration successful!"
-                : "Registration failed.");
+              (ok ? tr("register.toast.success") : tr("register.toast.fail"));
 
-            showToast(message, toastType);
+            showToast(msg, ok ? "success" : "error");
 
-            if (result.succeeded) {
+            if (ok) {
               form.reset();
               window.location.href = "check-email.html";
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.textContent = original;
             }
           } catch (err) {
             console.error(err);
-            showToast("Network error. Please try again.", "error");
+            showToast(tr("register.toast.network"), "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = original;
           }
         });
+
+      // Toggle password buttons (localized titles/aria)
       function togglePassword(inputId, button) {
         const input = document.getElementById(inputId);
         const icon = button.querySelector("i");
-
         const isVisible = input.type === "text";
         input.type = isVisible ? "password" : "text";
-
         icon.classList.toggle("fa-eye");
         icon.classList.toggle("fa-eye-slash");
+
+        const key = input.type === "text" ? "a11y.hidePwd" : "a11y.showPwd";
+        button.title = tr(key);
+        button.setAttribute("aria-label", tr(key));
       }
 
       // Wizard Navigation
@@ -413,39 +470,52 @@
           }
         });
       }
-
       document.querySelectorAll(".next-step").forEach((btn) => {
         btn.addEventListener("click", () => {
           const current = steps[currentStep];
           const inputs = current.querySelectorAll("input, select");
           let valid = true;
-
           inputs.forEach((input) => {
             if (!input.checkValidity()) {
               input.reportValidity();
               valid = false;
             }
           });
-
           if (valid) {
             currentStep++;
             showStep(currentStep);
           }
         });
       });
-
       document.querySelectorAll(".prev-step").forEach((btn) => {
         btn.addEventListener("click", () => {
           currentStep--;
           showStep(currentStep);
         });
       });
-
       showStep(currentStep);
+
+      // Keep runtime bits in sync when language changes
+      document.addEventListener("i18n:change", () => {
+        // update Tom Select placeholder
+        if (ts) {
+          ts.settings.placeholder = tr("register.country.placeholder");
+          ts.input.placeholder = ts.settings.placeholder;
+          ts.refreshOptions(false);
+        }
+        // update toggle buttons initial titles (if still default state)
+        document.querySelectorAll("[data-i18n-title]").forEach((btn) => {
+          const key = btn.getAttribute("data-i18n-title");
+          btn.title = tr(key);
+        });
+        document.querySelectorAll("[data-i18n-aria-label]").forEach((btn) => {
+          const key = btn.getAttribute("data-i18n-aria-label");
+          btn.setAttribute("aria-label", tr(key));
+        });
+      });
     </script>
 
     <!-- Optional Scripts -->
-    <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
   </body>
 </html>
