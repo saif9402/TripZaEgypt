@@ -45,6 +45,25 @@ const translations = {
     "time.hourShort": "h",
     "time.minShort": "min",
 
+    "about.pageTitle": "About Us | TripZaEgypt",
+    "about.hero.title": "Who We Are",
+    "about.hero.subtitle":
+      "At TripZaEgypt, we're passionate about connecting people with unforgettable experiences across the globe. With carefully curated trips and seamless planning, we take the stress out of travel so you can focus on the adventure.",
+
+    "about.mission.imageAlt": "Our Mission",
+    "about.mission.title": "Our Mission",
+    "about.mission.desc":
+      "We aim to inspire and empower travelers to explore the world, experience different cultures, and create lifelong memories — all through personalized, high-quality tour services.",
+    "about.mission.point1": "Tailored travel packages",
+    "about.mission.point2": "Expert local guides",
+    "about.mission.point3": "Eco-friendly practices",
+    "about.mission.point4": "Reliable customer support",
+
+    "about.cta.title": "Ready to Explore With Us?",
+    "about.cta.subtitle":
+      "Start your journey today and experience travel like never before.",
+    "about.cta.button": "Browse Tours",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -140,6 +159,25 @@ const translations = {
     // time tokens
     "time.hourShort": "Std.",
     "time.minShort": "Min.",
+
+    "about.pageTitle": "Über uns | TripZaEgypt",
+    "about.hero.title": "Wer wir sind",
+    "about.hero.subtitle":
+      "Bei TripZaEgypt verbinden wir Menschen mit unvergesslichen Erlebnissen weltweit. Mit sorgfältig kuratierten Reisen und reibungsloser Planung nehmen wir den Stress aus dem Reisen, damit du dich ganz auf das Abenteuer konzentrieren kannst.",
+
+    "about.mission.imageAlt": "Unsere Mission",
+    "about.mission.title": "Unsere Mission",
+    "about.mission.desc":
+      "Wir möchten Reisende inspirieren und befähigen, die Welt zu entdecken, verschiedene Kulturen zu erleben und lebenslange Erinnerungen zu schaffen — durch persönliche, hochwertige Tour-Services.",
+    "about.mission.point1": "Maßgeschneiderte Reisepakete",
+    "about.mission.point2": "Erfahrene lokale Guides",
+    "about.mission.point3": "Umweltfreundliche Praktiken",
+    "about.mission.point4": "Zuverlässiger Kundensupport",
+
+    "about.cta.title": "Bereit, mit uns auf Entdeckungsreise zu gehen?",
+    "about.cta.subtitle":
+      "Starte noch heute deine Reise und erlebe Reisen wie nie zuvor.",
+    "about.cta.button": "Touren durchsuchen",
 
     "menu.name": "Menü",
     "menu.lang": "Sprache",

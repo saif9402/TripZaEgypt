@@ -28,8 +28,10 @@
     <!-- Hero Section -->
     <section class="bg-blue-50 py-16">
       <div class="max-w-5xl mx-auto text-center px-4">
-        <h2 class="text-4xl font-bold mb-4">Who We Are</h2>
-        <p class="text-lg text-gray-600">
+        <h2 class="text-4xl font-bold mb-4" data-i18n="about.hero.title">
+          Who We Are
+        </h2>
+        <p class="text-lg text-gray-600" data-i18n="about.hero.subtitle">
           At TripZaEgypt, we're passionate about connecting people with
           unforgettable experiences across the globe. With carefully curated
           trips and seamless planning, we take the stress out of travel so you
@@ -45,21 +47,27 @@
       >
         <img
           src="../img/sign in background.png"
-          alt="Our Mission"
           class="w-full rounded-lg shadow-md"
+          data-i18n-alt="about.mission.imageAlt"
+          alt="Our Mission"
         />
         <div>
-          <h3 class="text-2xl font-semibold mb-4">Our Mission</h3>
-          <p class="text-gray-700 mb-4">
+          <h3
+            class="text-2xl font-semibold mb-4"
+            data-i18n="about.mission.title"
+          >
+            Our Mission
+          </h3>
+          <p class="text-gray-700 mb-4" data-i18n="about.mission.desc">
             We aim to inspire and empower travelers to explore the world,
             experience different cultures, and create lifelong memories — all
             through personalized, high-quality tour services.
           </p>
           <ul class="list-disc pl-5 text-gray-600">
-            <li>Tailored travel packages</li>
-            <li>Expert local guides</li>
-            <li>Eco-friendly practices</li>
-            <li>Reliable customer support</li>
+            <li data-i18n="about.mission.point1">Tailored travel packages</li>
+            <li data-i18n="about.mission.point2">Expert local guides</li>
+            <li data-i18n="about.mission.point3">Eco-friendly practices</li>
+            <li data-i18n="about.mission.point4">Reliable customer support</li>
           </ul>
         </div>
       </div>
@@ -67,13 +75,16 @@
 
     <!-- Call to Action -->
     <section class="py-16 text-center bg-white">
-      <h3 class="text-3xl font-bold mb-4">Ready to Explore With Us?</h3>
-      <p class="text-gray-600 mb-6">
+      <h3 class="text-3xl font-bold mb-4" data-i18n="about.cta.title">
+        Ready to Explore With Us?
+      </h3>
+      <p class="text-gray-600 mb-6" data-i18n="about.cta.subtitle">
         Start your journey today and experience travel like never before.
       </p>
       <a
         href="trips-list.html"
         class="bg-yellow-400 text-black px-6 py-3 rounded-md hover:bg-yellow-500 font-semibold"
+        data-i18n="about.cta.button"
       >
         Browse Tours
       </a>
@@ -81,8 +92,27 @@
 
     <!-- Footer -->
     <div id="footer-placeholder"></div>
+
     <script src="../JS/translation.js"></script>
     <script src="../JS/transition.js"></script>
     <script src="../JS/includes.js"></script>
+
+    <!-- Keep page title translated (runs after language refresh too) -->
+    <script>
+      (function () {
+        function setAboutTitle() {
+          if (typeof window.t === "function") {
+            document.title = window.t("about.pageTitle") || document.title;
+          }
+        }
+        document.addEventListener("DOMContentLoaded", setAboutTitle);
+        const prevRefresh = window.refreshLangData;
+        window.refreshLangData = async function (...args) {
+          const out = await prevRefresh?.apply(this, args);
+          setAboutTitle();
+          return out;
+        };
+      })();
+    </script>
   </body>
 </html>
