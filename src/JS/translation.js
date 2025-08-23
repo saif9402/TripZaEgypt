@@ -154,6 +154,93 @@ const translations = {
     "signup.button": "Create Account",
     "signup.haveAccount": "Already have an account?",
     "signup.signin": "Sign in",
+
+    "profile.pageTitle": "Profile | Tour Guide",
+
+    "profile.sidebar.user": "User",
+    "profile.sidebar.location": "Location",
+
+    "profile.nav.info": "Profile Information",
+    "profile.nav.bookings": "Booking History",
+    "profile.nav.wishlist": "Wishlist",
+
+    "profile.info.title": "Personal Information",
+    "profile.security.title": "Security",
+
+    "profile.label.name": "Name",
+    "profile.label.phone": "Phone",
+    "profile.label.country": "Country",
+    "profile.label.email": "Email Address",
+
+    "profile.action.edit": "Edit",
+    "profile.action.cancel": "Cancel",
+    "profile.saveHint": "Edit your details, then click Save changes.",
+
+    "profile.bookings.title": "Booking History",
+    "profile.bookings.error": "Couldn’t load bookings. Please try again.",
+    "profile.bookings.empty": "No bookings yet.",
+
+    "profile.wishlist.title": "Wishlist",
+    "profile.wishlist.refresh": "Refresh",
+    "profile.wishlist.error": "Couldn’t load wishlist. Please try again.",
+    "profile.wishlist.empty": "No saved trips yet.",
+    "profile.wishlist.view": "View details",
+    "profile.wishlist.remove": "Remove",
+    "profile.badge.bestSeller": "Best Seller",
+
+    // Complete profile modal
+    "cp.title": "Complete your profile",
+    "cp.subtitle": "Please add your phone number and country to continue.",
+    "cp.name": "Full Name",
+    "cp.phone": "Phone Number",
+    "cp.phone.placeholder": "+201234567890",
+    "cp.country": "Country",
+    "cp.save": "Save & Continue",
+    "cp.cantNavigate": "You can’t navigate away until this is saved.",
+    "cp.error.noCountry": "Please choose your country.",
+    "cp.saving": "Saving…",
+    "cp.updated": "Profile updated. You're good to go!",
+    "cp.updateFailed": "Could not update profile.",
+
+    // Booking history UI / modal / actions
+    "booking.status.Pending": "Pending",
+    "booking.status.Confirmed": "Confirmed",
+    "booking.status.Canceled": "Canceled",
+    "booking.status.Rejected": "Rejected",
+
+    "booking.card.created": "Created",
+    "booking.card.total": "Total",
+    "booking.card.publicId": "Public ID",
+    "booking.card.adults": "Adults",
+    "booking.card.children": "Children",
+    "booking.btn.copy": "Copy",
+
+    "booking.toast.copied": "Copied!",
+    "booking.toast.copyFailed": "Copy failed",
+
+    "booking.modal.title": "Booking Details",
+    "booking.modal.loading": "Loading booking…",
+    "booking.modal.close": "Close",
+    "booking.modal.delete": "Delete",
+
+    "booking.delete.deleting": "Deleting…",
+    "booking.delete.deleted": "Booking deleted.",
+    "booking.error.load": "Couldn’t load bookings. {msg}",
+    "booking.modal.error.load": "Couldn’t load booking. {msg}",
+
+    "booking.confirm.deleteTitle": "Delete booking?",
+    "booking.confirm.htmlLine1":
+      "You’re about to permanently delete <b>{trip}</b>{created}.",
+    "booking.confirm.createdSuffix": " (created {date})",
+    "booking.confirm.totalLine": "Total: <b>{total}</b>",
+    "booking.confirm.irreversible": "This action cannot be undone.",
+    "booking.confirm.ok": "Delete",
+    "booking.confirm.cancel": "Keep Booking",
+
+    // Wishlist toasts
+    "wishlist.toast.someFailed": "Some items failed to load",
+    "wishlist.toast.removed": "Removed from wishlist",
+    "wishlist.toast.removeFailed": "Failed to remove",
   },
   deu: {
     "nav.home": "Startseite",
@@ -313,6 +400,96 @@ const translations = {
     "signup.button": "Konto erstellen",
     "signup.haveAccount": "Haben Sie bereits ein Konto?",
     "signup.signin": "Anmelden",
+
+    "profile.pageTitle": "Profil | Tour Guide",
+
+    "profile.sidebar.user": "Nutzer",
+    "profile.sidebar.location": "Standort",
+
+    "profile.nav.info": "Profilinformationen",
+    "profile.nav.bookings": "Buchungsverlauf",
+    "profile.nav.wishlist": "Merkliste",
+
+    "profile.info.title": "Persönliche Informationen",
+    "profile.security.title": "Sicherheit",
+
+    "profile.label.name": "Name",
+    "profile.label.phone": "Telefon",
+    "profile.label.country": "Land",
+    "profile.label.email": "E-Mail-Adresse",
+
+    "profile.action.edit": "Bearbeiten",
+    "profile.action.cancel": "Abbrechen",
+    "profile.saveHint":
+      "Bearbeite deine Daten und klicke dann auf Änderungen speichern.",
+
+    "profile.bookings.title": "Buchungsverlauf",
+    "profile.bookings.error":
+      "Buchungen konnten nicht geladen werden. Bitte versuche es erneut.",
+    "profile.bookings.empty": "Noch keine Buchungen.",
+
+    "profile.wishlist.title": "Merkliste",
+    "profile.wishlist.refresh": "Aktualisieren",
+    "profile.wishlist.error":
+      "Merkliste konnte nicht geladen werden. Bitte versuche es erneut.",
+    "profile.wishlist.empty": "Noch keine gespeicherten Reisen.",
+    "profile.wishlist.view": "Details ansehen",
+    "profile.wishlist.remove": "Entfernen",
+    "profile.badge.bestSeller": "Bestseller",
+
+    "cp.title": "Profil vervollständigen",
+    "cp.subtitle":
+      "Bitte füge deine Telefonnummer und dein Land hinzu, um fortzufahren.",
+    "cp.name": "Vollständiger Name",
+    "cp.phone": "Telefonnummer",
+    "cp.phone.placeholder": "+491234567890",
+    "cp.country": "Land",
+    "cp.save": "Speichern & fortfahren",
+    "cp.cantNavigate":
+      "Du kannst erst weiternavigieren, wenn dies gespeichert wurde.",
+    "cp.error.noCountry": "Bitte wähle dein Land.",
+    "cp.saving": "Speichern…",
+    "cp.updated": "Profil aktualisiert. Alles bereit!",
+    "cp.updateFailed": "Profil konnte nicht aktualisiert werden.",
+
+    "booking.status.Pending": "Ausstehend",
+    "booking.status.Confirmed": "Bestätigt",
+    "booking.status.Canceled": "Storniert",
+    "booking.status.Rejected": "Abgelehnt",
+
+    "booking.card.created": "Erstellt",
+    "booking.card.total": "Gesamt",
+    "booking.card.publicId": "Öffentliche ID",
+    "booking.card.adults": "Erwachsene",
+    "booking.card.children": "Kinder",
+    "booking.btn.copy": "Kopieren",
+
+    "booking.toast.copied": "Kopiert!",
+    "booking.toast.copyFailed": "Kopieren fehlgeschlagen",
+
+    "booking.modal.title": "Buchungsdetails",
+    "booking.modal.loading": "Buchung wird geladen…",
+    "booking.modal.close": "Schließen",
+    "booking.modal.delete": "Löschen",
+
+    "booking.delete.deleting": "Wird gelöscht…",
+    "booking.delete.deleted": "Buchung gelöscht.",
+    "booking.error.load": "Buchungen konnten nicht geladen werden. {msg}",
+    "booking.modal.error.load": "Buchung konnte nicht geladen werden. {msg}",
+
+    "booking.confirm.deleteTitle": "Buchung löschen?",
+    "booking.confirm.htmlLine1":
+      "Du bist dabei, <b>{trip}</b>{created} dauerhaft zu löschen.",
+    "booking.confirm.createdSuffix": " (erstellt am {date})",
+    "booking.confirm.totalLine": "Gesamt: <b>{total}</b>",
+    "booking.confirm.irreversible":
+      "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "booking.confirm.ok": "Löschen",
+    "booking.confirm.cancel": "Buchung behalten",
+
+    "wishlist.toast.someFailed": "Einige Elemente konnten nicht geladen werden",
+    "wishlist.toast.removed": "Aus der Merkliste entfernt",
+    "wishlist.toast.removeFailed": "Entfernen fehlgeschlagen",
   },
 };
 

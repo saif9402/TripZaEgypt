@@ -4,13 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Profile | Tour Guide</title>
+    <title data-i18n="profile.pageTitle">Profile | Tour Guide</title>
 
-    <!-- Tailwind build + site styles -->
     <link href="../output.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css" />
 
-    <!-- Icons / Alpine (optional) -->
     <link
       href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
       rel="stylesheet"
@@ -51,12 +49,21 @@
             >
               <i class="fas fa-user"></i>
             </div>
-            <h2 id="sidebarName" class="text-2xl font-semibold">User</h2>
+            <h2
+              id="sidebarName"
+              class="text-2xl font-semibold"
+              data-i18n="profile.sidebar.user"
+            >
+              User
+            </h2>
+
+            <!-- split label/value so JS can set the country without clobbering i18n -->
             <p
-              id="sidebarLocation"
               class="text-sm text-gray-500 mt-1 flex items-center justify-center"
             >
-              <i class="fas fa-map-marker-alt mr-1"></i> Location
+              <i class="fas fa-map-marker-alt mr-1"></i>
+              <span data-i18n="profile.sidebar.location">Location</span>:
+              <span id="sidebarCountry" class="ml-1">—</span>
             </p>
           </div>
 
@@ -65,6 +72,7 @@
               id="navProfile"
               class="w-full bg-yellow-400 hover:bg-yellow-500 transition text-black font-medium px-4 py-2 rounded-lg"
               type="button"
+              data-i18n="profile.nav.info"
             >
               Profile Information
             </button>
@@ -72,6 +80,7 @@
               id="navBookings"
               class="w-full border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-medium px-4 py-2 rounded-lg"
               type="button"
+              data-i18n="profile.nav.bookings"
             >
               Booking History
             </button>
@@ -81,7 +90,7 @@
               type="button"
             >
               <i class="fas fa-heart text-rose-500"></i>
-              Wishlist
+              <span data-i18n="profile.nav.wishlist">Wishlist</span>
             </button>
           </div>
         </aside>
@@ -90,7 +99,10 @@
         <section class="lg:w-3/4 w-full">
           <!-- Profile Section -->
           <section id="profileSection">
-            <h2 class="text-xl font-semibold mb-6 border-b pb-2">
+            <h2
+              class="text-xl font-semibold mb-6 border-b pb-2"
+              data-i18n="profile.info.title"
+            >
               Personal Information
             </h2>
 
@@ -99,7 +111,10 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
               <div>
-                <label class="block text-sm font-medium mb-1" for="profileName"
+                <label
+                  class="block text-sm font-medium mb-1"
+                  for="profileName"
+                  data-i18n="profile.label.name"
                   >Name</label
                 >
                 <input
@@ -111,7 +126,10 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium mb-1" for="profilePhone"
+                <label
+                  class="block text-sm font-medium mb-1"
+                  for="profilePhone"
+                  data-i18n="profile.label.phone"
                   >Phone</label
                 >
                 <input
@@ -127,6 +145,7 @@
                 <label
                   class="block text-sm font-medium mb-1"
                   for="profileLocation"
+                  data-i18n="profile.label.country"
                   >Country</label
                 >
                 <input
@@ -145,26 +164,37 @@
                 id="editSaveBtn"
                 class="bg-yellow-400 hover:bg-yellow-500 text-white font-medium px-5 py-2.5 rounded-lg transition"
               >
-                <i class="fas fa-pen mr-2"></i><span>Edit</span>
+                <i class="fas fa-pen mr-2"></i
+                ><span data-i18n="profile.action.edit">Edit</span>
               </button>
               <button
                 id="cancelBtn"
                 class="hidden border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-lg transition"
                 type="button"
+                data-i18n="profile.action.cancel"
               >
                 Cancel
               </button>
-              <span id="saveHint" class="hidden text-sm text-gray-500"
-                >Edit your details, then click <b>Save changes</b>.</span
+              <span
+                id="saveHint"
+                class="text-sm text-gray-500 hidden"
+                data-i18n="profile.saveHint"
+                >Edit your details, then click Save changes.</span
               >
             </div>
 
-            <h2 class="text-xl font-semibold mt-10 mb-6 border-b pb-2">
+            <h2
+              class="text-xl font-semibold mt-10 mb-6 border-b pb-2"
+              data-i18n="profile.security.title"
+            >
               Security
             </h2>
             <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium mb-1" for="profileEmail"
+                <label
+                  class="block text-sm font-medium mb-1"
+                  for="profileEmail"
+                  data-i18n="profile.label.email"
                   >Email Address</label
                 >
                 <input
@@ -180,7 +210,10 @@
           <!-- Booking Section -->
           <section id="bookingSection" class="hidden">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-semibold border-b pb-2 w-full">
+              <h2
+                class="text-xl font-semibold border-b pb-2 w-full"
+                data-i18n="profile.bookings.title"
+              >
                 Booking History
               </h2>
             </div>
@@ -189,6 +222,7 @@
             <div
               id="bookingsError"
               class="hidden mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm"
+              data-i18n="profile.bookings.error"
             >
               Couldn’t load bookings. Please try again.
             </div>
@@ -199,7 +233,7 @@
               class="hidden text-center py-10 text-gray-500"
             >
               <i class="fas fa-calendar-times text-4xl mb-3"></i>
-              <p>No bookings yet.</p>
+              <p data-i18n="profile.bookings.empty">No bookings yet.</p>
             </div>
 
             <!-- Loading skeleton -->
@@ -226,10 +260,14 @@
               class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
             ></div>
           </section>
+
           <!-- Wishlist Section -->
           <section id="wishlistSection" class="hidden">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-semibold border-b pb-2 w-full">
+              <h2
+                class="text-xl font-semibold border-b pb-2 w-full"
+                data-i18n="profile.wishlist.title"
+              >
                 Wishlist
               </h2>
               <button
@@ -237,6 +275,7 @@
                 class="ml-4 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 text-sm"
                 type="button"
                 title="Refresh"
+                data-i18n-title="profile.wishlist.refresh"
               >
                 <i class="fas fa-rotate-right"></i>
               </button>
@@ -246,6 +285,7 @@
             <div
               id="wishlistError"
               class="hidden mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm"
+              data-i18n="profile.wishlist.error"
             >
               Couldn’t load wishlist. Please try again.
             </div>
@@ -256,7 +296,7 @@
               class="hidden text-center py-10 text-gray-500"
             >
               <i class="far fa-heart text-4xl mb-3"></i>
-              <p>No saved trips yet.</p>
+              <p data-i18n="profile.wishlist.empty">No saved trips yet.</p>
             </div>
 
             <!-- Loading skeleton -->
@@ -304,5 +344,34 @@
     <script src="../JS/profile.js"></script>
     <script src="../JS/booking-history.js"></script>
     <script src="../JS/wishlist.js"></script>
+
+    <!-- Keep <title> translated after language switches -->
+    <script>
+      (function () {
+        function setPageTitle() {
+          if (typeof window.t === "function") {
+            document.title = window.t("profile.pageTitle") || document.title;
+          }
+        }
+        document.addEventListener("DOMContentLoaded", setPageTitle);
+        const prev = window.refreshLangData;
+        window.refreshLangData = async function (...args) {
+          const out = await prev?.apply(this, args);
+          setPageTitle();
+          return out;
+        };
+
+        // If includes.js fills currentUser, reflect country in the sidebar
+        window.addEventListener(
+          "auth:user",
+          (e) => {
+            const country = e.detail?.user?.country || "";
+            const el = document.getElementById("sidebarCountry");
+            if (el && country) el.textContent = country;
+          },
+          { once: true }
+        );
+      })();
+    </script>
   </body>
 </html>

@@ -1,8 +1,14 @@
 // ../JS/wishlist.js
 (function () {
+  const t = (k, p) =>
+    typeof window.t === "function"
+      ? window.t(k, p)
+      : k.replace(/\{(\w+)\}/g, (_, m) =>
+          p && p[m] != null ? p[m] : `{${m}}`
+        );
+
   const token = localStorage.getItem("accessToken");
 
-  // Sections & nav
   const profileSection = document.getElementById("profileSection");
   const bookingSection = document.getElementById("bookingSection");
   const wishlistSection = document.getElementById("wishlistSection");
@@ -11,7 +17,6 @@
   const navBookings = document.getElementById("navBookings");
   const navWishlist = document.getElementById("navWishlist");
 
-  // Wishlist UI
   const wishlistLoading = document.getElementById("wishlistLoading");
   const wishlistGrid = document.getElementById("wishlistGrid");
   const wishlistEmpty = document.getElementById("wishlistEmpty");
@@ -22,7 +27,6 @@
 
   function getLangId() {
     const lang = localStorage.getItem("lang") || "en";
-    // 1: German, 2: English (as per your API)
     return lang === "deu" ? 1 : 2;
   }
 
@@ -95,9 +99,7 @@
   async function fetchWishlistIds() {
     const res = await fetch("/api/Wishlist", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("Wishlist fetch failed");
     const json = await res.json();
@@ -109,9 +111,7 @@
       `/api/Trip/GetTripById/${id}?TranslationLanguageId=${langId}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     if (!res.ok) throw new Error(`Trip ${id} fetch failed`);
@@ -123,9 +123,7 @@
       `/api/Wishlist?TripId=${encodeURIComponent(tripId)}`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     if (!res.ok) throw new Error("Delete failed");
@@ -133,13 +131,16 @@
   }
 
   function tripCard({ id, trip }) {
-    const t = trip || {};
+    const tdata = trip || {};
     const img =
-      t.mainImage?.imageURL || "https://via.placeholder.com/600x400?text=Trip";
-    const name = t.name || "—";
-    const price = typeof t.price === "number" ? t.price.toFixed(2) : "—";
-    const rating = typeof t.rating === "number" ? t.rating.toFixed(1) : "—";
-    const bestseller = !!t.isBestSeller;
+      tdata.mainImage?.imageURL ||
+      "https://via.placeholder.com/600x400?text=Trip";
+    const name = tdata.name || "—";
+    const price =
+      typeof tdata.price === "number" ? tdata.price.toFixed(2) : "—";
+    const rating =
+      typeof tdata.rating === "number" ? tdata.rating.toFixed(1) : "—";
+    const bestseller = !!tdata.isBestSeller;
 
     return `
       <div id="wish-${id}" class="p-4 bg-white rounded-2xl border shadow-sm flex flex-col">
@@ -147,13 +148,15 @@
           <img src="${img}" alt="${name}" class="w-full h-40 object-cover rounded-xl" />
           ${
             bestseller
-              ? `<span class="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-semibold px-2 py-1 rounded">Best Seller</span>`
+              ? `<span class="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-semibold px-2 py-1 rounded">${t(
+                  "profile.badge.bestSeller"
+                )}</span>`
               : ""
           }
           <button
             data-action="remove"
             data-id="${id}"
-            title="Remove from wishlist"
+            title="${t("profile.wishlist.remove")}"
             class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow border"
             type="button"
           >
@@ -173,14 +176,14 @@
           <a
             href="/pages/trip-details.html?id=${id}"
             class="flex-1 text-center px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-black transition"
-          >View details</a>
+          >${t("profile.wishlist.view")}</a>
           <button
             data-action="remove"
             data-id="${id}"
             class="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
             type="button"
           >
-            Remove
+            ${t("profile.wishlist.remove")}
           </button>
         </div>
       </div>
@@ -220,7 +223,7 @@
       }
 
       if (ok.length < ids.length) {
-        showToast("Some items failed to load", "warn");
+        showToast(t("wishlist.toast.someFailed"), "warn");
       }
 
       renderGrid(ok);
@@ -230,7 +233,6 @@
     }
   }
 
-  // Remove item handlers (event delegation)
   wishlistGrid.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-action='remove']");
     if (!btn) return;
@@ -241,18 +243,15 @@
     try {
       await deleteWishlist(tripId);
       document.getElementById(`wish-${tripId}`)?.remove();
-      showToast("Removed from wishlist");
+      showToast(t("wishlist.toast.removed"));
 
-      // If nothing left, show empty state
       if (!wishlistGrid.children.length) showEmpty();
     } catch (err) {
       console.error(err);
-      showToast("Failed to remove", "error");
+      showToast(t("wishlist.toast.removeFailed"), "error");
       btn.disabled = false;
     }
   });
-
-  // --- Unified tab switching (replace your "Nav events" block with this) ---
 
   const ACTIVE_BTN = ["bg-yellow-400", "hover:bg-yellow-500", "text-black"];
   const INACTIVE_BTN = ["border", "border-gray-300", "text-gray-700"];
@@ -292,20 +291,17 @@
         wishlistSection?.classList.remove("hidden");
         navWishlist?.classList.remove(...INACTIVE_BTN);
         navWishlist?.classList.add(...ACTIVE_BTN);
-        // Only load when opening wishlist
         loadWishlist();
         break;
     }
   }
 
-  // Ensure our logic runs AFTER any existing handlers
   const enforce = (tab) => setTimeout(() => activateTab(tab), 0);
 
   navProfile?.addEventListener("click", () => enforce("profile"));
   navBookings?.addEventListener("click", () => enforce("bookings"));
   navWishlist?.addEventListener("click", () => enforce("wishlist"));
 
-  // On first load, guarantee only one section shows (default to profile)
   enforce(
     !profileSection?.classList.contains("hidden")
       ? "profile"
@@ -320,6 +316,5 @@
     }
   };
 
-  // Optional: refresh button
   wishlistRefresh?.addEventListener("click", loadWishlist);
 })();

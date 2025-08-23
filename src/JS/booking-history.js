@@ -1,4 +1,11 @@
 (function () {
+  const t = (k, p) =>
+    typeof window.t === "function"
+      ? window.t(k, p)
+      : k.replace(/\{(\w+)\}/g, (_, m) =>
+          p && p[m] != null ? p[m] : `{${m}}`
+        );
+
   const grid = () => document.getElementById("bookingsGrid");
   const loading = () => document.getElementById("bookingsLoading");
   const empty = () => document.getElementById("bookingsEmpty");
@@ -6,14 +13,14 @@
 
   const langCode = localStorage.getItem("lang") || "en";
 
-  let bookingsCache = null; // cache after first fetch
+  let bookingsCache = null;
   let loadedOnce = false;
 
   const STATUS_STYLES = {
     Pending: { cls: "bg-yellow-100 text-yellow-800", icon: "fa-clock" },
     Confirmed: { cls: "bg-green-100 text-green-800", icon: "fa-circle-check" },
     Canceled: { cls: "bg-red-100 text-red-800", icon: "fa-circle-xmark" },
-    Cancelled: { cls: "bg-red-100 text-red-800", icon: "fa-circle-xmark" }, // alt spelling
+    Cancelled: { cls: "bg-red-100 text-red-800", icon: "fa-circle-xmark" },
     Rejected: { cls: "bg-gray-100 text-gray-700", icon: "fa-ban" },
   };
 
@@ -22,16 +29,25 @@
       cls: "bg-gray-100 text-gray-700",
       icon: "fa-info-circle",
     };
+    const labelKey = `booking.status.${
+      status in STATUS_STYLES ? status : "Unknown"
+    }`;
+    const label =
+      status in STATUS_STYLES
+        ? t(labelKey) === labelKey
+          ? status
+          : t(labelKey)
+        : status;
     return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${s.cls}">
-          <i class="fa-solid ${s.icon}"></i> ${status}
-        </span>`;
+      <i class="fa-solid ${s.icon}"></i> ${label}
+    </span>`;
   }
 
   function confirmModal({
-    title = "Are you sure?",
+    title = t("booking.confirm.deleteTitle"),
     html = "",
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText = t("booking.confirm.ok"),
+    cancelText = t("booking.confirm.cancel"),
     danger = false,
   } = {}) {
     return new Promise((resolve) => {
@@ -76,7 +92,6 @@
       </div>
     `;
 
-      // mount + animate
       document.body.appendChild(overlay);
       document.documentElement.style.overflow = "hidden";
       requestAnimationFrame(() => {
@@ -98,7 +113,6 @@
         }, 150);
       };
 
-      // events
       overlay.addEventListener("click", (e) => {
         const card = overlay.querySelector("#confirmCard");
         if (!card.contains(e.target)) cleanup(false);
@@ -122,7 +136,6 @@
     });
   }
 
-  // Escape HTML (for safe interpolation)
   function escapeHtml(s) {
     return String(s ?? "").replace(
       /[&<>"']/g,
@@ -178,30 +191,39 @@
       return d.toLocaleString("en-GB");
     }
   }
+
   async function confirmDeleteBooking(id) {
-    // try to enrich with details from cache
     const b = Array.isArray(bookingsCache)
       ? bookingsCache.find((x) => String(x.id) === String(id))
       : null;
 
-    const trip = b?.tripName ? escapeHtml(b.tripName) : "this booking";
+    const trip = b?.tripName
+      ? escapeHtml(b.tripName)
+      : t("booking.modal.title");
     const created = b?.createdAt ? formatDateLocal(b.createdAt) : null;
     const total =
       (b?.totalCost ?? null) !== null ? formatPrice(b.totalCost, "EUR") : null;
 
-    const html = `
-    <p>You’re about to permanently delete <b>${trip}</b>${
-      created ? ` (created ${created})` : ""
-    }.</p>
-    ${total ? `<p class="mt-1">Total: <b>${total}</b></p>` : ""}
-    <p class="mt-3 text-xs text-red-600">This action cannot be undone.</p>
-  `;
+    const line1 = t("booking.confirm.htmlLine1", {
+      trip,
+      created: created
+        ? t("booking.confirm.createdSuffix", { date: created })
+        : "",
+    });
+    const lineTotal = total
+      ? `<p class="mt-1">${t("booking.confirm.totalLine", { total })}</p>`
+      : "";
+    const irreversible = `<p class="mt-3 text-xs text-red-600">${t(
+      "booking.confirm.irreversible"
+    )}</p>`;
+
+    const html = `<p>${line1}</p>${lineTotal}${irreversible}`;
 
     return confirmModal({
-      title: "Delete booking?",
+      title: t("booking.confirm.deleteTitle"),
       html,
-      confirmText: "Delete",
-      cancelText: "Keep Booking",
+      confirmText: t("booking.confirm.ok"),
+      cancelText: t("booking.confirm.cancel"),
       danger: true,
     });
   }
@@ -209,52 +231,59 @@
   function bookingCard(b) {
     const isPending = String(b.status).toLowerCase() === "pending";
     const created = formatDateLocal(b.createdAt);
+    const createdLbl = t("booking.card.created");
+    const totalLbl = t("booking.card.total");
+    const publicIdLbl = t("booking.card.publicId");
+    const copyLbl = t("booking.btn.copy");
+
     return `
-        <article class="booking-card p-4 rounded-xl border bg-white shadow-sm hover:shadow transition cursor-pointer"
-                 data-id="${b.id}" data-bpid="${b.bookingPublicId}">
-          <div class="flex items-start justify-between gap-3">
-            <h3 class="font-semibold text-gray-900 leading-snug line-clamp-2 mr-2">${
-              b.tripName
-            }</h3>
-            ${statusBadge(b.status)}
-          </div>
+      <article class="booking-card p-4 rounded-xl border bg-white shadow-sm hover:shadow transition cursor-pointer"
+               data-id="${b.id}" data-bpid="${b.bookingPublicId}">
+        <div class="flex items-start justify-between gap-3">
+          <h3 class="font-semibold text-gray-900 leading-snug line-clamp-2 mr-2">${
+            b.tripName
+          }</h3>
+          ${statusBadge(b.status)}
+        </div>
 
-          <div class="mt-2 text-sm text-gray-600 space-y-1">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-calendar-day text-gray-400"></i>
-              <span class="truncate">Created: <b>${created}</b></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-tag text-gray-400"></i>
-              <span>Total: <b>${formatPrice(b.totalCost, "EUR")}</b></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-fingerprint text-gray-400"></i>
-              <code class="text-xs bg-gray-50 px-1.5 py-0.5 rounded break-all">${
-                b.bookingPublicId
-              }</code>
-              <button class="copy-id ml-1 text-xs underline hover:no-underline" type="button" data-id="${
-                b.bookingPublicId
-              }">
-                Copy
-              </button>
-            </div>
+        <div class="mt-2 text-sm text-gray-600 space-y-1">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar-day text-gray-400"></i>
+            <span class="truncate">${createdLbl}: <b>${created}</b></span>
           </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-tag text-gray-400"></i>
+            <span>${totalLbl}: <b>${formatPrice(b.totalCost, "EUR")}</b></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-fingerprint text-gray-400"></i>
+            <code class="text-xs bg-gray-50 px-1.5 py-0.5 rounded break-all">${
+              b.bookingPublicId
+            }</code>
+            <button class="copy-id ml-1 text-xs underline hover:no-underline" type="button" data-id="${
+              b.bookingPublicId
+            }">
+              ${copyLbl}
+            </button>
+          </div>
+        </div>
 
-          <div class="mt-4 flex items-center justify-end">
-            ${
-              isPending
-                ? `<button class="delete-booking inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
-                       type="button" data-bid="${b.id}">
-                     <i class="fa-solid fa-trash"></i> Delete
-                   </button>`
-                : `<button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-gray-500 text-sm cursor-not-allowed opacity-60" disabled>
-                     <i class="fa-solid fa-ban"></i> Delete
-                   </button>`
-            }
-          </div>
-        </article>
-      `;
+        <div class="mt-4 flex items-center justify-end">
+          ${
+            isPending
+              ? `<button class="delete-booking inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+                     type="button" data-bid="${b.id}">
+                   <i class="fa-solid fa-trash"></i> ${t(
+                     "booking.modal.delete"
+                   )}
+                 </button>`
+              : `<button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-gray-500 text-sm cursor-not-allowed opacity-60" disabled>
+                   <i class="fa-solid fa-ban"></i> ${t("booking.modal.delete")}
+                 </button>`
+          }
+        </div>
+      </article>
+    `;
   }
 
   function renderBookings(list) {
@@ -304,29 +333,29 @@
     } catch (err) {
       console.error(err);
       loading().classList.add("hidden");
-      errorBox().textContent =
-        "Couldn’t load bookings. " + (err?.message || "");
+      errorBox().textContent = t("booking.error.load", {
+        msg: err?.message || "",
+      });
       errorBox().classList.remove("hidden");
     } finally {
       loadedOnce = true;
     }
   }
 
-  // Delete API (pending only)
   async function deleteBooking(id, btn) {
     const token = localStorage.getItem("accessToken");
     const ok = await confirmDeleteBooking(id);
     if (!ok) return;
 
-    // lock UI
     btn.disabled = true;
     const prevHtml = btn.innerHTML;
-    btn.innerHTML =
-      '<i class="fa-solid fa-circle-notch fa-spin"></i> Deleting…';
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${t(
+      "booking.delete.deleting"
+    )}`;
 
     try {
       const res = await fetch(`/api/Booking/DeleteBooking/${id}`, {
-        method: "DELETE", // change to "POST" if your backend expects POST
+        method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         credentials: "include",
       });
@@ -340,13 +369,11 @@
         throw new Error(msg || "Delete failed");
       }
 
-      // Remove from cache
       if (Array.isArray(bookingsCache)) {
         bookingsCache = bookingsCache.filter(
           (b) => String(b.id) !== String(id)
         );
       }
-      // Remove card in grid (works for both grid-button and modal-button)
       const card =
         btn.closest(".booking-card") ||
         document.querySelector(`.booking-card[data-id="${id}"]`);
@@ -355,49 +382,50 @@
         setTimeout(() => card.remove(), 150);
       }
 
-      showToast("Booking deleted.");
+      showToast(t("booking.delete.deleted"));
       if (!grid().querySelector(".booking-card")) {
         renderBookings([]);
       }
 
-      // If inside modal, close it
       const modal = document.getElementById("bookingModal");
       if (modal) closeBookingModal();
     } catch (err) {
       console.error(err);
-      showToast(err?.message || "Could not delete booking.", "error");
+      showToast(
+        err?.message || t("booking.modal.error.load", { msg: "" }),
+        "error"
+      );
       btn.disabled = false;
       btn.innerHTML = prevHtml;
     }
   }
 
-  // -------- Modal --------
   function buildModalSkeleton() {
     const overlay = document.createElement("div");
     overlay.id = "bookingModal";
     overlay.className =
       "fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
     overlay.innerHTML = `
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl relative">
-          
-
-          <div class="p-6">
-            <div id="bookingModalHeader" class="flex items-start justify-between gap-3">
-              <h3 class="font-semibold text-lg leading-snug">Booking Details</h3>
-              <span id="bookingModalStatus"></span>
-            </div>
-
-            <div id="bookingModalBody" class="mt-4 space-y-3 text-sm text-gray-700">
-              <div class="flex items-center gap-2 text-gray-500">
-                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                <span>Loading booking…</span>
-              </div>
-            </div>
-
-            <div id="bookingModalFooter" class="mt-6 flex items-center justify-end gap-2"></div>
+      <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl relative">
+        <div class="p-6">
+          <div id="bookingModalHeader" class="flex items-start justify-between gap-3">
+            <h3 class="font-semibold text-lg leading-snug">${t(
+              "booking.modal.title"
+            )}</h3>
+            <span id="bookingModalStatus"></span>
           </div>
+
+          <div id="bookingModalBody" class="mt-4 space-y-3 text-sm text-gray-700">
+            <div class="flex items-center gap-2 text-gray-500">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              <span>${t("booking.modal.loading")}</span>
+            </div>
+          </div>
+
+          <div id="bookingModalFooter" class="mt-6 flex items-center justify-end gap-2"></div>
         </div>
-      `;
+      </div>
+    `;
     return overlay;
   }
 
@@ -417,7 +445,6 @@
   }
 
   async function openBookingModal(id) {
-    // Create & show modal
     const overlay = buildModalSkeleton();
     document.body.appendChild(overlay);
     document.documentElement.style.overflow = "hidden";
@@ -425,7 +452,7 @@
     overlay.addEventListener("click", (e) => {
       const card = overlay.firstElementChild;
       if (!card.contains(e.target)) {
-        e.stopPropagation(); // click-outside closes
+        e.stopPropagation();
         closeBookingModal();
       }
     });
@@ -457,56 +484,61 @@
       const b = payload?.data;
       if (!b) throw new Error("Missing booking data.");
 
-      // Header
-      header.querySelector("h3").textContent = b.tripName || "Booking Details";
+      header.querySelector("h3").textContent =
+        b.tripName || t("booking.modal.title");
       statusSlot.innerHTML = statusBadge(b.status);
 
-      // Body
+      const publicIdLbl = t("booking.card.publicId");
+      const createdLbl = t("booking.card.created");
+      const adultsLbl = t("booking.card.adults");
+      const childrenLbl = t("booking.card.children");
+      const totalLbl = t("booking.card.total");
+      const copyLbl = t("booking.btn.copy");
+
       body.innerHTML = `
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="space-y-1">
-              <div class="text-xs text-gray-500">Public ID</div>
-              <div class="flex items-center gap-2">
-                <code class="text-xs bg-gray-50 px-1.5 py-0.5 rounded break-all">${
-                  b.bookingPublicId
-                }</code>
-                <button class="copy-id text-xs underline hover:no-underline" type="button" data-id="${
-                  b.bookingPublicId
-                }">
-                  Copy
-                </button>
-              </div>
-            </div>
-
-            <div class="space-y-1">
-              <div class="text-xs text-gray-500">Created</div>
-              <div class="font-medium">${formatDateLocal(b.createdAt)}</div>
-            </div>
-
-            <div class="space-y-1">
-              <div class="text-xs text-gray-500">Adults</div>
-              <div class="font-medium">${b.adults ?? "-"}</div>
-            </div>
-
-            <div class="space-y-1">
-              <div class="text-xs text-gray-500">Children</div>
-              <div class="font-medium">${b.childrens ?? "-"}</div>
-            </div>
-
-            <div class="space-y-1">
-              <div class="text-xs text-gray-500">Total</div>
-              <div class="font-medium">${formatPrice(b.totalCost, "EUR")}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <div class="text-xs text-gray-500">${publicIdLbl}</div>
+            <div class="flex items-center gap-2">
+              <code class="text-xs bg-gray-50 px-1.5 py-0.5 rounded break-all">${
+                b.bookingPublicId
+              }</code>
+              <button class="copy-id text-xs underline hover:no-underline" type="button" data-id="${
+                b.bookingPublicId
+              }">
+                ${copyLbl}
+              </button>
             </div>
           </div>
-        `;
 
-      // Footer (Delete if pending)
+          <div class="space-y-1">
+            <div class="text-xs text-gray-500">${createdLbl}</div>
+            <div class="font-medium">${formatDateLocal(b.createdAt)}</div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="text-xs text-gray-500">${adultsLbl}</div>
+            <div class="font-medium">${b.adults ?? "-"}</div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="text-xs text-gray-500">${childrenLbl}</div>
+            <div class="font-medium">${b.childrens ?? "-"}</div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="text-xs text-gray-500">${totalLbl}</div>
+            <div class="font-medium">${formatPrice(b.totalCost, "EUR")}</div>
+          </div>
+        </div>
+      `;
+
       footer.innerHTML = "";
       const isPending = String(b.status).toLowerCase() === "pending";
       const closeBtn = document.createElement("button");
       closeBtn.type = "button";
       closeBtn.className = "px-4 py-2 rounded-lg border hover:bg-gray-50";
-      closeBtn.textContent = "Close";
+      closeBtn.textContent = t("booking.modal.close");
       closeBtn.addEventListener("click", closeBookingModal);
       footer.appendChild(closeBtn);
 
@@ -515,35 +547,35 @@
         delBtn.type = "button";
         delBtn.className =
           "px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white";
-        delBtn.innerHTML = '<i class="fa-solid fa-trash mr-2"></i>Delete';
+        delBtn.innerHTML = `<i class="fa-solid fa-trash mr-2"></i>${t(
+          "booking.modal.delete"
+        )}`;
         delBtn.addEventListener("click", () => deleteBooking(b.id, delBtn));
         footer.appendChild(delBtn);
       }
 
-      // Copy handler inside modal
       body.addEventListener("click", (e) => {
         const copyBtn = e.target.closest(".copy-id");
         if (copyBtn) {
           const text = copyBtn.getAttribute("data-id");
           try {
             navigator.clipboard.writeText(text);
-            showToast("Copied!");
+            showToast(t("booking.toast.copied"));
           } catch (_) {
-            showToast("Copy failed", "error");
+            showToast(t("booking.toast.copyFailed"), "error");
           }
         }
       });
     } catch (err) {
       console.error(err);
       body.innerHTML = `
-          <div class="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-            Couldn’t load booking. ${err?.message || ""}
-          </div>
-        `;
+        <div class="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+          ${t("booking.modal.error.load", { msg: err?.message || "" })}
+        </div>
+      `;
     }
   }
 
-  // -------- Events & Nav --------
   function setActiveNav(which) {
     const btnProfile = document.getElementById("navProfile");
     const btnBookings = document.getElementById("navBookings");
@@ -588,7 +620,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Switch tabs
     document
       .getElementById("navProfile")
       .addEventListener("click", () => setActiveNav("profile"));
@@ -599,12 +630,9 @@
         if (!loadedOnce) await fetchBookings();
       });
 
-    // Default: profile
     setActiveNav("profile");
 
-    // Delegated actions for grid (delete, copy, open modal)
     grid().addEventListener("click", (e) => {
-      // Delete button
       const delBtn = e.target.closest(".delete-booking");
       if (delBtn) {
         const id = delBtn.getAttribute("data-bid");
@@ -612,20 +640,18 @@
         e.stopPropagation();
         return;
       }
-      // Copy id
       const copyBtn = e.target.closest(".copy-id");
       if (copyBtn) {
         const text = copyBtn.getAttribute("data-id");
         try {
           navigator.clipboard.writeText(text);
-          showToast("Copied!");
+          showToast(t("booking.toast.copied"));
         } catch (_) {
-          showToast("Copy failed", "error");
+          showToast(t("booking.toast.copyFailed"), "error");
         }
         e.stopPropagation();
         return;
       }
-      // Card click => open modal
       const card = e.target.closest(".booking-card");
       if (card) {
         const id = card.getAttribute("data-id");

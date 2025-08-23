@@ -1,21 +1,24 @@
 (() => {
-  // Pages where we should NOT block (auth pages)
+  const t = (k, p) =>
+    typeof window.t === "function"
+      ? window.t(k, p)
+      : k.replace(/\{(\w+)\}/g, (_, m) =>
+          p && p[m] != null ? p[m] : `{${m}}`
+        );
+
   const SKIP_PAGES = [
     /sign-in\.html$/i,
     /sign-up\.html$/i,
     /check-email\.html$/i,
   ];
 
-  // Nuke the legacy flag so it never interferes again
   try {
     localStorage.removeItem("mustCompleteProfile");
   } catch (_) {}
 
-  // Only run for logged-in users, and not on auth pages
   if (!localStorage.getItem("accessToken")) return;
   if (SKIP_PAGES.some((rx) => rx.test(location.pathname))) return;
 
-  // --- Helpers ---
   function waitForCurrentUser(timeoutMs = 12000) {
     return new Promise((resolve) => {
       if (window.currentUser) return resolve(window.currentUser);
@@ -30,7 +33,6 @@
         }
       }, 120);
 
-      // If your includes.js emits this, we resolve immediately
       window.addEventListener(
         "auth:user",
         (e) => {
@@ -43,12 +45,10 @@
   }
 
   function isProfileComplete(u) {
-    if (!u) return true; // don't block if we couldn't load
+    if (!u) return true;
     const phone = String(u.phoneNumber || u.phone || "").replace(/[^\d+]/g, "");
     const country = String(u.country || "").trim();
-    const hasPhone = phone.length >= 7; // minimal sanity check
-    const hasCountry = country.length > 0;
-    return hasPhone && hasCountry;
+    return phone.length >= 7 && country.length > 0;
   }
 
   function lockScroll(lock) {
@@ -146,35 +146,45 @@
     overlay.className =
       "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
 
-    const safeName = String(user?.fullName || "").replace(/\"/g, "&quot;");
+    const safeName = String(user?.fullName || "").replace(/"/g, "&quot;");
 
     overlay.innerHTML = `
       <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
-        <h2 class="text-xl font-semibold mb-1">Complete your profile</h2>
-        <p class="text-sm text-gray-600 mb-4">Please add your phone number and country to continue.</p>
+        <h2 class="text-xl font-semibold mb-1">${t("cp.title")}</h2>
+        <p class="text-sm text-gray-600 mb-4">${t("cp.subtitle")}</p>
 
         <form id="cpForm" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">${t(
+              "cp.name"
+            )}</label>
             <input required id="cpName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2" value="${safeName}">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
-            <input id="cpPhone" type="tel" inputmode="tel" placeholder="+201234567890"
+            <label class="block text-sm font-medium text-gray-700 mb-1">${t(
+              "cp.phone"
+            )} <span class="text-red-500">*</span></label>
+            <input id="cpPhone" type="tel" inputmode="tel" placeholder="${t(
+              "cp.phone.placeholder"
+            )}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2" required />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Country <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">${t(
+              "cp.country"
+            )} <span class="text-red-500">*</span></label>
             <select id="cpCountry" class="w-full border border-gray-300 rounded-lg px-3 py-2" required></select>
           </div>
 
           <button id="cpSave" type="submit"
                   class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 rounded-lg">
-            Save & Continue
+            ${t("cp.save")}
           </button>
-          <p class="text-[11px] text-gray-500 text-center">You can’t navigate away until this is saved.</p>
+          <p class="text-[11px] text-gray-500 text-center">${t(
+            "cp.cantNavigate"
+          )}</p>
         </form>
       </div>
     `;
@@ -191,7 +201,6 @@
     });
     sel.value = user?.country || "Egypt";
 
-    // Block closing by outside click or Esc
     overlay.addEventListener(
       "click",
       (e) => {
@@ -217,12 +226,12 @@
       const name = overlay.querySelector("#cpName").value.trim();
       const phone = overlay.querySelector("#cpPhone").value.trim();
       const country = overlay.querySelector("#cpCountry").value.trim();
-      if (!country) return toast("Please choose your country.", false);
+      if (!country) return toast(t("cp.error.noCountry"), false);
 
       const btn = overlay.querySelector("#cpSave");
       const prev = btn.textContent;
       btn.disabled = true;
-      btn.textContent = "Saving…";
+      btn.textContent = t("cp.saving");
 
       const token = localStorage.getItem("accessToken");
       const params = new URLSearchParams({
@@ -250,7 +259,6 @@
           throw new Error(msg || "Update failed");
         }
 
-        // Update global user + any visible UI if present
         if (window.currentUser) {
           window.currentUser.fullName = name || window.currentUser.fullName;
           window.currentUser.phoneNumber = phone;
@@ -258,24 +266,26 @@
         }
         try {
           const n = document.getElementById("sidebarName");
-          const l = document.getElementById("sidebarLocation");
           const pn = document.getElementById("profileName");
           const pp = document.getElementById("profilePhone");
           const pc = document.getElementById("profileLocation");
-          if (n) n.textContent = name || user?.fullName || "User";
-          if (l)
-            l.innerHTML =
-              '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
+          const sc = document.getElementById("sidebarCountry");
+          if (n)
+            n.textContent =
+              name ||
+              user?.fullName ||
+              window.t?.("profile.sidebar.user") ||
+              "User";
+          if (sc) sc.textContent = country;
           if (pn) pn.value = name || user?.fullName || "";
           if (pp) pp.value = phone;
           if (pc) pc.value = country;
         } catch (_) {}
 
-        toast("Profile updated. You're good to go!");
+        toast(t("cp.updated"));
         overlay.remove();
         lockScroll(false);
 
-        // Notify listeners if needed
         window.dispatchEvent(
           new CustomEvent("profile:completed", {
             detail: { fullName: name, phoneNumber: phone, country },
@@ -283,7 +293,7 @@
         );
       } catch (ex) {
         console.error(ex);
-        toast(ex.message || "Could not update profile.", false);
+        toast(ex.message || t("cp.updateFailed"), false);
       } finally {
         btn.disabled = false;
         btn.textContent = prev;
@@ -291,13 +301,11 @@
     });
   }
 
-  // Start
   waitForCurrentUser().then((user) => {
-    if (!user) return; // couldn't load user; don't block
+    if (!user) return;
     if (!isProfileComplete(user)) openCompleteProfileModal(user);
   });
 
-  // Optional: expose to call manually if needed
   window.ensureCompleteProfile = async () => {
     const u = await waitForCurrentUser();
     if (u && !isProfileComplete(u)) openCompleteProfileModal(u);
