@@ -92,6 +92,14 @@ const translations = {
     "img.logoAlt": "main logo",
     "footer.copy.tail": "Tour Guide. All rights reserved.",
 
+    "header.logoAlt": "logo header",
+    "header.allTrips": "All Trips",
+    "aria.nav.open": "Open menu",
+    "aria.nav.close": "Close menu",
+    "nav.profile": "Profile",
+    "nav.logout": "Logout",
+    "nav.user": "User",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -236,6 +244,14 @@ const translations = {
     "img.bgAlt": "Hintergrundbild",
     "img.logoAlt": "Logo",
     "footer.copy.tail": "Tour Guide. Alle Rechte vorbehalten.",
+
+    "header.logoAlt": "Header-Logo",
+    "header.allTrips": "Alle Reisen",
+    "aria.nav.open": "Menü öffnen",
+    "aria.nav.close": "Menü schließen",
+    "nav.profile": "Profil",
+    "nav.logout": "Abmelden",
+    "nav.user": "Nutzer",
 
     "menu.name": "Menü",
     "menu.lang": "Sprache",

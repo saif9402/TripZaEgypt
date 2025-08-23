@@ -5,16 +5,20 @@
   <div class="flex items-center justify-start h-9 md:h-12">
     <img
       src="/img/Header.svg"
-      alt="logo header"
       class="h-50 object-contain -ml-9 flex items-start justify-start"
+      alt="logo header"
+      data-i18n-alt="header.logoAlt"
     />
   </div>
 
   <!-- Hamburger Icon (Mobile) -->
   <button
-    title="nav button"
     @click="open = true"
     class="md:hidden text-white text-2xl"
+    title="Open menu"
+    aria-label="Open menu"
+    data-i18n-title="aria.nav.open"
+    data-i18n-aria-label="aria.nav.open"
   >
     <i class="fas fa-bars"></i>
   </button>
@@ -33,14 +37,17 @@
       class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
       >About Us</a
     >
+
+    <!-- Trips dropdown -->
     <div x-data="{ openTrips: false }" class="relative">
       <button
         @click="openTrips = !openTrips"
         class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+        data-i18n="nav.trips"
       >
         Our Trips
       </button>
-      <!-- Dropdown -->
+
       <ul
         x-show="openTrips"
         x-cloak
@@ -54,20 +61,18 @@
         class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl ring-1 ring-black/10 z-50 overflow-hidden"
         id="tripsDropdown"
       >
-        <!-- All Trips (special item) -->
+        <!-- 'All Trips' gets overwritten by includes.js as well, but we i18n it here for safety -->
         <li>
           <a
             href="/pages/trips-list.html"
             class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50"
+            data-i18n="header.allTrips"
           >
             All Trips
           </a>
         </li>
-
-        <!-- Divider -->
         <li><hr class="border-t border-gray-200 my-1" /></li>
-
-        <!-- Categories will be injected here -->
+        <!-- Categories injected here -->
       </ul>
     </div>
 
@@ -96,31 +101,37 @@
           <a
             onclick="setLanguage('en')"
             class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/en.jpeg" class="w-4 h-4" /> EN</a
+            ><img src="/img/flags/en.jpeg" class="w-4 h-4" alt="English flag" />
+            EN</a
           >
         </li>
         <li>
           <a
             onclick="setLanguage('deu')"
             class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/deu.png" class="w-4 h-4" /> DEU</a
+            ><img src="/img/flags/deu.png" class="w-4 h-4" alt="German flag" />
+            DEU</a
           >
         </li>
       </ul>
     </div>
 
-    <!-- Sign In Button -->
-    <div x-data="{ langOpen: false }" class="relative">
+    <!-- User menu -->
+    <div x-data="{ userOpen: false }" class="relative">
       <button
-        id="currentLang"
-        @click="langOpen = !langOpen"
+        id="userMenuBtn"
+        @click="userOpen = !userOpen"
         class="focus:outline-none w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition flex items-center justify-center"
+        aria-haspopup="menu"
+        aria-expanded="false"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-white"
           viewBox="0 0 20 20"
           fill="currentColor"
+          role="img"
+          aria-hidden="true"
         >
           <path
             d="M10 10a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-6 2-6 4v1h12v-1c0-2-2-4-6-4z"
@@ -128,9 +139,9 @@
         </svg>
       </button>
       <ul
-        x-show="langOpen"
+        x-show="userOpen"
         x-cloak
-        @click.away="langOpen = false"
+        @click.away="userOpen = false"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 translate-y-1"
         x-transition:enter-end="opacity-100 translate-y-0"
@@ -143,6 +154,7 @@
           <a
             href="/pages/profile.html"
             class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
+            data-i18n="nav.profile"
             >Profile</a
           >
         </li>
@@ -150,6 +162,7 @@
           <a
             onclick="logout()"
             class="flex cursor-pointer items-center gap-2 px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+            data-i18n="nav.logout"
           >
             Logout
           </a>
@@ -159,13 +172,13 @@
   </nav>
 
   <!-- Overlay -->
-  <!-- Overlay -->
   <div
     class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
     x-show="open"
     x-transition.opacity
     x-cloak
     @click="open = false"
+    aria-hidden="true"
   ></div>
 
   <!-- Mobile Top Drawer -->
@@ -184,15 +197,19 @@
     <div class="flex items-center justify-start h-9 md:h-12">
       <img
         src="/img/Header.svg"
-        alt="logo header"
         class="h-50 object-contain -ml-9 flex items-start justify-start"
+        alt="logo header"
+        data-i18n-alt="header.logoAlt"
       />
     </div>
 
     <button
-      title="b"
       class="text-black text-2xl absolute top-4 right-4"
       @click="open = false"
+      title="Close menu"
+      aria-label="Close menu"
+      data-i18n-title="aria.nav.close"
+      data-i18n-aria-label="aria.nav.close"
     >
       <i class="fas fa-times"></i>
     </button>
@@ -207,6 +224,7 @@
         data-i18n="nav.about"
         >About Us</a
       >
+
       <div class="flex flex-col space-y-1">
         <a
           href="/pages/trips-list.html"
@@ -219,10 +237,16 @@
         </ul>
       </div>
 
-      <a href="/pages/profile.html" class="hover:text-blue-500">Profile</a>
+      <a
+        href="/pages/profile.html"
+        class="hover:text-blue-500"
+        data-i18n="nav.profile"
+        >Profile</a
+      >
       <button
         onclick="logout()"
         class="text-left text-red-600 hover:text-red-800"
+        data-i18n="nav.logout"
       >
         Logout
       </button>
@@ -235,7 +259,7 @@
           class="mt-4 px-3 py-2 bg-gray-200 rounded text-sm flex items-center justify-between w-full"
         >
           <span>🌐 <span id="mobileLangLabel">EN</span></span>
-          <i class="fas fa-chevron-down ml-2"></i>
+          <i class="fas fa-chevron-down ml-2" aria-hidden="true"></i>
         </button>
         <ul
           x-show="langOpen"
@@ -253,65 +277,28 @@
             <a
               onclick="setLanguage('en')"
               class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
+            >
+              <img
                 src="/img/flags/en.jpeg"
                 class="inline w-4 h-4 mr-2"
+                alt="English flag"
               />
-              EN</a
-            >
+              EN
+            </a>
           </li>
           <li>
             <a
               onclick="setLanguage('deu')"
               class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
+            >
+              <img
                 src="/img/flags/deu.png"
                 class="inline w-4 h-4 mr-2"
+                alt="German flag"
               />
-              DEU</a
-            >
+              DEU
+            </a>
           </li>
-          <!-- <li>
-            <a
-              onclick="setLanguage('ru')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/ru.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              RU</a
-            >
-          </li>
-          <li>
-            <a
-              onclick="setLanguage('pl')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/pl.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              PL</a
-            >
-          </li>
-          <li>
-            <a
-              onclick="setLanguage('cz')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/cs.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              CZ</a
-            >
-          </li> -->
         </ul>
       </div>
     </nav>
@@ -319,18 +306,17 @@
 </header>
 
 <script>
-  // Inject user info into desktop and mobile headers
-  if (window.currentUser) {
-    const { fullName, email, profilePictureURL } = currentUser;
-
-    document.getElementById("userName").textContent = fullName || "User";
-    document.getElementById("mobileUserName").textContent = fullName || "User";
-    document.getElementById("mobileUserEmail").textContent =
-      email || "user@example.com";
-  }
-
-  function logout() {
-    localStorage.removeItem("accessToken");
-    location.reload();
-  }
+  (function () {
+    // Populate names if present (avoid errors if elements are not in this template)
+    if (window.currentUser) {
+      const { fullName, email } = window.currentUser;
+      const el1 = document.getElementById("userName");
+      const el2 = document.getElementById("mobileUserName");
+      const el3 = document.getElementById("mobileUserEmail");
+      if (el1) el1.textContent = fullName || window.t?.("nav.user") || "User";
+      if (el2) el2.textContent = fullName || window.t?.("nav.user") || "User";
+      if (el3) el3.textContent = email || "user@example.com";
+    }
+    // Don't redefine logout here; includes.js already defines a robust global logout()
+  })();
 </script>
