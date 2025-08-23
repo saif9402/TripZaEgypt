@@ -142,6 +142,19 @@ function setLanguage(lang) {
     }
   });
 
+  // Works even if header/footer are injected later:
+  if (!window.__langDelegationBound) {
+    window.__langDelegationBound = true;
+    document.addEventListener(
+      "change",
+      (e) => {
+        const sel = e.target?.closest?.("#languageSelect");
+        if (sel) setLanguage(sel.value);
+      },
+      true // capture phase so it always fires
+    );
+  }
+
   // Apply data-i18n-placeholder
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     const key = el.getAttribute("data-i18n-placeholder");
