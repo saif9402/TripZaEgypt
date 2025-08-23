@@ -126,6 +126,154 @@
   };
 
   // ---------------- Toasts (Tailwind-ish) ----------------
+  // ---------------- Modern Confirm Modal (Promise-based) ----------------
+  function ensureConfirmModal() {
+    let modal = document.getElementById("confirmModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "confirmModal";
+    modal.className =
+      "fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200";
+
+    modal.innerHTML = `
+    <div class="absolute inset-0" id="confirmBackdrop"></div>
+
+    <div role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage"
+         class="relative w-[92vw] max-w-md bg-white rounded-2xl shadow-2xl p-6
+                opacity-0 translate-y-2 transition-all duration-200" id="confirmCard">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0 w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="flex-1">
+          <h3 id="confirmTitle" class="text-lg font-semibold">Delete item</h3>
+          <p id="confirmMessage" class="mt-1 text-sm text-gray-600">
+            Are you sure you want to delete this? This action cannot be undone.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center justify-end gap-2">
+        <button id="confirmCancel"
+                class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
+          Cancel
+        </button>
+        <button id="confirmOk"
+                class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">
+          Delete
+        </button>
+      </div>
+    </div>
+  `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  /**
+   * uiConfirm({ title, message, confirmText, cancelText, tone })
+   * tone: "danger" | "primary" (affects confirm button color)
+   * Returns Promise<boolean>
+   */
+  function uiConfirm(opts = {}) {
+    const {
+      title = "Are you sure?",
+      message = "This action cannot be undone.",
+      confirmText = "Confirm",
+      cancelText = "Cancel",
+      tone = "danger",
+    } = opts;
+
+    const modal = ensureConfirmModal();
+    const card = modal.querySelector("#confirmCard");
+    const backdrop = modal.querySelector("#confirmBackdrop");
+    const t = modal.querySelector("#confirmTitle");
+    const m = modal.querySelector("#confirmMessage");
+    const ok = modal.querySelector("#confirmOk");
+    const cancel = modal.querySelector("#confirmCancel");
+
+    t.textContent = title;
+    m.textContent = message;
+    ok.textContent = confirmText;
+    cancel.textContent = cancelText;
+
+    // tone styles
+    if (tone === "danger") {
+      ok.className =
+        "px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700";
+    } else {
+      ok.className =
+        "px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700";
+    }
+
+    // open
+    modal.classList.remove("opacity-0", "pointer-events-none");
+    requestAnimationFrame(() => {
+      modal.classList.add("opacity-100");
+      card.classList.remove("opacity-0", "translate-y-2");
+      card.classList.add("opacity-100", "translate-y-0");
+    });
+
+    // focus management
+    const prevActive = document.activeElement;
+    ok.focus();
+
+    // Trap focus (simple)
+    const onKeydown = (e) => {
+      if (e.key === "Escape") doClose(false);
+      if (e.key === "Enter") doClose(true);
+      if (e.key === "Tab") {
+        const focusables = [cancel, ok];
+        const idx = focusables.indexOf(document.activeElement);
+        if (e.shiftKey) {
+          e.preventDefault();
+          focusables[(idx - 1 + focusables.length) % focusables.length].focus();
+        } else {
+          e.preventDefault();
+          focusables[(idx + 1) % focusables.length].focus();
+        }
+      }
+    };
+
+    const doClose = (result) =>
+      new Promise((resolve) => {
+        document.removeEventListener("keydown", onKeydown);
+        // animate out
+        modal.classList.remove("opacity-100");
+        card.classList.remove("opacity-100", "translate-y-0");
+        card.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => {
+          modal.classList.add("opacity-0", "pointer-events-none");
+          prevActive && prevActive.focus?.();
+          resolve(result);
+        }, 180);
+      });
+
+    return new Promise((resolve) => {
+      const cleanup = () => {
+        ok.removeEventListener("click", onOk);
+        cancel.removeEventListener("click", onCancel);
+        backdrop.removeEventListener("click", onCancel);
+        document.removeEventListener("keydown", onKeydown);
+      };
+      const onOk = async () => {
+        cleanup();
+        const r = await doClose(true);
+        resolve(r);
+      };
+      const onCancel = async () => {
+        cleanup();
+        const r = await doClose(false);
+        resolve(r);
+      };
+
+      ok.addEventListener("click", onOk);
+      cancel.addEventListener("click", onCancel);
+      backdrop.addEventListener("click", onCancel);
+      document.addEventListener("keydown", onKeydown);
+    });
+  }
+
   function ensureToastRoot() {
     let root = document.getElementById("toast-root");
     if (!root) {
@@ -910,12 +1058,19 @@
     });
   }
 
-  function confirmDelete(id) {
+  async function confirmDelete(id) {
     const r = reviewState.all.find((x) => String(x.id) === String(id));
     if (!r) return;
-    const ok = window.confirm(
-      "Delete your review? This action cannot be undone."
-    );
+
+    const ok = await uiConfirm({
+      title: "Delete your review?",
+      message:
+        "This will permanently remove your review. You can write a new one later if you like.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      tone: "danger",
+    });
+
     if (!ok) return;
 
     deleteReview({ tripId: getTripIdFromUrl(), userId: reviewState.userId })
