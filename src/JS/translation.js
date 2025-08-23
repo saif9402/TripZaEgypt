@@ -267,6 +267,19 @@ const translations = {
     "reset.success.inline": "✅ Success! Redirecting to sign in…",
     "reset.error.generic": "Something went wrong.",
     "reset.error.network": "Failed to reset password. Please try again.",
+
+    "signin.pageTitle": "Sign In | Tour Guide",
+    "signin.email.placeholder": "you@example.com",
+    "signin.pass.placeholder": "••••••••",
+    "signin.forgot": "Forgot password?",
+    "signin.or": "Or continue with",
+    "signin.google": "Sign in with Google",
+    "signin.submitting": "Signing in…",
+    "signin.toast.success": "Login successful!",
+    "signin.toast.invalid": "Invalid credentials.",
+    "signin.toast.server": "Server error. Please try again.",
+    "signin.aria.showPwd": "Show password",
+    "signin.aria.hidePwd": "Hide password",
   },
   deu: {
     "nav.home": "Startseite",
@@ -546,6 +559,19 @@ const translations = {
     "reset.error.generic": "Etwas ist schiefgelaufen.",
     "reset.error.network":
       "Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
+
+    "signin.pageTitle": "Anmelden | Tour Guide",
+    "signin.email.placeholder": "du@beispiel.de",
+    "signin.pass.placeholder": "••••••••",
+    "signin.forgot": "Passwort vergessen?",
+    "signin.or": "Oder weiter mit",
+    "signin.google": "Mit Google anmelden",
+    "signin.submitting": "Wird angemeldet…",
+    "signin.toast.success": "Anmeldung erfolgreich!",
+    "signin.toast.invalid": "Ungültige Zugangsdaten.",
+    "signin.toast.server": "Serverfehler. Bitte erneut versuchen.",
+    "signin.aria.showPwd": "Passwort anzeigen",
+    "signin.aria.hidePwd": "Passwort verbergen",
   },
 };
 
