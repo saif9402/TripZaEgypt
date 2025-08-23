@@ -75,6 +75,14 @@
             >
               Booking History
             </button>
+            <button
+              id="navWishlist"
+              class="w-full border border-gray-300 hover:bg-gray-100 transition text-gray-700 font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-2"
+              type="button"
+            >
+              <i class="fas fa-heart text-rose-500"></i>
+              Wishlist
+            </button>
           </div>
         </aside>
 
@@ -218,6 +226,63 @@
               class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
             ></div>
           </section>
+          <!-- Wishlist Section -->
+          <section id="wishlistSection" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold border-b pb-2 w-full">
+                Wishlist
+              </h2>
+              <button
+                id="wishlistRefresh"
+                class="ml-4 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 text-sm"
+                type="button"
+                title="Refresh"
+              >
+                <i class="fas fa-rotate-right"></i>
+              </button>
+            </div>
+
+            <!-- Error -->
+            <div
+              id="wishlistError"
+              class="hidden mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm"
+            >
+              Couldn’t load wishlist. Please try again.
+            </div>
+
+            <!-- Empty -->
+            <div
+              id="wishlistEmpty"
+              class="hidden text-center py-10 text-gray-500"
+            >
+              <i class="far fa-heart text-4xl mb-3"></i>
+              <p>No saved trips yet.</p>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div
+              id="wishlistLoading"
+              class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              <div class="p-4 rounded-xl border bg-white animate-pulse">
+                <div class="h-40 w-full bg-gray-200 rounded mb-3"></div>
+                <div class="h-5 w-40 bg-gray-200 rounded mb-2"></div>
+                <div class="h-4 w-28 bg-gray-200 rounded mb-4"></div>
+                <div class="flex justify-between items-center">
+                  <div class="h-6 w-20 bg-gray-200 rounded"></div>
+                  <div class="h-8 w-24 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+              <div class="p-4 rounded-xl border bg-white animate-pulse"></div>
+              <div class="p-4 rounded-xl border bg-white animate-pulse"></div>
+            </div>
+
+            <!-- Cards -->
+            <div
+              id="wishlistGrid"
+              class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            ></div>
+          </section>
         </section>
       </div>
     </main>
@@ -238,245 +303,6 @@
     <script src="../JS/require-complete-profile.js"></script>
     <script src="../JS/profile.js"></script>
     <script src="../JS/booking-history.js"></script>
-
-    <!-- BLOCKING MODAL: Complete profile after Google sign-in (unchanged) -->
-    <!-- <script>
-      (function () {
-        if (localStorage.getItem("mustCompleteProfile") !== "1") return;
-
-        function toast(message, ok = true) {
-          const tc = document.getElementById("toast-container");
-          const el = document.createElement("div");
-          el.className =
-            "max-w-sm w-full px-4 py-3 rounded-lg shadow-lg text-white animate-fade-in-up transition " +
-            (ok ? "bg-green-600" : "bg-red-600");
-          el.textContent = message;
-          tc.appendChild(el);
-          setTimeout(() => {
-            el.style.opacity = "0";
-            el.addEventListener("transitionend", () => el.remove());
-          }, 3500);
-        }
-
-        function lockScroll(lock) {
-          document.documentElement.style.overflow = lock ? "hidden" : "";
-        }
-
-        const countries = [
-          "Egypt",
-          "Saudi Arabia",
-          "UAE",
-          "Qatar",
-          "Kuwait",
-          "Jordan",
-          "Bahrain",
-          "Oman",
-          "Morocco",
-          "Algeria",
-          "Tunisia",
-          "Libya",
-          "Lebanon",
-          "Iraq",
-          "Syria",
-          "Yemen",
-          "Turkey",
-          "USA",
-          "UK",
-          "France",
-          "Germany",
-          "Italy",
-          "Spain",
-          "Netherlands",
-          "Switzerland",
-          "Sweden",
-          "Norway",
-          "Denmark",
-          "Finland",
-          "Canada",
-          "Brazil",
-          "Argentina",
-          "Mexico",
-          "South Africa",
-          "Kenya",
-          "Nigeria",
-          "India",
-          "Pakistan",
-          "Bangladesh",
-          "China",
-          "Japan",
-          "South Korea",
-          "Indonesia",
-          "Malaysia",
-          "Philippines",
-          "Australia",
-          "New Zealand",
-          "Russia",
-          "Ukraine",
-          "Romania",
-          "Poland",
-          "Portugal",
-          "Greece",
-          "Ireland",
-          "Austria",
-          "Belgium",
-          "Singapore",
-          "Vietnam",
-          "Thailand",
-          "Sri Lanka",
-        ];
-
-        const overlay = document.createElement("div");
-        overlay.id = "completeProfileModal";
-        overlay.className =
-          "fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4";
-
-        const u = window.currentUser || {};
-        const safeName = (u.fullName || "").replace(/\"/g, "&quot;");
-
-        overlay.innerHTML = `
-          <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
-            <h2 class="text-xl font-semibold mb-1">Complete your profile</h2>
-            <p class="text-sm text-gray-600 mb-4">Please add your phone number and country to continue.</p>
-
-            <form id="cpForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input required id="cpName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2" value="${safeName}">
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
-                <input id="cpPhone" type="tel" inputmode="tel" placeholder="+201234567890"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2" required />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Country <span class="text-red-500">*</span></label>
-                <select id="cpCountry" class="w-full border border-gray-300 rounded-lg px-3 py-2" required></select>
-              </div>
-
-              <button id="cpSave" type="submit"
-                      class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 rounded-lg">
-                Save & Continue
-              </button>
-              <p class="text-[11px] text-gray-500 text-center">You can’t navigate away until this is saved.</p>
-            </form>
-          </div>
-        `;
-
-        document.body.appendChild(overlay);
-        lockScroll(true);
-
-        const sel = overlay.querySelector("#cpCountry");
-        countries.forEach((c) => {
-          const o = document.createElement("option");
-          o.value = c;
-          o.textContent = c;
-          sel.appendChild(o);
-        });
-        sel.value = u.country || "Egypt";
-
-        overlay.addEventListener(
-          "click",
-          (e) => {
-            const card = overlay.firstElementChild;
-            if (!card.contains(e.target)) {
-              e.stopPropagation();
-              e.preventDefault();
-            }
-          },
-          true
-        );
-        document.addEventListener(
-          "keydown",
-          (e) => {
-            if (e.key === "Escape") e.preventDefault();
-          },
-          true
-        );
-
-        overlay
-          .querySelector("#cpForm")
-          .addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const name = overlay.querySelector("#cpName").value.trim();
-            const phone = overlay.querySelector("#cpPhone").value.trim();
-            const country = overlay.querySelector("#cpCountry").value.trim();
-
-            if (!country) {
-              toast("Please choose your country.", false);
-              return;
-            }
-
-            const btn = overlay.querySelector("#cpSave");
-            const prev = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = "Saving…";
-
-            const token = localStorage.getItem("accessToken");
-            const params = new URLSearchParams({
-              FullName: name || u.fullName || "",
-              PhoneNumber: phone,
-              Country: country,
-            });
-
-            try {
-              const res = await fetch(`/api/Auth/Update?${params.toString()}`, {
-                method: "POST",
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                credentials: "include",
-              });
-
-              if (!res.ok) {
-                let msg = res.statusText;
-                try {
-                  const payload = await res.json();
-                  msg =
-                    payload?.message ||
-                    (Array.isArray(payload?.errors)
-                      ? payload.errors.join(", ")
-                      : msg);
-                } catch (_) {}
-                throw new Error(msg || "Update failed");
-              }
-
-              localStorage.setItem("mustCompleteProfile", "0");
-              toast("Profile updated. You're good to go!");
-
-              try {
-                document.getElementById("profilePhone").value = phone;
-                document.getElementById("profileLocation").value = country;
-                if (name) document.getElementById("profileName").value = name;
-                document.getElementById("sidebarName").textContent =
-                  name || u.fullName || "User";
-                document.getElementById("sidebarLocation").innerHTML =
-                  '<i class="fas fa-map-marker-alt mr-1"></i> ' + country;
-                if (window.currentUser) {
-                  window.currentUser.fullName =
-                    name || window.currentUser.fullName;
-                  window.currentUser.phoneNumber = phone;
-                  window.currentUser.country = country;
-                }
-              } catch (_) {}
-
-              overlay.remove();
-              lockScroll(false);
-
-              const back = sessionStorage.getItem("afterProfile");
-              if (back && back !== location.href) {
-                sessionStorage.removeItem("afterProfile");
-                location.href = back;
-              }
-            } catch (ex) {
-              console.error(ex);
-              toast(ex.message || "Could not update profile.", false);
-            } finally {
-              btn.disabled = false;
-              btn.textContent = prev;
-            }
-          });
-      })();
-    </script> -->
+    <script src="../JS/wishlist.js"></script>
   </body>
 </html>
