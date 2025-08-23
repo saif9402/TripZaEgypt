@@ -64,6 +64,10 @@ const translations = {
       "Start your journey today and experience travel like never before.",
     "about.cta.button": "Browse Tours",
 
+    "checkEmail.pageTitle": "Check your email",
+    "checkEmail.heading": "Please check your email…",
+    "checkEmail.message": "We have sent you an email to verify your account.",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -178,6 +182,11 @@ const translations = {
     "about.cta.subtitle":
       "Starte noch heute deine Reise und erlebe Reisen wie nie zuvor.",
     "about.cta.button": "Touren durchsuchen",
+
+    "checkEmail.pageTitle": "E-Mail prüfen",
+    "checkEmail.heading": "Bitte prüfe deine E-Mail…",
+    "checkEmail.message":
+      "Wir haben dir eine E-Mail gesendet, um dein Konto zu bestätigen.",
 
     "menu.name": "Menü",
     "menu.lang": "Sprache",

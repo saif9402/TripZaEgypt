@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta charset="UTF-8" />
-    <title>check Email</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="checkEmail.pageTitle">Check your email</title>
     <style>
       body {
         font-family: sans-serif;
@@ -24,7 +23,30 @@
     </style>
   </head>
   <body>
-    <h1>Please check your Email…</h1>
-    <div id="message">We have sent you an Email to verify your account.</div>
+    <h1 data-i18n="checkEmail.heading">Please check your email…</h1>
+    <div id="message" data-i18n="checkEmail.message">
+      We have sent you an email to verify your account.
+    </div>
+
+    <!-- i18n -->
+    <script src="../JS/translation.js"></script>
+
+    <!-- Keep the <title> translated on language switch -->
+    <script>
+      (function () {
+        function setPageTitle() {
+          if (typeof window.t === "function") {
+            document.title = window.t("checkEmail.pageTitle") || document.title;
+          }
+        }
+        document.addEventListener("DOMContentLoaded", setPageTitle);
+        const prev = window.refreshLangData;
+        window.refreshLangData = async function (...args) {
+          const out = await prev?.apply(this, args);
+          setPageTitle();
+          return out;
+        };
+      })();
+    </script>
   </body>
 </html>
