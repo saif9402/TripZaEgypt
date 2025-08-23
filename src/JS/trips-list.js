@@ -83,7 +83,8 @@
   };
 
   // Search term in URL
-  const getSearchFromQS = () => getQS().get("search") || "";
+  const getSearchFromQS = () =>
+    getQS().get("search") || getQS().get("Search") || "";
   const setSearchInQS = (value) => {
     const url = new URL(location.href);
     if (value) url.searchParams.set("search", value);
@@ -311,8 +312,19 @@
   }
 
   // ----------- Date filter (URL + API) -----------
-  const getStartDateFromQS = () => getQS().get("start") || "";
-  const getEndDateFromQS = () => getQS().get("end") || "";
+  const getStartDateFromQS = () => {
+    const lower = getQS().get("start");
+    if (lower) return lower; // already YYYY-MM-DD
+    const upper = getQS().get("StartDate"); // may be ISO
+    return upper && upper.length >= 10 ? upper.slice(0, 10) : "";
+  };
+
+  const getEndDateFromQS = () => {
+    const lower = getQS().get("end");
+    if (lower) return lower;
+    const upper = getQS().get("EndDate");
+    return upper && upper.length >= 10 ? upper.slice(0, 10) : "";
+  };
 
   function setDateRangeInQS(startDateStr, endDateStr) {
     const url = new URL(location.href);

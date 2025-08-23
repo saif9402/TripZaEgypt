@@ -1484,10 +1484,11 @@ function setupHomeSearch() {
     // Swap if reversed
     if (sd && ed && sd > ed) [sd, ed] = [ed, sd];
 
+    // AFTER (lowercase, date-only; trips-list.js expands to full-day ISO)
     const params = new URLSearchParams();
-    if (q) params.set("Search", q);
-    if (sd) params.set("StartDate", toLocalISOWithOffset(sd, false));
-    if (ed) params.set("EndDate", toLocalISOWithOffset(ed, true));
+    if (q) params.set("search", q);
+    if (sd) params.set("start", sd); // YYYY-MM-DD
+    if (ed) params.set("end", ed); // YYYY-MM-DD
 
     hint && (hint.textContent = ""); // clear any previous hint
 
