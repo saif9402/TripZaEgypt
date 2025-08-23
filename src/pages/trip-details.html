@@ -117,17 +117,30 @@
             </div>
           </div>
 
-          <a
-            href="#bookingPanel"
-            class="md:hidden flex mb-5 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-white font-semibold shadow-lg hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600"
-            type="a"
-            aria-label="Book now"
-          >
-            <!-- optional icon -->
+          <!-- Mobile-only actions -->
+          <div class="md:hidden flex gap-3 mb-5">
+            <!-- Book now (unchanged classes, just added flex-1 so they share width) -->
+            <a
+              href="#bookingPanel"
+              class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-white font-semibold shadow-lg hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600"
+              aria-label="Book now"
+            >
+              <i class="fa-solid fa-ticket"></i>
+              Book now
+            </a>
 
-            <i class="fa-solid fa-ticket"></i>
-            Book now
-          </a>
+            <!-- Mobile wishlist toggle -->
+            <button
+              id="wishlistToggleBtnMobile"
+              type="button"
+              class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-white font-semibold shadow-lg hover:bg-rose-700 active:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-600"
+              aria-pressed="false"
+              title="Save to Wishlist"
+            >
+              <i id="wishlistIconMobile" class="fa-regular fa-heart"></i>
+              <span>Wishlist</span>
+            </button>
+          </div>
 
           <!-- Description -->
           <div class="mb-6">

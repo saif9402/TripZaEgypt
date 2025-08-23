@@ -1848,28 +1848,46 @@
 
   // --- Wishlist toggle (trip page) -------------------------------------------
 
-  // UI helpers
   function setWishlistUI(saved, loading = false) {
-    const btn = document.getElementById("wishlistToggleBtn");
-    if (!btn) return;
-    const icon = btn.querySelector("#wishlistIcon") || btn.querySelector("i");
-    const text = btn.querySelector("#wishlistText");
+    const btns = [
+      document.getElementById("wishlistToggleBtn"), // desktop (in panel)
+      document.getElementById("wishlistToggleBtnMobile"), // mobile (top)
+    ].filter(Boolean);
 
-    btn.disabled = loading;
-    btn.classList.toggle("opacity-50", loading);
-    btn.dataset.saved = saved ? "1" : "0";
-    btn.setAttribute("aria-pressed", saved ? "true" : "false");
+    btns.forEach((btn) => {
+      const icon =
+        btn.querySelector("#wishlistIcon") ||
+        btn.querySelector("#wishlistIconMobile") ||
+        btn.querySelector("i");
+      const text =
+        btn.querySelector("#wishlistText") || btn.querySelector("span");
 
-    if (icon) {
-      icon.classList.remove("fa-solid", "fa-regular", "text-rose-600");
-      if (saved) {
-        icon.classList.add("fa-solid", "fa-heart", "text-rose-600");
-      } else {
-        icon.classList.add("fa-regular", "fa-heart");
+      btn.disabled = loading;
+      btn.classList.toggle("opacity-50", loading);
+      btn.dataset.saved = saved ? "1" : "0";
+      btn.setAttribute("aria-pressed", saved ? "true" : "false");
+
+      if (icon) {
+        icon.classList.remove("fa-solid", "fa-regular", "text-rose-600");
+        if (saved) {
+          icon.classList.add("fa-solid", "fa-heart", "text-rose-600");
+        } else {
+          icon.classList.add("fa-regular", "fa-heart");
+        }
       }
-    }
-    if (text)
-      text.textContent = saved ? "Saved to Wishlist" : "Save to Wishlist";
+      if (text) {
+        // Keep short label on mobile; desktop has its own longer label element if present
+        const label =
+          text.getAttribute("id") === "wishlistText"
+            ? saved
+              ? "Saved to Wishlist"
+              : "Save to Wishlist"
+            : saved
+            ? "Saved"
+            : "Wishlist";
+        text.textContent = label;
+      }
+    });
   }
 
   async function fetchWishlistIds() {
@@ -1942,11 +1960,15 @@
   }
 
   async function initWishlistToggle() {
-    const btn = document.getElementById("wishlistToggleBtn");
-    if (!btn) return;
+    const desktopBtn = document.getElementById("wishlistToggleBtn");
+    const mobileBtn = document.getElementById("wishlistToggleBtnMobile");
+    if (!desktopBtn && !mobileBtn) return;
 
     const tripId = getTripIdFromUrl();
     if (!tripId) return;
+
+    // Shared state
+    let isSaved = false;
 
     // Initial state: loading
     setWishlistUI(false, true);
@@ -1954,42 +1976,43 @@
     // Read current membership (don’t force login just to display)
     try {
       const ids = await fetchWishlistIds();
-      const has = ids.includes(String(tripId));
-      setWishlistUI(has, false);
+      isSaved = ids.includes(String(tripId));
+      setWishlistUI(isSaved, false);
     } catch {
-      // If something fails, show as not saved (still clickable)
       setWishlistUI(false, false);
     }
 
-    // Click handler
-    btn.addEventListener("click", async () => {
-      const saved = btn.dataset.saved === "1";
-
-      // Require login when interacting
+    async function handleToggle() {
+      // Require login for interaction
       const ok = await ensureLoggedInOrRedirect();
       if (!ok) return;
 
-      setWishlistUI(saved, true); // lock UI while processing
+      setWishlistUI(isSaved, true); // lock UI while processing
       try {
-        if (saved) {
+        if (isSaved) {
           await deleteWishlist(tripId);
-          setWishlistUI(false, false);
+          isSaved = false;
+          setWishlistUI(isSaved, false);
           toast("success", "Removed", "Removed from your wishlist.");
         } else {
           await addWishlist(tripId);
-          setWishlistUI(true, false);
+          isSaved = true;
+          setWishlistUI(isSaved, false);
           toast("success", "Saved", "Added to your wishlist.");
         }
       } catch (e) {
         console.error(e);
-        setWishlistUI(saved, false); // revert
+        setWishlistUI(isSaved, false); // revert
         toast(
           "error",
           "Couldn't update wishlist",
           e?.message || "Please try again."
         );
       }
-    });
+    }
+
+    desktopBtn?.addEventListener("click", handleToggle);
+    mobileBtn?.addEventListener("click", handleToggle);
   }
 
   window.addEventListener("DOMContentLoaded", async () => {

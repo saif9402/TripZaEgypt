@@ -45,6 +45,8 @@
     --color-purple-600: oklch(55.8% 0.288 302.321);
     --color-rose-500: oklch(64.5% 0.246 16.439);
     --color-rose-600: oklch(58.6% 0.253 17.585);
+    --color-rose-700: oklch(51.4% 0.222 16.935);
+    --color-rose-800: oklch(45.5% 0.188 13.697);
     --color-gray-50: oklch(98.5% 0.002 247.839);
     --color-gray-100: oklch(96.7% 0.003 264.542);
     --color-gray-200: oklch(92.8% 0.006 264.531);
@@ -1131,6 +1133,9 @@
   .bg-red-600 {
     background-color: var(--color-red-600);
   }
+  .bg-rose-600 {
+    background-color: var(--color-rose-600);
+  }
   .bg-teal-50 {
     background-color: var(--color-teal-50);
   }
@@ -1845,6 +1850,13 @@
       }
     }
   }
+  .hover\:bg-rose-700 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-rose-700);
+      }
+    }
+  }
   .hover\:bg-sky-100 {
     &:hover {
       @media (hover: hover) {
@@ -2035,6 +2047,11 @@
       --tw-ring-color: var(--color-green-600);
     }
   }
+  .focus\:ring-rose-600 {
+    &:focus {
+      --tw-ring-color: var(--color-rose-600);
+    }
+  }
   .focus\:ring-white\/60 {
     &:focus {
       --tw-ring-color: color-mix(in srgb, #fff 60%, transparent);
@@ -2068,6 +2085,11 @@
   .active\:bg-green-800 {
     &:active {
       background-color: var(--color-green-800);
+    }
+  }
+  .active\:bg-rose-800 {
+    &:active {
+      background-color: var(--color-rose-800);
     }
   }
   .disabled\:cursor-not-allowed {
