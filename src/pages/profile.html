@@ -395,6 +395,56 @@
           { once: true }
         );
       })();
+
+      (function () {
+        const editBtn = document.getElementById("editSaveBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+
+        // Inputs you enable/disable when editing
+        const inputs = [
+          document.getElementById("profileName"),
+          document.getElementById("profilePhone"),
+          document.getElementById("profileLocation"),
+        ].filter(Boolean);
+
+        const getLang = () =>
+          window.__currentLang || localStorage.getItem("lang") || "en";
+        const tr = (k, params) =>
+          (typeof window.t === "function"
+            ? window.t(k, params)
+            : window.translations?.[getLang()]?.[k]) || k;
+
+        function setMode(mode /* 'view' | 'edit' */) {
+          editBtn.dataset.mode = mode;
+
+          const key =
+            mode === "edit" ? "profile.action.save" : "profile.action.edit";
+          const label = editBtn.querySelector("span");
+          if (label) {
+            label.setAttribute("data-i18n", key); // keep it consistent with your system
+            label.textContent = tr(key); // update immediately
+          }
+
+          // enable/disable inputs + show/hide Cancel
+          inputs.forEach((el) => (el.disabled = mode !== "edit"));
+          if (cancelBtn) cancelBtn.classList.toggle("hidden", mode !== "edit");
+        }
+
+        // Clicks
+        editBtn?.addEventListener("click", () => {
+          const next = editBtn.dataset.mode === "edit" ? "view" : "edit";
+          setMode(next);
+        });
+        cancelBtn?.addEventListener("click", () => setMode("view"));
+
+        // Re-translate current label if language changes
+        document.addEventListener("i18n:change", () => {
+          setMode(editBtn.dataset.mode || "view");
+        });
+
+        // Initial state
+        setMode("view");
+      })();
     </script>
   </body>
 </html>

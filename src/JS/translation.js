@@ -241,6 +241,32 @@ const translations = {
     "wishlist.toast.someFailed": "Some items failed to load",
     "wishlist.toast.removed": "Removed from wishlist",
     "wishlist.toast.removeFailed": "Failed to remove",
+
+    "reset.pageTitle": "Reset Password",
+    "reset.title": "Reset your password",
+    "reset.subtitle": "Choose a strong password you don’t use elsewhere.",
+    "reset.new": "New password",
+    "reset.confirm": "Confirm password",
+    "reset.placeholder": "••••••••",
+    "reset.strength.hint": "At least 8 characters.",
+    "reset.strength.tooWeak": "Too weak",
+    "reset.strength.weak": "Weak",
+    "reset.strength.okay": "Okay",
+    "reset.strength.good": "Good",
+    "reset.strength.strong": "Strong",
+    "reset.cta": "Reset Password",
+    "reset.backToSignIn": "Back to sign in",
+    "reset.aria.showPwd": "Show password",
+    "reset.aria.hidePwd": "Hide password",
+    "reset.message.missingLink":
+      "Missing or invalid reset link. Please request a new one.",
+    "reset.error.minLength": "Password must be at least 8 characters.",
+    "reset.error.mismatch": "Passwords do not match.",
+    "reset.submitting": "Resetting…",
+    "reset.success.toast": "Password reset successful. You can now sign in.",
+    "reset.success.inline": "✅ Success! Redirecting to sign in…",
+    "reset.error.generic": "Something went wrong.",
+    "reset.error.network": "Failed to reset password. Please try again.",
   },
   deu: {
     "nav.home": "Startseite",
@@ -490,6 +516,36 @@ const translations = {
     "wishlist.toast.someFailed": "Einige Elemente konnten nicht geladen werden",
     "wishlist.toast.removed": "Aus der Merkliste entfernt",
     "wishlist.toast.removeFailed": "Entfernen fehlgeschlagen",
+
+    "reset.pageTitle": "Passwort zurücksetzen",
+    "reset.title": "Setzen Sie Ihr Passwort zurück",
+    "reset.subtitle":
+      "Wählen Sie ein starkes Passwort, das Sie nirgendwo sonst verwenden.",
+    "reset.new": "Neues Passwort",
+    "reset.confirm": "Passwort bestätigen",
+    "reset.placeholder": "••••••••",
+    "reset.strength.hint": "Mindestens 8 Zeichen.",
+    "reset.strength.tooWeak": "Zu schwach",
+    "reset.strength.weak": "Schwach",
+    "reset.strength.okay": "Okay",
+    "reset.strength.good": "Gut",
+    "reset.strength.strong": "Stark",
+    "reset.cta": "Passwort zurücksetzen",
+    "reset.backToSignIn": "Zur Anmeldung zurück",
+    "reset.aria.showPwd": "Passwort anzeigen",
+    "reset.aria.hidePwd": "Passwort verbergen",
+    "reset.message.missingLink":
+      "Fehlender oder ungültiger Zurücksetz-Link. Bitte fordern Sie einen neuen an.",
+    "reset.error.minLength":
+      "Das Passwort muss mindestens 8 Zeichen lang sein.",
+    "reset.error.mismatch": "Passwörter stimmen nicht überein.",
+    "reset.submitting": "Wird zurückgesetzt…",
+    "reset.success.toast":
+      "Passwort erfolgreich zurückgesetzt. Sie können sich jetzt anmelden.",
+    "reset.success.inline": "✅ Erfolgreich! Weiterleitung zur Anmeldung…",
+    "reset.error.generic": "Etwas ist schiefgelaufen.",
+    "reset.error.network":
+      "Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
   },
 };
 
@@ -602,6 +658,7 @@ function setLanguage(lang) {
     window.refreshLangData?.();
     window.refreshTripDetailsLang?.();
   }
+  document.dispatchEvent(new CustomEvent("i18n:change", { detail: { lang } }));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
