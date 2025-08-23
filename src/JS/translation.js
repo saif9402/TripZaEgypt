@@ -539,11 +539,13 @@ function setLanguage(lang) {
   }
 
   // --- 1) Translate elements with data-i18n (textContent) ---
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const key = el.getAttribute("data-i18n");
-    const val = translate(key);
-    if (val) el.textContent = val;
-  });
+  document
+    .querySelectorAll("[data-i18n]:not([data-i18n-skip])")
+    .forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      const val = translate(key);
+      if (val) el.textContent = val;
+    });
 
   // --- 2) Translate any data-i18n-ATTR => set ATTR (placeholder, title, aria-label, etc.) ---
   document.querySelectorAll("*").forEach((el) => {

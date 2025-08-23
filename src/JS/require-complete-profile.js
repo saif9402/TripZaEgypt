@@ -270,6 +270,8 @@
           const pp = document.getElementById("profilePhone");
           const pc = document.getElementById("profileLocation");
           const sc = document.getElementById("sidebarCountry");
+          const lt = document.getElementById("sidebarLocationText");
+
           if (n)
             n.textContent =
               name ||
@@ -280,6 +282,7 @@
           if (pn) pn.value = name || user?.fullName || "";
           if (pp) pp.value = phone;
           if (pc) pc.value = country;
+          if (lt) lt.textContent = country;
         } catch (_) {}
 
         toast(t("cp.updated"));

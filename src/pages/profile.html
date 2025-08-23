@@ -52,18 +52,17 @@
             <h2
               id="sidebarName"
               class="text-2xl font-semibold"
-              data-i18n="profile.sidebar.user"
-            >
-              User
-            </h2>
+              data-i18n-skip
+            ></h2>
 
             <!-- split label/value so JS can set the country without clobbering i18n -->
             <p
+              id="sidebarLocation"
               class="text-sm text-gray-500 mt-1 flex items-center justify-center"
+              data-i18n-skip
             >
               <i class="fas fa-map-marker-alt mr-1"></i>
-              <span data-i18n="profile.sidebar.location">Location</span>:
-              <span id="sidebarCountry" class="ml-1">—</span>
+              <span id="sidebarLocationText">—</span>
             </p>
           </div>
 
@@ -368,6 +367,30 @@
             const country = e.detail?.user?.country || "";
             const el = document.getElementById("sidebarCountry");
             if (el && country) el.textContent = country;
+          },
+          { once: true }
+        );
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function fillSidebarFromUser(u) {
+          if (!u) return;
+          const nameEl = document.getElementById("sidebarName");
+          const locEl = document.getElementById("sidebarLocationText");
+          if (nameEl) nameEl.textContent = u.fullName || u.name || "User";
+          if (locEl) locEl.textContent = u.country || u.location || "—";
+        }
+
+        // if already available
+        if (window.currentUser) fillSidebarFromUser(window.currentUser);
+
+        // when your auth bootstrap finishes
+        window.addEventListener(
+          "auth:user",
+          (e) => {
+            fillSidebarFromUser(e.detail?.user || window.currentUser);
           },
           { once: true }
         );
