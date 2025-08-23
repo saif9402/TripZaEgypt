@@ -601,6 +601,9 @@ function setLanguage(lang) {
     // refresh dynamic areas (trending, categories, trip details, etc.)
     window.refreshLangData?.();
     window.refreshTripDetailsLang?.();
+    document.dispatchEvent(
+      new CustomEvent("i18n:change", { detail: { lang } })
+    );
   }
 }
 
