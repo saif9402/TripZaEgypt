@@ -1,4 +1,6 @@
-// includes.js — shared layout + trending + categories
+// simple i18n accessor (works even if translation.js loads earlier/later)
+const _t = (k, params) =>
+  typeof window.t === "function" ? window.t(k, params) : k;
 
 // ------- Utilities to include HTML fragments -------
 function includeHTML(id, file, onDone) {
@@ -178,37 +180,25 @@ async function initTopRatedSlider(noCache = false) {
 
   if (!trips.length) {
     root.innerHTML = `
-      <div class="max-w-7xl mx-auto p-8 text-center text-white/90">
-        No top rated trips yet.
-      </div>`;
+    <div class="max-w-7xl mx-auto p-8 text-center text-white/90">
+       ${_t("empty.noTopRated")}
+     </div>`;
     return;
   }
 
   // Force randomness even if backend ignores Sort=rand
   _shuffleInPlace(trips);
 
-  const i18n =
-    langCode === "deu"
-      ? {
-          mins: "Min.",
-          available: "Jetzt verfügbar",
-          unavailable: "Derzeit nicht verfügbar",
-          trending: "JETZT IM TREND",
-          book: "Jetzt buchen",
-          reviews: "Bewertungen",
-          prev: "Vorheriger",
-          next: "Nächster",
-        }
-      : {
-          mins: "min",
-          available: "Available now",
-          unavailable: "Currently unavailable",
-          trending: "TRENDING NOW",
-          book: "Book Now",
-          reviews: "reviews",
-          prev: "Previous",
-          next: "Next",
-        };
+  const i18n = {
+    mins: _t("trending.mins"),
+    available: _t("trending.available"),
+    unavailable: _t("trending.unavailable"),
+    trending: _t("trending.trending"),
+    book: _t("trending.book"),
+    reviews: _t("trending.reviews"),
+    prev: _t("trending.prev"),
+    next: _t("trending.next"),
+  };
 
   const formatPrice = (
     value,
@@ -314,7 +304,9 @@ async function initTopRatedSlider(noCache = false) {
 
       <div class="meta text-gray-100">
         <span class="trending-price text-2xl">${
-          t.price != null ? formatPrice(t.price, "EUR") + "&nbsp;/ person" : ""
+          t.price != null
+            ? formatPrice(t.price, "EUR") + "&nbsp;" + _t("card.perPerson")
+            : ""
         }</span>
         <span class="meta-sep">|</span>
         <span class="trending-rating inline-flex items-center gap-1">
@@ -701,8 +693,9 @@ async function fetchAndRenderCategories() {
   if (desktopDropdown) {
     desktopDropdown.innerHTML = `
       <li>
-        <a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">All Trips</a>
-      </li>
+<a href="/pages/trips-list.html" class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">${_t(
+      "header.allTrips"
+    )}</a>      </li>
       <li><hr class="border-t border-gray-200 my-1" /></li>
     `;
     categories.forEach((cat) => {
@@ -764,21 +757,23 @@ const _esc = (s) =>
   );
 
 // Inline fallback image (no DNS)
-const _FALLBACK_DATA_IMG =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'>
+const _fallbackDataImg = () => {
+  const label = _t("img.noImage");
+  return (
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'>
        <rect width='100%' height='100%' fill='#e5e7eb'/>
        <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
-             font-size='22' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>
-         No Image
-       </text>
+             font-size='22' fill='#9ca3af' font-family='system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif'>${label}</text>
      </svg>`
+    )
   );
+};
 
 const _safeImg = (u) =>
   !u
-    ? _FALLBACK_DATA_IMG
+    ? _fallbackDataImg()
     : /^data:/i.test(u)
     ? u
     : /^https?:\/\//i.test(u)
@@ -794,7 +789,7 @@ function _attachImgFallbacks(root = document) {
     img.addEventListener(
       "error",
       () => {
-        if (img.src !== _FALLBACK_DATA_IMG) img.src = _FALLBACK_DATA_IMG;
+        if (img.src !== _fallbackDataImg()) img.src = _fallbackDataImg();
       },
       { once: true }
     );
@@ -811,9 +806,11 @@ const _minsToLabel = (mins) => {
   const m = Number(mins) || 0;
   const h = Math.floor(m / 60),
     r = m % 60;
-  if (h && r) return `${h} h ${r} min`;
-  if (h) return `${h} h`;
-  return `${m} min`;
+  const H = _t("time.hourShort");
+  const M = _t("time.minShort");
+  if (h && r) return `${h} ${H} ${r} ${M}`;
+  if (h) return `${h} ${H}`;
+  return `${m} ${M}`;
 };
 
 const _activitiesPreview = (arr, max = 220) => {
@@ -857,7 +854,7 @@ const _skeletonCards = (n = 4) =>
 
 const _emptyState = `
   <div class="col-span-full text-center text-gray-500 py-10">
-    No other trips found in this category.
+    ${_t("empty.noTripsInCategory")}
   </div>
 `;
 
@@ -1019,18 +1016,20 @@ function tripCardHTML(t) {
         <div class="trip-card__row"><span class="i">${
           t.isAvailable ? "✅" : "⛔"
         }</span><span>${
-    t.isAvailable ? "Available" : "Unavailable"
+    t.isAvailable ? _t("card.available") : _t("card.unavailable")
   }</span></div>
       </div>
 
       <div class="trip-card__footer">
         <div>
           <span class="trip-card__ratingStars">${_stars(t.rating)}</span>
-          <span class="trip-card__reviews">${t.reviews ?? 0} reviews</span>
+          <span class="trip-card__reviews">${t.reviews ?? 0} ${_t(
+    "card.reviews"
+  )}</span>
         </div>
         <div class="trip-card__price">
           ${t.price != null ? _formatPrice(t.price, "EUR") : ""}
-          <span class="trip-card__per">/person</span>
+         <span class="trip-card__per">${_t("card.perPerson")}</span>
         </div>
       </div>
     </div>
@@ -1121,7 +1120,7 @@ function renderFeatured(trip) {
       pills.push({
         c: "bg-yellow-100 text-yellow-700",
         icon: "fa-bolt",
-        label: "Best Seller",
+        label: _t("featured.bestSeller"),
       });
     pills.push({
       c: "bg-green-100 text-green-700",
@@ -1260,7 +1259,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
     console.error("Failed to load trips by category:", e);
     grid.innerHTML = `
       <div class="col-span-full text-center text-red-500 py-10">
-        Something went wrong loading trips. Please try again.
+        ${_t("error.loadTrips")}
       </div>
     `;
     stopFeaturedRotator();
@@ -1281,10 +1280,7 @@ function setActiveCategoryButton(clickedBtn) {
 
 // --- Sidebar categories (dynamic, i18n) ---
 function i18nSidebar() {
-  const lang = localStorage.getItem("lang") || "en";
-  return lang === "deu"
-    ? { showMore: "Mehr anzeigen", showLess: "Weniger anzeigen" }
-    : { showMore: "Show more", showLess: "Show less" };
+  return { showMore: _t("sidebar.showMore"), showLess: _t("sidebar.showLess") };
 }
 
 function renderSidebarCategoriesList(categories) {
@@ -1439,8 +1435,8 @@ function setupHomeSearch() {
     });
 
     // Visible placeholders (these show on mobile because they're regular text inputs)
-    sPicker.altInput?.setAttribute("placeholder", "Start Date");
-    ePicker.altInput?.setAttribute("placeholder", "End Date");
+    sPicker.altInput?.setAttribute("placeholder", _t("date.start"));
+    ePicker.altInput?.setAttribute("placeholder", _t("date.end"));
   } else {
     // Fallback: native date inputs (placeholders may not show on some phones)
     sEl?.setAttribute("placeholder", "Start Date");

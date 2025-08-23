@@ -2,16 +2,49 @@
 
 const translations = {
   en: {
-    "web.title": "Tour Guide",
-    "hero.title": "We Find The Best Tours For You",
-    "hero.subtitle":
-      "Discover unforgettable adventures in Hurghada — from desert safaris to Red Sea cruises, all at unbeatable prices.",
-    "hero.video": "Watch Video",
-    "nav.title": "Tour Guide",
     "nav.home": "Home",
     "nav.about": "About Us",
     "nav.trips": "Our Trips",
     "nav.signin": "Sign In",
+    // meta / a11y
+    "date.start": "Start Date",
+    "date.end": "End Date",
+    "aria.searchTrips": "Search trips",
+    "aria.swapDates": "Swap start and end dates",
+    "slider.prev": "Previous image",
+    "slider.next": "Next image",
+    "header.allTrips": "All Trips",
+
+    // trending / slider labels
+    "trending.mins": "min",
+    "trending.available": "Available now",
+    "trending.unavailable": "Currently unavailable",
+    "trending.trending": "TRENDING NOW",
+    "trending.book": "Book Now",
+    "trending.reviews": "reviews",
+    "trending.prev": "Previous",
+    "trending.next": "Next",
+
+    // cards / lists
+    "card.available": "Available",
+    "card.unavailable": "Unavailable",
+    "card.reviews": "reviews",
+    "card.perPerson": "/person",
+
+    // empty / error / misc
+    "empty.noTopRated": "No top rated trips yet.",
+    "empty.noTripsInCategory": "No other trips found in this category.",
+    "error.loadTrips": "Something went wrong loading trips. Please try again.",
+    "img.noImage": "No Image",
+    "gallery.imageAlt": "Image {n}",
+    "featured.bestSeller": "Best Seller",
+    "sidebar.showMore": "Show more",
+    "sidebar.showLess": "Show less",
+
+    // time tokens
+    "time.hourShort": "h",
+    "time.minShort": "min",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -63,16 +96,51 @@ const translations = {
     "signup.signin": "Sign in",
   },
   deu: {
-    "web.title": "Reiseführer",
-    "hero.title": "Wir finden die besten Touren für Sie",
-    "hero.subtitle":
-      "Entdecken Sie unvergessliche Abenteuer in Hurghada – von Wüstensafaris bis zu Kreuzfahrten auf dem Roten Meer, alles zu unschlagbaren Preisen.",
-    "hero.video": "Video ansehen",
-    "nav.title": "Reiseführer",
     "nav.home": "Startseite",
     "nav.about": "Über uns",
     "nav.trips": "Unsere Reisen",
     "nav.signin": "Anmelden",
+    // meta / a11y
+    "date.start": "Startdatum",
+    "date.end": "Enddatum",
+    "aria.searchTrips": "Reisen suchen",
+    "aria.swapDates": "Start- und Enddatum tauschen",
+    "slider.prev": "Vorheriges Bild",
+    "slider.next": "Nächstes Bild",
+    "header.allTrips": "Alle Reisen",
+
+    // trending / slider labels
+    "trending.mins": "Min.",
+    "trending.available": "Jetzt verfügbar",
+    "trending.unavailable": "Derzeit nicht verfügbar",
+    "trending.trending": "JETZT IM TREND",
+    "trending.book": "Jetzt buchen",
+    "trending.reviews": "Bewertungen",
+    "trending.prev": "Vorheriger",
+    "trending.next": "Nächster",
+
+    // cards / lists
+    "card.available": "Verfügbar",
+    "card.unavailable": "Nicht verfügbar",
+    "card.reviews": "Bewertungen",
+    "card.perPerson": "/Person",
+
+    // empty / error / misc
+    "empty.noTopRated": "Noch keine Top-bewerteten Reisen.",
+    "empty.noTripsInCategory":
+      "Keine weiteren Reisen in dieser Kategorie gefunden.",
+    "error.loadTrips":
+      "Beim Laden der Reisen ist etwas schiefgelaufen. Bitte versuche es erneut.",
+    "img.noImage": "Kein Bild",
+    "gallery.imageAlt": "Bild {n}",
+    "featured.bestSeller": "Bestseller",
+    "sidebar.showMore": "Mehr anzeigen",
+    "sidebar.showLess": "Weniger anzeigen",
+
+    // time tokens
+    "time.hourShort": "Std.",
+    "time.minShort": "Min.",
+
     "menu.name": "Menü",
     "menu.lang": "Sprache",
     "search.label": "Suchen",
@@ -126,74 +194,120 @@ const translations = {
   },
 };
 
-// track the last language we actually applied to avoid duplicate heavy work
+const FALLBACK_LANG = "en";
+window.t = function t(key, params = {}) {
+  const lang =
+    window.__currentLang || localStorage.getItem("lang") || FALLBACK_LANG;
+  let str =
+    translations?.[lang]?.[key] ?? translations?.[FALLBACK_LANG]?.[key] ?? "";
+
+  for (const [k, v] of Object.entries(params)) {
+    str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+  }
+  return str;
+};
+
 window.__currentLang = window.__currentLang || null;
 
 function setLanguage(lang) {
-  // If nothing changed, update labels only and skip heavy reloads
-  const languageChanged = window.__currentLang !== lang;
+  const prev = window.__currentLang || null;
+  const languageChanged = prev !== lang;
   window.__currentLang = lang;
 
-  // Apply data-i18n text
-  document.querySelectorAll("[data-i18n]").forEach((el) => {
-    const key = el.getAttribute("data-i18n");
-    if (translations[lang] && translations[lang][key]) {
-      el.textContent = translations[lang][key];
+  // --- helper: safe translate (uses window.t if present; else falls back) ---
+  const translate = (key, params = {}) => {
+    if (typeof window.t === "function") return window.t(key, params);
+    const fallback = "en";
+    const dict = translations?.[lang] || translations?.[fallback] || {};
+    let str = dict[key] || translations?.[fallback]?.[key] || "";
+    for (const [k, v] of Object.entries(params)) {
+      str = str.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
     }
-  });
+    return str;
+  };
 
-  // Works even if header/footer are injected later:
+  // --- delegate languageSelect change globally (works for injected headers/footers) ---
   if (!window.__langDelegationBound) {
     window.__langDelegationBound = true;
     document.addEventListener(
       "change",
       (e) => {
         const sel = e.target?.closest?.("#languageSelect");
-        if (sel) setLanguage(sel.value);
+        if (sel && sel.value) setLanguage(sel.value);
       },
-      true // capture phase so it always fires
+      true // capture to catch events even inside shadowed/injected DOM
     );
   }
 
-  // Apply data-i18n-placeholder
-  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-    const key = el.getAttribute("data-i18n-placeholder");
-    if (translations[lang]?.[key]) {
-      el.setAttribute("placeholder", translations[lang][key]);
+  // --- 1) Translate elements with data-i18n (textContent) ---
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    const val = translate(key);
+    if (val) el.textContent = val;
+  });
+
+  // --- 2) Translate any data-i18n-ATTR => set ATTR (placeholder, title, aria-label, etc.) ---
+  document.querySelectorAll("*").forEach((el) => {
+    const attrs = el.getAttributeNames?.() || [];
+    for (const attr of attrs) {
+      const m = /^data-i18n-(.+)$/.exec(attr);
+      if (!m) continue;
+      const targetAttr = m[1]; // e.g., "placeholder", "aria-label", "title"
+      const key = el.getAttribute(attr);
+      const val = translate(key);
+      if (!val) continue;
+
+      if (targetAttr === "text") {
+        // optional: <span data-i18n-text="some.key"></span>
+        el.textContent = val;
+      } else {
+        el.setAttribute(targetAttr, val);
+      }
     }
   });
 
-  // Update UI language labels
+  // --- 3) Keep <title> in sync ---
+  const titleStr = translate("web.title");
+  if (titleStr) document.title = titleStr;
+
+  // --- 4) Update little UI language badges/controls ---
+  const codeLabel = lang === "deu" ? "DE" : lang.toUpperCase();
   const mobileLangLabel = document.getElementById("mobileLangLabel");
-  if (mobileLangLabel) mobileLangLabel.innerText = lang.toUpperCase();
+  if (mobileLangLabel) mobileLangLabel.innerText = codeLabel;
 
   const currentLang = document.getElementById("currentLang");
-  if (currentLang) currentLang.innerText = lang.toUpperCase();
+  if (currentLang) currentLang.innerText = codeLabel;
 
   const select = document.getElementById("languageSelect");
   if (select && select.value !== lang) select.value = lang;
 
-  // Sync <html lang="..">
+  // --- 5) Sync <html lang="..."> for accessibility / spellcheck ---
   document.documentElement.setAttribute("lang", lang === "deu" ? "de" : "en");
 
-  // Persist only when changed
+  // --- 6) If Flatpickr is mounted, update visible placeholders on its altInputs ---
+  try {
+    const sFP = document.querySelector("#homeStartDate")?._flatpickr;
+    const eFP = document.querySelector("#homeEndDate")?._flatpickr;
+    sFP?.altInput?.setAttribute("placeholder", translate("date.start"));
+    eFP?.altInput?.setAttribute("placeholder", translate("date.end"));
+  } catch {}
+
+  // --- 7) Persist + refresh language-dependent data only if actual change ---
   if (languageChanged) {
-    localStorage.setItem("lang", lang);
-    // 🔁 refresh language-dependent data (trending + categories)
+    try {
+      localStorage.setItem("lang", lang);
+    } catch {}
+    // refresh dynamic areas (trending, categories, trip details, etc.)
     window.refreshLangData?.();
-    // 🔁 and the trip details page (GetTripById?TranslationLanguageId=…)
     window.refreshTripDetailsLang?.();
   }
 }
 
-// Initial load (idempotent)
 document.addEventListener("DOMContentLoaded", () => {
   const savedLang = localStorage.getItem("lang") || "en";
-  // Avoid redundant heavy work if someone else already set it
   if (window.__currentLang !== savedLang) {
     setLanguage(savedLang);
   } else {
-    // still make sure dropdowns/labels reflect the value
     const select = document.getElementById("languageSelect");
     if (select && select.value !== savedLang) select.value = savedLang;
   }

@@ -13,6 +13,8 @@ const imagePaths = [
   "img/Home12.jpg",
   "img/Home13.jpg",
 ];
+const _t = (k, params) =>
+  typeof window.t === "function" ? window.t(k, params) : k;
 
 const slider = document.getElementById("slider");
 const dotsContainer = document.getElementById("dots");
@@ -23,7 +25,7 @@ function renderImage(index) {
   // Create and style new image
   const img = document.createElement("img");
   img.src = imagePaths[index];
-  img.alt = `Image ${index + 1}`;
+  img.alt = _t("gallery.imageAlt", { n: index + 1 });
   img.className =
     "w-full h-full object-contain opacity-0 transition-opacity duration-700 absolute inset-0";
 
