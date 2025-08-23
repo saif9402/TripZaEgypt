@@ -252,12 +252,67 @@
     }
   });
 
-  // Nav events (doesn't interfere with your existing handlers)
-  navWishlist?.addEventListener("click", () => {
-    showSection(wishlistSection);
-    setActiveNav(navWishlist);
-    loadWishlist();
-  });
+  // --- Unified tab switching (replace your "Nav events" block with this) ---
+
+  const ACTIVE_BTN = ["bg-yellow-400", "hover:bg-yellow-500", "text-black"];
+  const INACTIVE_BTN = ["border", "border-gray-300", "text-gray-700"];
+
+  function clearActiveNav() {
+    [navProfile, navBookings, navWishlist].forEach((btn) => {
+      if (!btn) return;
+      btn.classList.remove(...ACTIVE_BTN);
+      btn.classList.add(...INACTIVE_BTN);
+    });
+  }
+
+  function hideAllSections() {
+    [profileSection, bookingSection, wishlistSection].forEach((sec) =>
+      sec?.classList.add("hidden")
+    );
+  }
+
+  function activateTab(tab) {
+    hideAllSections();
+    clearActiveNav();
+
+    switch (tab) {
+      case "profile":
+        profileSection?.classList.remove("hidden");
+        navProfile?.classList.remove(...INACTIVE_BTN);
+        navProfile?.classList.add(...ACTIVE_BTN);
+        break;
+
+      case "bookings":
+        bookingSection?.classList.remove("hidden");
+        navBookings?.classList.remove(...INACTIVE_BTN);
+        navBookings?.classList.add(...ACTIVE_BTN);
+        break;
+
+      case "wishlist":
+        wishlistSection?.classList.remove("hidden");
+        navWishlist?.classList.remove(...INACTIVE_BTN);
+        navWishlist?.classList.add(...ACTIVE_BTN);
+        // Only load when opening wishlist
+        loadWishlist();
+        break;
+    }
+  }
+
+  // Ensure our logic runs AFTER any existing handlers
+  const enforce = (tab) => setTimeout(() => activateTab(tab), 0);
+
+  navProfile?.addEventListener("click", () => enforce("profile"));
+  navBookings?.addEventListener("click", () => enforce("bookings"));
+  navWishlist?.addEventListener("click", () => enforce("wishlist"));
+
+  // On first load, guarantee only one section shows (default to profile)
+  enforce(
+    !profileSection?.classList.contains("hidden")
+      ? "profile"
+      : !bookingSection?.classList.contains("hidden")
+      ? "bookings"
+      : "profile"
+  );
 
   window.refreshTripDetailsLang = () => {
     if (!wishlistSection.classList.contains("hidden")) {
