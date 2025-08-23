@@ -491,9 +491,7 @@
                 id="tripPrice"
                 aria-live="polite"
                 class="text-xl sm:text-2xl font-bold"
-              >
-                $78.90
-              </div>
+              ></div>
 
               <!-- Actions -->
               <button
@@ -502,8 +500,14 @@
               >
                 Confirm Booking
               </button>
-              <button class="w-full mt-1 sm:mt-2 text-sm text-gray-600">
-                ❤️ Save to Wishlist
+              <button
+                id="wishlistToggleBtn"
+                class="w-full mt-1 sm:mt-2 text-sm font-medium text-gray-700 border border-gray-200 rounded flex items-center justify-center gap-2 hover:bg-gray-50"
+                type="button"
+                aria-pressed="false"
+              >
+                <i id="wishlistIcon" class="fa-regular fa-heart"></i>
+                <span id="wishlistText">Save to Wishlist</span>
               </button>
             </div>
           </aside>

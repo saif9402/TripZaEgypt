@@ -1846,11 +1846,163 @@
     }
   });
 
+  // --- Wishlist toggle (trip page) -------------------------------------------
+  function getTripIdFromUrl() {
+    return new URL(location.href).searchParams.get("id");
+  }
+
+  // UI helpers
+  function setWishlistUI(saved, loading = false) {
+    const btn = document.getElementById("wishlistToggleBtn");
+    if (!btn) return;
+    const icon = btn.querySelector("#wishlistIcon") || btn.querySelector("i");
+    const text = btn.querySelector("#wishlistText");
+
+    btn.disabled = loading;
+    btn.classList.toggle("opacity-50", loading);
+    btn.dataset.saved = saved ? "1" : "0";
+    btn.setAttribute("aria-pressed", saved ? "true" : "false");
+
+    if (icon) {
+      icon.classList.remove("fa-solid", "fa-regular", "text-rose-600");
+      if (saved) {
+        icon.classList.add("fa-solid", "fa-heart", "text-rose-600");
+      } else {
+        icon.classList.add("fa-regular", "fa-heart");
+      }
+    }
+    if (text)
+      text.textContent = saved ? "Saved to Wishlist" : "Save to Wishlist";
+  }
+
+  async function fetchWishlistIds() {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return [];
+    const res = await fetch("/api/Wishlist", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json?.data)
+      ? json.data.map((x) => String(x.tripId))
+      : [];
+  }
+
+  async function deleteWishlist(tripId) {
+    const token = await getFreshAccessToken().catch(() => null);
+    if (!token) {
+      redirectToLogin();
+      throw new Error("Not authenticated");
+    }
+    const res = await fetch(
+      `/api/Wishlist?TripId=${encodeURIComponent(tripId)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) throw new Error("Remove failed");
+    return true;
+  }
+
+  // Note: I try two common patterns. If your API uses only one, keep that one.
+  async function addWishlist(tripId) {
+    const token = await getFreshAccessToken().catch(() => null);
+    if (!token) {
+      redirectToLogin();
+      throw new Error("Not authenticated");
+    }
+
+    // Attempt 1: query param
+    let res = await fetch(
+      `/api/Wishlist?TripId=${encodeURIComponent(tripId)}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Attempt 2: JSON body (fallback)
+    if (!res.ok) {
+      res = await fetch(`/api/Wishlist`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tripId: Number(tripId) }),
+      });
+    }
+
+    if (!res.ok) throw new Error("Add failed");
+    return true;
+  }
+
+  async function initWishlistToggle() {
+    const btn = document.getElementById("wishlistToggleBtn");
+    if (!btn) return;
+
+    const tripId = getTripIdFromUrl();
+    if (!tripId) return;
+
+    // Initial state: loading
+    setWishlistUI(false, true);
+
+    // Read current membership (don’t force login just to display)
+    try {
+      const ids = await fetchWishlistIds();
+      const has = ids.includes(String(tripId));
+      setWishlistUI(has, false);
+    } catch {
+      // If something fails, show as not saved (still clickable)
+      setWishlistUI(false, false);
+    }
+
+    // Click handler
+    btn.addEventListener("click", async () => {
+      const saved = btn.dataset.saved === "1";
+
+      // Require login when interacting
+      const ok = await ensureLoggedInOrRedirect();
+      if (!ok) return;
+
+      setWishlistUI(saved, true); // lock UI while processing
+      try {
+        if (saved) {
+          await deleteWishlist(tripId);
+          setWishlistUI(false, false);
+          toast("success", "Removed", "Removed from your wishlist.");
+        } else {
+          await addWishlist(tripId);
+          setWishlistUI(true, false);
+          toast("success", "Saved", "Added to your wishlist.");
+        }
+      } catch (e) {
+        console.error(e);
+        setWishlistUI(saved, false); // revert
+        toast(
+          "error",
+          "Couldn't update wishlist",
+          e?.message || "Please try again."
+        );
+      }
+    });
+  }
+
   window.addEventListener("DOMContentLoaded", async () => {
-    await _waitForHeaderAuth(); // <= adaptive, fast when already ready
+    await _waitForHeaderAuth();
     ensureRelatedDOM();
     wireRelatedNav();
-    wireReviewsSection(); // this will call fetchReviews(...)
+    wireReviewsSection();
     loadTrip();
+    initWishlistToggle();
   });
 })();
