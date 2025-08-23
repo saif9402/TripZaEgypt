@@ -5,16 +5,20 @@
   <div class="flex items-center justify-start h-9 md:h-12">
     <img
       src="/img/Header.svg"
-      alt="logo header"
       class="h-50 object-contain -ml-9 flex items-start justify-start"
+      alt="logo header"
+      data-i18n-alt="header.logoAlt"
     />
   </div>
 
   <!-- Hamburger Icon (Mobile) -->
   <button
-    title="nav button"
     @click="open = true"
     class="md:hidden text-white text-2xl"
+    title="Open menu"
+    aria-label="Open menu"
+    data-i18n-title="aria.nav.open"
+    data-i18n-aria-label="aria.nav.open"
   >
     <i class="fas fa-bars"></i>
   </button>
@@ -33,10 +37,14 @@
       class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
       >About Us</a
     >
+
     <div x-data="{ openTrips: false }" class="relative">
       <button
         @click="openTrips = !openTrips"
         class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+        data-i18n="nav.trips"
+        aria-haspopup="menu"
+        aria-expanded="false"
       >
         Our Trips
       </button>
@@ -59,6 +67,7 @@
           <a
             href="/pages/trips-list.html"
             class="block px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50"
+            data-i18n="header.allTrips"
           >
             All Trips
           </a>
@@ -96,40 +105,20 @@
           <a
             onclick="setLanguage('en')"
             class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/en.jpeg" class="w-4 h-4" /> EN</a
           >
+            <img src="/img/flags/en.jpeg" class="w-4 h-4" alt="English flag" />
+            EN
+          </a>
         </li>
         <li>
           <a
             onclick="setLanguage('deu')"
             class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/deu.png" class="w-4 h-4" /> DEU</a
           >
+            <img src="/img/flags/deu.png" class="w-4 h-4" alt="German flag" />
+            DEU
+          </a>
         </li>
-        <!-- <li>
-          <a
-            onclick="setLanguage('ru')"
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/ru.png" class="w-4 h-4" /> RU</a
-          >
-        </li>
-        <li>
-          <a
-            onclick="setLanguage('pl')"
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/pl.png" class="w-4 h-4" /> PL</a
-          >
-        </li>
-        <li>
-          <a
-            onclick="setLanguage('cz')"
-            href="#"
-            class="flex items-center gap-2 px-4 py-2 hover:bg-sky-100"
-            ><img title="img" src="/img/flags/cs.png" class="w-4 h-4" /> CZ</a
-          >
-        </li> -->
       </ul>
     </div>
 
@@ -144,13 +133,13 @@
   </nav>
 
   <!-- Overlay -->
-  <!-- Overlay -->
   <div
     class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
     x-show="open"
     x-transition.opacity
     x-cloak
     @click="open = false"
+    aria-hidden="true"
   ></div>
 
   <!-- Mobile Top Drawer -->
@@ -169,15 +158,19 @@
     <div class="flex items-center justify-start h-9 md:h-12">
       <img
         src="/img/Header.svg"
-        alt="logo header"
         class="h-50 object-contain -ml-9 flex items-start justify-start"
+        alt="logo header"
+        data-i18n-alt="header.logoAlt"
       />
     </div>
 
     <button
-      title="b"
       class="text-black text-2xl absolute top-4 right-4"
       @click="open = false"
+      title="Close menu"
+      aria-label="Close menu"
+      data-i18n-title="aria.nav.close"
+      data-i18n-aria-label="aria.nav.close"
     >
       <i class="fas fa-times"></i>
     </button>
@@ -192,6 +185,7 @@
         data-i18n="nav.about"
         >About Us</a
       >
+
       <div class="flex flex-col space-y-1">
         <a
           href="/pages/trips-list.html"
@@ -219,7 +213,7 @@
           class="mt-4 px-3 py-2 bg-gray-200 rounded text-sm flex items-center justify-between w-full"
         >
           <span>🌐 <span id="mobileLangLabel">EN</span></span>
-          <i class="fas fa-chevron-down ml-2"></i>
+          <i class="fas fa-chevron-down ml-2" aria-hidden="true"></i>
         </button>
         <ul
           x-show="langOpen"
@@ -237,65 +231,28 @@
             <a
               onclick="setLanguage('en')"
               class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
+            >
+              <img
                 src="/img/flags/en.jpeg"
                 class="inline w-4 h-4 mr-2"
+                alt="English flag"
               />
-              EN</a
-            >
+              EN
+            </a>
           </li>
           <li>
             <a
               onclick="setLanguage('deu')"
               class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
+            >
+              <img
                 src="/img/flags/deu.png"
                 class="inline w-4 h-4 mr-2"
+                alt="German flag"
               />
-              DEU</a
-            >
+              DEU
+            </a>
           </li>
-          <!-- <li>
-            <a
-              onclick="setLanguage('ru')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/ru.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              RU</a
-            >
-          </li>
-          <li>
-            <a
-              onclick="setLanguage('pl')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/pl.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              PL</a
-            >
-          </li>
-          <li>
-            <a
-              onclick="setLanguage('cz')"
-              href="#"
-              class="block px-4 py-2 hover:bg-gray-100"
-              ><img
-                title="i"
-                src="/img/flags/cs.png"
-                class="inline w-4 h-4 mr-2"
-              />
-              CZ</a
-            >
-          </li> -->
         </ul>
       </div>
     </nav>

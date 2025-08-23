@@ -100,6 +100,11 @@ const translations = {
     "nav.logout": "Logout",
     "nav.user": "User",
 
+    "header.logoAlt": "logo header",
+    "header.allTrips": "All Trips",
+    "aria.nav.open": "Open menu",
+    "aria.nav.close": "Close menu",
+
     "menu.name": "Menu",
     "menu.lang": "Language",
     "search.label": "Search",
@@ -252,6 +257,11 @@ const translations = {
     "nav.profile": "Profil",
     "nav.logout": "Abmelden",
     "nav.user": "Nutzer",
+
+    "header.logoAlt": "logo header",
+    "header.allTrips": "All Trips",
+    "aria.nav.open": "Open menu",
+    "aria.nav.close": "Close menu",
 
     "menu.name": "Menü",
     "menu.lang": "Sprache",
