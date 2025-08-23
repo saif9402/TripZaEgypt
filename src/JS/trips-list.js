@@ -2,6 +2,11 @@
 
 (() => {
   ("use strict");
+  // i18n helper (reuses your existing getLang)
+  const tr = (k) =>
+    typeof window.t === "function"
+      ? window.t(k)
+      : window.translations?.[getLang()]?.[k] ?? k;
 
   // ----------- Config / DOM -----------
   const PAGE_SIZE = 10;
@@ -277,22 +282,19 @@
       .map((r) => formatDateRange(r.start, r.end, locale));
     const extra = Math.max(0, ranges.length - 2);
 
-    const t =
-      getLang() === "deu"
-        ? { available: "Verfügbar", more: "weitere" }
-        : { available: "Available", more: "more" };
-
     return `
-      <span class="flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days"></i>
-        <span class="truncate">
-          <span class="font-medium">${t.available}:</span>
-          ${esc(shown.join(" • "))}${
-      extra ? ` <span class="text-gray-500">+${extra} ${t.more}</span>` : ""
+    <span class="flex items-center gap-2">
+      <i class="fa-solid fa-calendar-days"></i>
+      <span class="truncate">
+        <span class="font-medium">${tr("trips.available")}:</span>
+        ${esc(shown.join(" • "))}${
+      extra
+        ? ` <span class="text-gray-500">+${extra} ${tr("trips.more")}</span>`
+        : ""
     }
-        </span>
       </span>
-    `;
+    </span>
+  `;
   }
 
   function setSearchCount(n) {
@@ -365,8 +367,8 @@
     if (!startStr && !endStr) return "";
     if (startStr && endStr)
       return `${prettyDate(startStr)} → ${prettyDate(endStr)}`;
-    if (startStr) return `from ${prettyDate(startStr)}`;
-    return `until ${prettyDate(endStr)}`;
+    if (startStr) return `${tr("common.from")} ${prettyDate(startStr)}`;
+    return `${tr("common.until")} ${prettyDate(endStr)}`;
   }
 
   function initDateFilterUI() {
@@ -440,9 +442,17 @@
 
   function summarizeDuration(min, max) {
     if (min === "" && max === "") return "";
-    if (min !== "" && max !== "") return `Duration ${min}–${max} min`;
-    if (min !== "") return `Duration ≥ ${min} min`;
-    return `Duration ≤ ${max} min`;
+    if (min !== "" && max !== "")
+      return `${tr("trips.filters.duration.title")} ${min}–${max} ${tr(
+        "trips.filters.duration.minUnit"
+      )}`;
+    if (min !== "")
+      return `${tr("trips.filters.duration.title")} ≥ ${min} ${tr(
+        "trips.filters.duration.minUnit"
+      )}`;
+    return `${tr("trips.filters.duration.title")} ≤ ${max} ${tr(
+      "trips.filters.duration.minUnit"
+    )}`;
   }
 
   function initDurationFilterUI() {
@@ -526,111 +536,100 @@
 
   // ----------- Row template -----------
   const rowHTML = (t) => `
-    <a href="/pages/trip-details.html?id=${t.id}" 
-       class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden">
-      <div class="flex flex-col sm:flex-row">
-       <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}"
-          class="w-full sm:w-56 h-44 object-cover"
-          loading="lazy" decoding="async"
-          onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'">
+  <a href="/pages/trip-details.html?id=${t.id}"
+     class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden">
+    <div class="flex flex-col sm:flex-row">
+      <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}"
+           class="w-full sm:w-56 h-44 object-cover" loading="lazy" decoding="async"
+           onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'">
 
-        <div class="flex-1 p-4">
-          <div class="flex items-center gap-2 text-xs">
-            <span class="px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-semibold">
-              ${esc(t.category || "Activity")}
-            </span>
-            ${
-              t.isBestSeller
-                ? `<span class="px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 font-semibold">Best seller</span>`
-                : ""
-            }
-            ${
-              t.isAvailable
-                ? `<span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-semibold">Available</span>`
-                : `<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-500">Unavailable</span>`
-            }
-          </div>
-
-          <h3 class="mt-2 text-lg font-semibold truncate">${esc(t.name)}</h3>
-
-          <div class="mt-1 flex items-center gap-2 text-sm">
-            <div class="flex items-center gap-1" aria-label="rating">
-              ${starsHTML(t.rating)}
-              <span class="ml-1 text-gray-600">${(
-                Number(t.rating) || 0
-              ).toFixed(1)}</span>
-            </div>
-            <span class="text-gray-400">•</span>
-            <span class="text-gray-600">${t.reviews ?? 0} reviews</span>
-          </div>
-
-          <div class="mt-2 text-sm text-gray-700">
-            ${availabilityHTML(t)}
-          </div>
-
-          <div class="mt-3 flex items-center gap-6 text-sm text-gray-600">
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-clock"></i> ${minutesToLabel(t.duration)}
-            </span>
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-people-group"></i> Family Plan
-            </span>
-          </div>
+      <div class="flex-1 p-4">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-semibold">
+            ${esc(t.category || tr("trips.category.default"))}
+          </span>
+          ${
+            t.isBestSeller
+              ? `<span class="px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 font-semibold">${tr(
+                  "trips.badge.bestSeller"
+                )}</span>`
+              : ""
+          }
+          ${
+            t.isAvailable
+              ? `<span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-semibold">${tr(
+                  "trips.available"
+                )}</span>`
+              : `<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-500">${tr(
+                  "trips.unavailable"
+                )}</span>`
+          }
         </div>
 
-        <div class="px-4 pb-4 sm:p-4 sm:w-56 flex sm:flex-col items-end justify-between">
-          <div class="text-right">
-            <div class="text-xl font-bold">
-              ${t.price != null ? formatPrice(t.price) : ""}
-            </div>
-            <div class="text-xs text-gray-500">per person</div>
+        <h3 class="mt-2 text-lg font-semibold truncate">${esc(t.name)}</h3>
+
+        <div class="mt-1 flex items-center gap-2 text-sm">
+          <div class="flex items-center gap-1" aria-label="${tr(
+            "trips.rating.aria"
+          )}">
+            ${starsHTML(t.rating)}
+            <span class="ml-1 text-gray-600">${(Number(t.rating) || 0).toFixed(
+              1
+            )}</span>
           </div>
-          <span class="mt-2 inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold">
-            View details <i class="fa-solid fa-chevron-right text-xs"></i>
+          <span class="text-gray-400">•</span>
+          <span class="text-gray-600">${t.reviews ?? 0} ${tr(
+    "trips.summary.tripsReviews"
+  )}</span>
+        </div>
+
+        <div class="mt-2 text-sm text-gray-700">
+          ${availabilityHTML(t)}
+        </div>
+
+        <div class="mt-3 flex items-center gap-6 text-sm text-gray-600">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-clock"></i> ${minutesToLabel(t.duration)}
+          </span>
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-people-group"></i> ${tr("trips.familyPlan")}
           </span>
         </div>
       </div>
-    </a>
-  `;
+
+      <div class="px-4 pb-4 sm:p-4 sm:w-56 flex sm:flex-col items-end justify-between">
+        <div class="text-right">
+          <div class="text-xl font-bold">
+            ${t.price != null ? formatPrice(t.price) : ""}
+          </div>
+          <div class="text-xs text-gray-500">${tr("trips.perPerson")}</div>
+        </div>
+        <span class="mt-2 inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold">
+          ${tr(
+            "trips.viewDetails"
+          )} <i class="fa-solid fa-chevron-right text-xs"></i>
+        </span>
+      </div>
+    </div>
+  </a>
+`;
 
   // ----------- Labels (i18n) -----------
-  const sortLabels = () => {
-    if (getLang() === "deu") {
-      return {
-        title: "Sortieren nach",
-        recommended: "Empfohlen",
-        bestseller: "Bestseller zuerst",
-        priceLow: "Preis: aufsteigend",
-        priceHigh: "Preis: absteigend",
-        ratingHigh: "Bewertung: absteigend",
-        ratingLow: "Bewertung: aufsteigend",
-      };
-    }
-    return {
-      title: "Sort by",
-      recommended: "Recommended",
-      bestseller: "Best seller",
-      priceLow: "Price: low to high",
-      priceHigh: "Price: high to low",
-      ratingHigh: "Rating: high to low",
-      ratingLow: "Rating: low to high",
-    };
-  };
+  const sortLabels = () => ({
+    title: tr("trips.sort.title"),
+    recommended: tr("trips.sort.recommended"),
+    bestseller: tr("trips.sort.bestseller"),
+    priceLow: tr("trips.sort.priceLow"),
+    priceHigh: tr("trips.sort.priceHigh"),
+    ratingHigh: tr("trips.sort.ratingHigh"),
+    ratingLow: tr("trips.sort.ratingLow"),
+  });
 
-  const searchLabels = () => {
-    if (getLang() === "deu") {
-      return {
-        placeholder: "Ausflüge suchen",
-        aria: "Ausflüge suchen",
-        clear: "Löschen",
-      };
-    }
-    return {
-      placeholder: "Search trips",
-      aria: "Search trips",
-      clear: "Clear",
-    };
-  };
+  const searchLabels = () => ({
+    placeholder: tr("trips.search.placeholder"),
+    aria: tr("trips.search.aria"),
+    clear: tr("common.clear"),
+  });
 
   function initSortUI() {
     const sel = document.getElementById("sortSelect");
@@ -718,25 +717,15 @@
         return String(n);
       }
     };
-    const words = isDE
-      ? {
-          trip: "Ausflug",
-          trips: "Ausflüge",
-          none: "Keine Ausflüge",
-          for: "für",
-          page: "Seite",
-          of: "von",
-          searching: "Suche…",
-        }
-      : {
-          trip: "trip",
-          trips: "trips",
-          none: "No trips",
-          for: "for",
-          page: "page",
-          of: "of",
-          searching: "Searching…",
-        };
+    const words = {
+      trip: tr("trips.summary.trip"),
+      trips: tr("trips.summary.trips"),
+      none: tr("trips.summary.none"),
+      for: tr("trips.summary.for"),
+      page: tr("trips.summary.page"),
+      of: tr("trips.summary.of"),
+      searching: tr("trips.summary.searching"),
+    };
 
     const srch = getSearchFromQS();
     const start = getStartDateFromQS();
@@ -862,21 +851,25 @@
         const durText = summarizeDuration(dMin, dMax);
 
         listEl.innerHTML = `
-        <div class="bg-white rounded p-10 text-center text-gray-500">
-          ${
-            srch || hasDate || hasDur
-              ? `No trips found${
-                  srch
-                    ? ` for "<span class="font-semibold">${esc(srch)}</span>"`
-                    : ""
-                }${
-                  hasDate
-                    ? ` in ${esc(summarizeDateFilter(startQS, endQS))}`
-                    : ""
-                }${hasDur ? ` • ${esc(durText)}` : ""}.`
-              : "No trips found."
-          }
-        </div>`;
+          <div class="bg-white rounded p-10 text-center text-gray-500">
+            ${
+              srch || hasDate || hasDur
+                ? `${tr("trips.noResults")}${
+                    srch
+                      ? ` ${tr(
+                          "trips.summary.for"
+                        )} "<span class="font-semibold">${esc(srch)}</span>"`
+                      : ""
+                  }${
+                    hasDate
+                      ? ` ${tr("common.in")} ${esc(
+                          summarizeDateFilter(startQS, endQS)
+                        )}`
+                      : ""
+                  }${hasDur ? ` • ${esc(durText)}` : ""}.`
+                : tr("trips.noResults")
+            }
+          </div>`;
       } else {
         listEl.innerHTML = items.map(rowHTML).join("");
 
@@ -928,7 +921,9 @@
       console.error("Failed to load trips:", err);
       setSearchCount(null);
       listEl.innerHTML =
-        '<div class="bg-white rounded p-10 text-center text-red-500">Something went wrong. Please try again.</div>';
+        '<div class="bg-white rounded p-10 text-center text-red-500">' +
+        tr("common.errorGeneric") +
+        "</div>";
     }
   }
 
@@ -945,7 +940,9 @@
       </button>`;
 
     let html = `<div class="inline-flex items-center gap-2">`;
-    html += mkBtn("‹ Prev", currentPage - 1, { disabled: currentPage === 1 });
+    html += mkBtn(`‹ ${tr("common.prev")}`, currentPage - 1, {
+      disabled: currentPage === 1,
+    });
 
     const windowSize = 2;
     const start = Math.max(1, currentPage - windowSize);
@@ -967,9 +964,10 @@
       });
     }
 
-    html += mkBtn("Next ›", currentPage + 1, {
+    html += mkBtn(`${tr("common.next")} ›`, currentPage + 1, {
       disabled: currentPage === totalPages,
     });
+
     html += `</div>`;
 
     pagerEl.innerHTML = html;
@@ -991,6 +989,14 @@
   // ----------- Init -----------
   document.addEventListener("DOMContentLoaded", () => {
     ensureToolbarControls();
+    initSortUI();
+    initSearchUI();
+    initDateFilterUI();
+    initDurationFilterUI();
+    load(1);
+  });
+
+  document.addEventListener("i18n:change", () => {
     initSortUI();
     initSearchUI();
     initDateFilterUI();
