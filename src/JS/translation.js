@@ -392,10 +392,11 @@ const translations = {
     "trip.booking.timeSelect": "Select time",
     "trip.booking.adults": "Adults",
     "trip.booking.children": "Children",
-    "trip.booking.policy.free":
-      "Children under 2 years is <strong>Free</strong>",
+    "trip.booking.policy.free": "Children under 2 years is ",
+    "trip.booking.policy.free.underTwo": "Free",
     "trip.booking.policy.child50":
-      "Children from 2 to 11 years are charged at <strong>50% of the adult price</strong>.",
+      "Children from 2 to 11 years are charged at ",
+    "trip.booking.policy.child50.price": "50% of the adult price.",
     "trip.booking.confirmBtn": "Confirm Booking",
     "trip.booking.warn.selectTitle": "Select date & time",
     "trip.booking.warn.selectBody": "Please choose an available date and time.",
@@ -911,10 +912,10 @@ const translations = {
     "trip.booking.timeSelect": "Uhrzeit auswählen",
     "trip.booking.adults": "Erwachsene",
     "trip.booking.children": "Kinder",
-    "trip.booking.policy.free":
-      "Kinder unter 2 Jahren sind <strong>kostenlos</strong>",
-    "trip.booking.policy.child50":
-      "Kinder von 2 bis 11 Jahren zahlen <strong>50 % des Erwachsenenpreises</strong>.",
+    "trip.booking.policy.free": "Kinder unter 2 Jahren sind ",
+    "trip.booking.policy.free.underTwo": "kostenlos",
+    "trip.booking.policy.child50": "Kinder von 2 bis 11 Jahren zahlen ",
+    "trip.booking.policy.child50.price": "50 % des Erwachsenenpreises.",
     "trip.booking.confirmBtn": "Buchung bestätigen",
     "trip.booking.warn.selectTitle": "Datum & Uhrzeit wählen",
     "trip.booking.warn.selectBody":
