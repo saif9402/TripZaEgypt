@@ -945,25 +945,45 @@
   }
 
   async function deleteReview({ tripId, userId }) {
-    // Token likely required; try to refresh but don't crash if missing
-    const token = await getFreshAccessToken().catch(() => null);
-    const params = new URLSearchParams();
-    if (userId != null) params.append("UserId", String(userId));
+    if (!tripId) throw new Error("Missing tripId");
+    if (userId == null) throw new Error("Missing userId");
 
-    const res = await fetch(
-      `/api/Reviews/DeleteReview/${encodeURIComponent(
-        tripId
-      )}?${params.toString()}`,
-      {
+    // one place to attempt the DELETE
+    const doDelete = async () => {
+      // try to use current token, refresh if absent
+      let token = null;
+      try {
+        token = localStorage.getItem("accessToken");
+      } catch {}
+      if (!token) {
+        token = await getFreshAccessToken().catch(() => null);
+      }
+
+      return fetch(`/api/Reviews/DeleteReview/${encodeURIComponent(tripId)}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
           Accept: "application/json, text/plain",
+          "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-      }
-    );
+        // ⬅️ API requires body: { id: userId }
+        body: JSON.stringify({ id: Number(userId) }),
+        cache: "no-store",
+      });
+    };
+
+    // first try
+    let res = await doDelete();
+
+    // if unauthorized, refresh once and retry
+    if (res.status === 401 || res.status === 403) {
+      await getFreshAccessToken().catch(() => {});
+      res = await doDelete();
+    }
+
     const payload = await parseMaybeTextJSON(res);
+
     if (!res.ok || payload?.succeeded === false) {
       const msg =
         payload?.message ||
