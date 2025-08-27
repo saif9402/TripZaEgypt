@@ -3,37 +3,393 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-i18n="checkEmail.pageTitle">Check your email</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <title data-i18n="checkEmail.pageTitle">
+      Check your email | Tour Guide
+    </title>
+
+    <!-- Tailwind build + your site styles (matches the rest of your auth pages) -->
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <!-- Favicons (optional) -->
+    <link rel="icon" href="../img/Vector.png" />
+
     <style>
-      body {
-        font-family: sans-serif;
-        padding: 2rem;
-        text-align: center;
+      /* tiny polish for the envelope wiggle */
+      @keyframes floaty {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+        100% {
+          transform: translateY(0);
+        }
       }
-      #message {
-        margin-top: 1.5rem;
-        font-size: 1.1rem;
-      }
-      .error {
-        color: #c00;
-      }
-      .success {
-        color: #080;
+      .floaty {
+        animation: floaty 3s ease-in-out infinite;
       }
     </style>
   </head>
-  <body>
-    <h1 data-i18n="checkEmail.heading">Please check your email…</h1>
-    <div id="message" data-i18n="checkEmail.message">
-      We have sent you an email to verify your account.
+
+  <body class="relative min-h-screen overflow-x-hidden">
+    <!-- Toast Container (shared UX) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Background (same aesthetic as Sign In / Forgot) -->
+    <div class="absolute inset-0">
+      <img
+        src="../img/sign in background.png"
+        class="w-full h-full object-cover blur-xl"
+        data-i18n-alt="img.bgBlurAlt"
+        alt="blurred background"
+      />
+    </div>
+    <img
+      src="../img/sign in background.png"
+      class="absolute inset-0 w-full h-full bg-img transition-opacity duration-700 opacity-0"
+      loading="lazy"
+      onload="this.style.opacity=1"
+      data-i18n-alt="img.bgAlt"
+      alt="background image"
+    />
+
+    <!-- Page content -->
+    <div
+      class="relative z-10 flex items-center justify-center min-h-screen px-4 bg-black/40"
+    >
+      <div
+        class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden"
+      >
+        <!-- Accent strip -->
+        <div
+          class="h-1.5 bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500"
+        ></div>
+
+        <div class="p-8">
+          <!-- Logo -->
+          <div class="flex items-center justify-center mb-4">
+            <img
+              src="../img/Vector.png"
+              data-i18n-alt="img.logoAlt"
+              alt="Tour Guide logo"
+              class="h-10"
+            />
+          </div>
+
+          <!-- Icon -->
+          <div
+            class="mx-auto mb-4 w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center ring-8 ring-yellow-50"
+          >
+            <!-- Envelope icon (stroke matches your style) -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="w-8 h-8 text-yellow-500 floaty"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+              />
+              <path d="M22 8l-10 6L2 8" />
+            </svg>
+          </div>
+
+          <!-- Heading -->
+          <h1
+            class="text-2xl font-bold text-center text-gray-800"
+            data-i18n="checkEmail.heading"
+          >
+            Please check your email
+          </h1>
+
+          <!-- Message -->
+          <p
+            id="message"
+            class="mt-2 text-center text-gray-600"
+            data-i18n="checkEmail.message"
+          >
+            We’ve sent a link to verify your account.
+          </p>
+          <p class="mt-1 text-center text-gray-500 text-sm">
+            <span data-i18n="checkEmail.to">Sent to</span>
+            <strong id="emailTarget" class="break-all">—</strong>
+          </p>
+
+          <!-- Tips -->
+          <div class="mt-6 bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+            <p
+              class="font-medium text-gray-700 mb-2"
+              data-i18n="checkEmail.tips.title"
+            >
+              Didn’t see it yet?
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li data-i18n="checkEmail.tips.spam">
+                Check your Spam/Junk folder.
+              </li>
+              <li data-i18n="checkEmail.tips.search">
+                Search for “Tour Guide” in your inbox.
+              </li>
+              <li data-i18n="checkEmail.tips.wait">
+                It may take up to a minute to arrive.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-6 space-y-3">
+            <!-- Open inbox / mail app -->
+            <a
+              id="openInboxBtn"
+              href="#"
+              target="_blank"
+              rel="noopener"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-yellow-400 text-white font-semibold shadow-md hover:bg-yellow-500 transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                  d="M3 8l9 6 9-6"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                  d="M21 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"
+                />
+              </svg>
+              <span data-i18n="checkEmail.openInbox">Open your inbox</span>
+            </a>
+          </div>
+
+          <!-- Back link -->
+          <p class="mt-6 text-center text-sm text-gray-500">
+            <a
+              href="sign-in.html"
+              class="text-yellow-600 hover:underline"
+              data-i18n="checkEmail.back"
+              >Back to sign in</a
+            >
+          </p>
+
+          <!-- Inline status line (ARIA live) -->
+          <p
+            id="statusLine"
+            class="mt-3 text-center text-sm hidden"
+            role="status"
+            aria-live="polite"
+          ></p>
+
+          <p class="text-center text-xs text-gray-400 mt-6">
+            <span id="copyYear"></span>
+            <span data-i18n="footer.copy.tail"
+              >Tour Guide. All rights reserved.</span
+            >
+          </p>
+        </div>
+      </div>
     </div>
 
-    <!-- i18n -->
+    <!-- Your translator -->
     <script src="../JS/translation.js"></script>
 
-    <!-- Keep the <title> translated on language switch -->
     <script>
+      // ---------- Helpers ----------
+      const getLang = () =>
+        window.__currentLang || localStorage.getItem("lang") || "en";
+      const tr = (k, p) =>
+        typeof window.t === "function"
+          ? window.t(k, p)
+          : (k || "").replace(/\{(\w+)\}/g, (_, m) =>
+              p && p[m] != null ? p[m] : `{${m}}`
+            );
+
+      function showToast(message, type = "success") {
+        const toastContainer = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = `max-w-sm w-full px-4 py-3 rounded-lg shadow-lg text-white transition ${
+          type === "success" ? "bg-green-600" : "bg-red-600"
+        }`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.addEventListener("transitionend", () => toast.remove());
+        }, 3500);
+      }
+
+      // ---------- Pull email to display ----------
+      (function initEmailAndInbox() {
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get("email");
+        // attempt to reuse email captured during sign-up/login (set this yourself when you redirect)
+        const fromStorage =
+          localStorage.getItem("pendingEmail") ||
+          localStorage.getItem("signupEmail") ||
+          localStorage.getItem("lastLoginEmail");
+        const email = (fromQuery || fromStorage || "").trim();
+        const span = document.getElementById("emailTarget");
+        span.textContent =
+          email || tr("checkEmail.unknownEmail") || "your email";
+
+        // Smart "Open inbox" button
+        const domain = (email.split("@")[1] || "").toLowerCase();
+        const providers = {
+          "gmail.com": "https://mail.google.com/",
+          "googlemail.com": "https://mail.google.com/",
+          "outlook.com": "https://outlook.live.com/mail/0/inbox",
+          "hotmail.com": "https://outlook.live.com/mail/0/inbox",
+          "live.com": "https://outlook.live.com/mail/0/inbox",
+          "msn.com": "https://outlook.live.com/mail/0/inbox",
+          "yahoo.com": "https://mail.yahoo.com/",
+          "icloud.com": "https://www.icloud.com/mail/",
+          "me.com": "https://www.icloud.com/mail/",
+          "proton.me": "https://mail.proton.me/u/0/inbox",
+          "protonmail.com": "https://mail.proton.me/u/0/inbox",
+        };
+        const openBtn = document.getElementById("openInboxBtn");
+        if (providers[domain]) {
+          openBtn.href = providers[domain];
+          openBtn.target = "_blank";
+        } else {
+          // fallback: try to nudge default mail app via mailto
+          openBtn.removeAttribute("target");
+          openBtn.addEventListener(
+            "click",
+            (e) => {
+              e.preventDefault();
+              window.location.href = email ? `mailto:${email}` : "mailto:";
+            },
+            { once: true }
+          );
+        }
+      })();
+
+      // ---------- Resend verification flow ----------
+      (function resendFlow() {
+        const RESEND_ENDPOINT =
+          document.body.getAttribute("data-resend-endpoint") ||
+          "/api/Auth/ResendEmailConfirmation"; // adjust if your API differs
+        const btn = document.getElementById("resendBtn");
+        const status = document.getElementById("statusLine");
+        let timer = null;
+
+        function setStatus(text, kind = "info") {
+          status.textContent = text;
+          status.className = `mt-3 text-center text-sm ${
+            kind === "ok"
+              ? "text-green-600"
+              : kind === "err"
+              ? "text-red-600"
+              : "text-gray-600"
+          }`;
+          status.classList.remove("hidden");
+        }
+
+        function startCooldown(seconds = 30) {
+          let remain = seconds;
+          btn.disabled = true;
+          const base =
+            tr("checkEmail.resendCooldown", { s: remain }) ||
+            `Resend in ${remain}s`;
+          btn.querySelector("span").textContent = base;
+          timer = setInterval(() => {
+            remain -= 1;
+            if (remain <= 0) {
+              clearInterval(timer);
+              btn.disabled = false;
+              btn.querySelector("span").textContent =
+                tr("checkEmail.resend") || "Resend verification email";
+            } else {
+              btn.querySelector("span").textContent =
+                tr("checkEmail.resendCooldown", { s: remain }) ||
+                `Resend in ${remain}s`;
+            }
+          }, 1000);
+        }
+
+        btn.addEventListener("click", async () => {
+          if (btn.disabled) return;
+          const email = document
+            .getElementById("emailTarget")
+            .textContent.trim();
+          try {
+            btn.disabled = true;
+            btn.querySelector("span").textContent =
+              tr("checkEmail.sending") || "Sending…";
+            setStatus("");
+
+            const payload = email ? { email } : {};
+            const res = await fetch(RESEND_ENDPOINT, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            let data = {};
+            try {
+              data = await res.json();
+            } catch {}
+
+            if (res.ok && (data.succeeded ?? true)) {
+              showToast(
+                tr("checkEmail.toast.sent") || "Verification email sent",
+                "success"
+              );
+              setStatus(
+                tr("checkEmail.inline.sent") || "We’ve sent another email.",
+                "ok"
+              );
+              startCooldown(30);
+            } else {
+              const msg =
+                (data && (data.errors?.join(", ") || data.message)) ||
+                tr("checkEmail.error.generic") ||
+                "Something went wrong.";
+              showToast(msg, "error");
+              setStatus(msg, "err");
+              btn.disabled = false;
+              btn.querySelector("span").textContent =
+                tr("checkEmail.resend") || "Resend verification email";
+            }
+          } catch (e) {
+            showToast(
+              tr("checkEmail.error.network") || "Network error. Try again.",
+              "error"
+            );
+            setStatus(
+              tr("checkEmail.error.network") || "Network error.",
+              "err"
+            );
+            btn.disabled = false;
+            btn.querySelector("span").textContent =
+              tr("checkEmail.resend") || "Resend verification email";
+          }
+        });
+      })();
+
+      // Footer year + i18n title sync
       (function () {
+        const y = new Date().getFullYear();
+        const copyYear = document.getElementById("copyYear");
+        if (copyYear) copyYear.textContent = `© ${y} `;
+
         function setPageTitle() {
           if (typeof window.t === "function") {
             document.title = window.t("checkEmail.pageTitle") || document.title;
