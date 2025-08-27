@@ -118,10 +118,6 @@
           >
             We’ve sent a link to verify your account.
           </p>
-          <p class="mt-1 text-center text-gray-500 text-sm">
-            <span data-i18n="checkEmail.to">Sent to</span>
-            <strong id="emailTarget" class="break-all">—</strong>
-          </p>
 
           <!-- Tips -->
           <div class="mt-6 bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
@@ -244,9 +240,6 @@
           localStorage.getItem("signupEmail") ||
           localStorage.getItem("lastLoginEmail");
         const email = (fromQuery || fromStorage || "").trim();
-        const span = document.getElementById("emailTarget");
-        span.textContent =
-          email || tr("checkEmail.unknownEmail") || "your email";
 
         // Smart "Open inbox" button
         const domain = (email.split("@")[1] || "").toLowerCase();
