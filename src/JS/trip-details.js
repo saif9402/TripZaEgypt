@@ -54,8 +54,6 @@
     const t0 = performance.now();
 
     while (performance.now() - t0 < maxMs) {
-      // includes.js sets window.currentUser on success, and also explicitly
-      // clears localStorage token on logout.
       if (window.currentUser !== undefined) return; // logged in or logged out; header finished
 
       // token changed? then header likely ran
@@ -1205,6 +1203,7 @@
     }
   };
 
+  // replace setupAvailability in ../JS/trip-details.js
   const setupAvailability = (tripDates = []) => {
     const dateInput = $("tripDateInput");
     const timeSelect = $("tripTimeSelect");
@@ -1212,54 +1211,74 @@
 
     availability = buildAvailability(tripDates);
 
-    if (!availability.days.length) {
-      try {
-        datePickerInstance?.destroy?.();
-      } catch {}
-      dateInput.value = "";
-      dateInput.placeholder = tr("trip.dates.none");
-      dateInput.disabled = true;
-      timeSelect.innerHTML = `<option value="">${tr(
-        "trip.times.none"
-      )}</option>`;
-      timeSelect.disabled = true;
-      return;
-    }
-
-    if (window.flatpickr) {
-      try {
-        datePickerInstance?.destroy?.();
-      } catch {}
-      datePickerInstance = flatpickr(dateInput, {
-        dateFormat: "Y-m-d",
-        minDate: availability.days[0],
-        enable: availability.days,
-        defaultDate: availability.days[0],
-        disableMobile: true,
-        onChange: (selectedDates) => {
-          const d = selectedDates && selectedDates[0];
-          if (d) syncTimeOptions(fmtDateKey(d));
-        },
-      });
-
-      syncTimeOptions(availability.days[0]);
-    } else {
+    // ensure FP exists (fallback to native if not)
+    if (!window.flatpickr) {
+      // Native fallback (still interactive)
       dateInput.type = "date";
-      dateInput.min = availability.days[0];
-      dateInput.value = availability.days[0];
-      dateInput.disabled = false;
-
-      dateInput.addEventListener("change", () => {
+      dateInput.disabled = false; // <— don't disable; user can still click
+      if (availability.days.length) {
+        dateInput.min = availability.days[0];
+        dateInput.value = availability.days[0];
+        syncTimeOptions(availability.days[0]);
+      } else {
+        dateInput.removeAttribute("min");
+        dateInput.value = "";
+        dateInput.placeholder = tr("trip.dates.none");
+        timeSelect.innerHTML = `<option value="">${tr(
+          "trip.times.none"
+        )}</option>`;
+        timeSelect.disabled = true;
+      }
+      // Keep constraints: if user picks a day not in availability, snap back
+      dateInput.onchange = () => {
         const val = dateInput.value;
-        if (!availability.days.includes(val)) {
+        if (!availability.days.includes(val) && availability.days.length) {
           dateInput.value = availability.days[0];
           syncTimeOptions(availability.days[0]);
         } else {
           syncTimeOptions(val);
         }
-      });
+      };
+      return;
+    }
 
-      syncTimeOptions(availability.days[0]);
+    // JS picker path
+    // 1) init once
+    if (!datePickerInstance) {
+      datePickerInstance = flatpickr(dateInput, {
+        dateFormat: "Y-m-d",
+        clickOpens: true,
+        disableMobile: true,
+        // default no-op enable (everything disabled) until we set days below
+        enable: [() => false],
+        onChange: (selectedDates) => {
+          const d = selectedDates?.[0];
+          if (d) syncTimeOptions(fmtDateKey(d));
+        },
+      });
+    }
+
+    // 2) keep input clickable
+    dateInput.disabled = false;
+
+    // 3) update config based on current availability
+    if (availability.days.length) {
+      const first = availability.days[0];
+      datePickerInstance.set("enable", availability.days.slice());
+      datePickerInstance.set("minDate", first);
+      datePickerInstance.setDate(first, true); // triggers onChange -> fills times
+      timeSelect.disabled = false;
+    } else {
+      // nothing available: keep calendar opening but block selection
+      datePickerInstance.clear();
+      datePickerInstance.set("enable", [() => false]); // disable all days
+      datePickerInstance.set("minDate", null);
+      dateInput.placeholder = tr("trip.dates.none");
+      // reflect in time select
+      timeSelect.innerHTML = `<option value="">${tr(
+        "trip.times.none"
+      )}</option>`;
+      timeSelect.disabled = true;
     }
   };
 
