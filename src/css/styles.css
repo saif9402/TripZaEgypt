@@ -324,3 +324,9 @@
   position: relative;
   z-index: 20;
 }
+
+/* put this AFTER your other styles */
+.blob {
+  width: auto !important;
+  height: auto !important;
+}

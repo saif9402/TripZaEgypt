@@ -276,7 +276,7 @@ async function initTopRatedSlider(noCache = false) {
   const slideHTML = (t) => {
     const clipId = uid();
     return `
-<div class="blob relative aspect-square w-[72vw] max-w-[340px] md:w-[400px]">
+<div class="blob relative aspect-square !w-[85vw] max-w-none md:!w-[400px]">
       <svg viewBox="0 0 200 200" class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="${clipId}" clipPathUnits="userSpaceOnUse">
