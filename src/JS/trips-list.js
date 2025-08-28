@@ -1,3 +1,5 @@
+/* trips-list.js — Trips list with pagination + Sort + Search + Date & Duration filters + i18n */
+
 (() => {
   ("use strict");
   // i18n helper (reuses your existing getLang)
@@ -535,14 +537,13 @@
   // ----------- Row template -----------
   const rowHTML = (t) => `
   <a href="/pages/trip-details.html?id=${t.id}"
-     class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden h-full">
-    <div class="flex flex-col sm:flex-row min-h-[176px]"> <!-- = h-44 -->
+     class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden">
+    <div class="flex flex-col sm:flex-row">
       <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}"
-           class="w-full sm:w-56 h-44 object-cover flex-none"  <!-- fixed image box -->
-           loading="lazy" decoding="async"
+           class="w-full sm:w-56 h-44 object-cover" loading="lazy" decoding="async"
            onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'">
 
-      <div class="flex-1 p-4 overflow-hidden">
+      <div class="flex-1 p-4">
         <div class="flex items-center gap-2 text-xs">
           <span class="px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-semibold">
             ${esc(t.category || tr("trips.category.default"))}
@@ -565,7 +566,7 @@
           }
         </div>
 
-        <h3 class="mt-2 text-lg font-semibold line-clamp-2">${esc(t.name)}</h3>
+        <h3 class="mt-2 text-lg font-semibold truncate">${esc(t.name)}</h3>
 
         <div class="mt-1 flex items-center gap-2 text-sm">
           <div class="flex items-center gap-1" aria-label="${tr(
@@ -582,7 +583,7 @@
   )}</span>
         </div>
 
-        <div class="mt-2 text-sm text-gray-700 line-clamp-1">
+        <div class="mt-2 text-sm text-gray-700">
           ${availabilityHTML(t)}
         </div>
 
@@ -596,7 +597,7 @@
         </div>
       </div>
 
-      <div class="px-4 pb-4 sm:p-4 sm:w-56 sm:self-stretch flex sm:flex-col justify-between">
+      <div class="px-4 pb-4 sm:p-4 sm:w-56 flex sm:flex-col items-end justify-between">
         <div class="text-right">
           <div class="text-xl font-bold">
             ${t.price != null ? formatPrice(t.price) : ""}
