@@ -632,6 +632,12 @@
   .min-h-screen {
     min-height: 100vh;
   }
+  .\!w-\[40vw\] {
+    width: 40vw !important;
+  }
+  .\!w-\[60vw\] {
+    width: 60vw !important;
+  }
   .\!w-\[85vw\] {
     width: 85vw !important;
   }
