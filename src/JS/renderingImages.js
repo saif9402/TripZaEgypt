@@ -1,6 +1,9 @@
 // JS/renderingImages.js
 (() => {
-  const imagePaths = [
+  const API_URL = "/api/SliderImages/GetSliderImages";
+
+  // Fallbacks if API returns nothing or fails
+  const FALLBACK_IMAGES = [
     "img/Home.png",
     "img/Home2.jpg",
     "img/Home3.jpg",
@@ -15,6 +18,9 @@
     "img/Home12.jpg",
     "img/Home13.jpg",
   ];
+
+  // Will be filled from API (or fallback)
+  const imagePaths = [];
 
   const t = (k, params) =>
     typeof window.t === "function" ? window.t(k, params) : k;
@@ -122,21 +128,16 @@
       nextFg.src = src;
       nextFg.alt = t("gallery.imageAlt", { n: currentIndex + 1 });
 
-      // One frame to ensure styles apply
       requestAnimationFrame(() => {
-        // fade out current
         curBg.style.opacity = "0";
         curFg.style.opacity = "0";
-        if (!prefersReduced) {
+        if (!prefersReduced)
           curFg.style.transform = "translateY(-4px) scale(0.995)";
-        }
 
-        // fade/animate in incoming
         nextBg.style.opacity = "1";
         nextFg.style.opacity = "1";
 
         if (!prefersReduced) {
-          // Nudge one more frame so transform transition always triggers
           requestAnimationFrame(() => {
             nextBg.style.transform = pan.end;
             nextFg.style.transform = "translateY(0) scale(1)";
@@ -159,32 +160,68 @@
 
   function startAuto() {
     if (intervalId) clearInterval(intervalId);
-    intervalId = setInterval(next, 5000); // autoplay interval
+    intervalId = setInterval(next, 5000);
   }
   function stopAuto() {
     if (intervalId) clearInterval(intervalId);
     intervalId = null;
   }
 
-  // Build dots
-  dotsContainer.innerHTML = "";
-  imagePaths.forEach((_, i) => {
-    const dot = document.createElement("button");
-    dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
-    dot.style.width = "10px";
-    dot.style.height = "10px";
-    dot.style.borderRadius = "9999px";
-    dot.style.background = "rgba(255,255,255,.4)";
-    dot.style.transition = "transform 200ms ease, background 200ms ease";
-    dot.addEventListener("click", () => {
-      stopAuto();
-      show(i);
-      startAuto();
-    });
-    dotsContainer.appendChild(dot);
-  });
+  // Helpers
+  const toAbsoluteURL = (u) => {
+    try {
+      return new URL(u, window.location.origin).href;
+    } catch {
+      return u;
+    }
+  };
 
-  // Controls + hover pause
+  async function loadImageURLsFromAPI() {
+    try {
+      const res = await fetch(API_URL, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        // credentials: "include", // uncomment if your API needs cookies
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      if (!json?.succeeded) throw new Error(json?.message || "Request failed");
+
+      const urls = (Array.isArray(json.data) ? json.data : [])
+        .map((item) => (item?.imageURL ?? item?.imageUrl ?? "").trim())
+        .filter(Boolean)
+        .map(toAbsoluteURL);
+
+      if (!urls.length) throw new Error("List of images is empty");
+
+      imagePaths.push(...urls);
+    } catch (err) {
+      console.error("Slider API error, using fallback images:", err);
+      imagePaths.push(...FALLBACK_IMAGES);
+    }
+  }
+
+  function buildDots() {
+    dotsContainer.innerHTML = "";
+    imagePaths.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+      dot.style.width = "10px";
+      dot.style.height = "10px";
+      dot.style.borderRadius = "9999px";
+      dot.style.background = "rgba(255,255,255,.4)";
+      dot.style.transition = "transform 200ms ease, background 200ms ease";
+      dot.addEventListener("click", () => {
+        stopAuto();
+        show(i);
+        startAuto();
+      });
+      dotsContainer.appendChild(dot);
+    });
+  }
+
+  // Controls + keyboard
   nextBtn?.addEventListener("click", () => {
     stopAuto();
     next();
@@ -196,7 +233,6 @@
     startAuto();
   });
 
-  // Keyboard nav (← →)
   slider.tabIndex = 0;
   slider.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") {
@@ -211,7 +247,12 @@
     }
   });
 
-  // Init
-  show(0);
-  startAuto();
+  // Init (fetch -> dots -> first slide -> autoplay)
+  (async () => {
+    await loadImageURLsFromAPI();
+    if (!imagePaths.length) return; // nothing to show
+    buildDots();
+    show(0);
+    startAuto();
+  })();
 })();

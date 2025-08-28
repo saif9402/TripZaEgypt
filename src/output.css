@@ -704,6 +704,9 @@
   .w-\[65vw\] {
     width: 65vw;
   }
+  .w-\[72vw\] {
+    width: 72vw;
+  }
   .w-\[90vw\] {
     width: 90vw;
   }
@@ -712,6 +715,9 @@
   }
   .w-\[130vw\] {
     width: 130vw;
+  }
+  .w-\[clamp\(220px\,65vw\,320px\)\] {
+    width: clamp(220px, 65vw, 320px);
   }
   .w-\[min\(100\%-1\.5rem\,64rem\)\] {
     width: min(100% - 1.5rem, 64rem);
@@ -733,6 +739,9 @@
   }
   .max-w-\[300px\] {
     max-width: 300px;
+  }
+  .max-w-\[340px\] {
+    max-width: 340px;
   }
   .max-w-\[420px\] {
     max-width: 420px;
