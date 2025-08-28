@@ -276,7 +276,7 @@ async function initTopRatedSlider(noCache = false) {
   const slideHTML = (t) => {
     const clipId = uid();
     return `
-<div class="blob relative aspect-square !w-[40vw] max-w-none md:!w-[400px]">
+<div class="blob relative aspect-square !w-[50vw] max-w-none md:!w-[400px]">
       <svg viewBox="0 0 200 200" class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="${clipId}" clipPathUnits="userSpaceOnUse">
@@ -289,7 +289,7 @@ async function initTopRatedSlider(noCache = false) {
       </svg>
     </div>
 
-    <div class="trending-text flex-1 space-y-3 md:space-y-4 trending-wrap">
+    <div class="trending-text flex-1 space-y-1 md:space-y-2 trending-wrap">
       <span class="trending-pill bg-cyan-200 text-cyan-900 px-4 py-1 rounded-full text-sm font-bold inline-block">
         ${i18n.trending}
       </span>

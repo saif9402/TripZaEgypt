@@ -635,6 +635,9 @@
   .\!w-\[40vw\] {
     width: 40vw !important;
   }
+  .\!w-\[50vw\] {
+    width: 50vw !important;
+  }
   .\!w-\[60vw\] {
     width: 60vw !important;
   }
@@ -2535,6 +2538,15 @@
   .md\:gap-4 {
     @media (width >= 48rem) {
       gap: calc(var(--spacing) * 4);
+    }
+  }
+  .md\:space-y-2 {
+    @media (width >= 48rem) {
+      :where(& > :not(:last-child)) {
+        --tw-space-y-reverse: 0;
+        margin-block-start: calc(calc(var(--spacing) * 2) * var(--tw-space-y-reverse));
+        margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
+      }
     }
   }
   .md\:space-y-4 {
