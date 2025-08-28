@@ -686,6 +686,9 @@
   .w-56 {
     width: calc(var(--spacing) * 56);
   }
+  .w-\[65vw\] {
+    width: 65vw;
+  }
   .w-\[90vw\] {
     width: 90vw;
   }
@@ -709,6 +712,9 @@
   }
   .max-w-\[92vw\] {
     max-width: 92vw;
+  }
+  .max-w-\[300px\] {
+    max-width: 300px;
   }
   .max-w-\[420px\] {
     max-width: 420px;
