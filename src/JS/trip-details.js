@@ -1,4 +1,3 @@
-// ../JS/trip-details.js
 (function () {
   const $ = (id) => document.getElementById(id);
   // i18n helper (works with your translation.js)
@@ -9,7 +8,6 @@
       ? window.t(k)
       : window.translations?.[getLang()]?.[k] || k;
 
-  // ---------- Image fallbacks (no external DNS needed) ----------
   const FALLBACK_DATA_IMG =
     "data:image/svg+xml;utf8," +
     encodeURIComponent(
@@ -42,7 +40,6 @@
     });
   }
 
-  // --- Small, safe wait for includes.js to finish auth ---
   const _sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   async function _waitForHeaderAuth({ maxMs = 1200, stepMs = 60 } = {}) {
@@ -98,8 +95,11 @@
     return "★".repeat(full + half) + "☆".repeat(5 - full - half);
   };
 
-  // ---- Timezone helpers (force Africa/Cairo everywhere) ----
+  // Always display/compute in Cairo
   const TZ = "Africa/Cairo";
+
+  // Your API returns local wall-clock times (no Z/offset)
+  const API_TIMES_ARE_UTC = false; // <-- important
 
   function ymdInTZ(date) {
     const parts = new Intl.DateTimeFormat("en-CA", {
@@ -109,7 +109,50 @@
       day: "2-digit",
     }).formatToParts(date);
     const get = (t) => parts.find((p) => p.type === t)?.value || "";
-    return `${get("year")}-${get("month")}-${get("day")}`; // YYYY-MM-DD
+    return `${get("year")}-${get("month")}-${get("day")}`;
+  }
+
+  // Interpret "YYYY-MM-DDTHH:mm:ss" as *Cairo local* and convert to a real instant
+  function parseISOAsTZ(iso, timeZone) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(
+      iso
+    );
+    if (!m) return new Date(NaN);
+    const [, y, mo, d, h, mi, se] = m.map(Number);
+
+    // Start with a UTC guess
+    let t = Date.UTC(y, mo - 1, d, h, mi, se || 0);
+
+    // What does that instant look like *in the zone*?
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date(t));
+
+    const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+    const desiredMins = h * 60 + mi;
+    const gotMins = Number(map.hour) * 60 + Number(map.minute);
+    const dayDelta =
+      (Date.UTC(y, mo - 1, d) -
+        Date.UTC(Number(map.year), Number(map.month) - 1, Number(map.day))) /
+      86400000;
+
+    // Adjust minutes (+ day shift if DST boundary)
+    t += (desiredMins - gotMins + dayDelta * 1440) * 60000;
+    return new Date(t);
+  }
+
+  // Unified parser for API trip dates
+  function parseTripDate(s) {
+    if (!s) return new Date(NaN);
+    if (/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) return new Date(s); // already absolute
+    return API_TIMES_ARE_UTC ? new Date(s + "Z") : parseISOAsTZ(s, TZ);
   }
 
   const formatPrice = (value, currency = "EUR") => {
@@ -1168,7 +1211,7 @@
     const days = [];
 
     const slots = dateStrings
-      .map((s) => ({ raw: s, d: new Date(s) })) // keep as instants
+      .map((s) => ({ raw: s, d: parseTripDate(s) }))
       .filter(({ d }) => !isNaN(d) && d >= now) // drop past instants
       .sort((a, b) => a.d - b.d);
 
@@ -1834,7 +1877,7 @@
     bmTripName && (bmTripName.textContent = currentTrip?.name || "Trip");
     bmDate && (bmDate.textContent = dateVal);
 
-    const t = new Date(timeISO);
+    const t = parseTripDate(timeISO);
     const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
     bmTime &&
       (bmTime.textContent = isNaN(t)
@@ -1891,7 +1934,7 @@
 
       closeBookingModal();
 
-      const timeTxt = new Date(payload.timeISO).toLocaleTimeString([], {
+      const timeTxt = parseTripDate(payload.timeISO).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         timeZone: TZ,
