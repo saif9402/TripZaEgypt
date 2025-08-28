@@ -98,6 +98,20 @@
     return "★".repeat(full + half) + "☆".repeat(5 - full - half);
   };
 
+  // ---- Timezone helpers (force Africa/Cairo everywhere) ----
+  const TZ = "Africa/Cairo";
+
+  function ymdInTZ(date) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(date);
+    const get = (t) => parts.find((p) => p.type === t)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")}`; // YYYY-MM-DD
+  }
+
   const formatPrice = (value, currency = "EUR") => {
     const lang = localStorage.getItem("lang") || "en";
     const locale = lang === "deu" ? "de-DE" : "en-EG";
@@ -1137,35 +1151,29 @@
   }
 
   // ---------------- Availability (dates + times) ----------------
-  const fmtDateKey = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${dd}`;
-  };
+  const fmtDateKey = (d) => ymdInTZ(d);
 
   const timeLabel = (d) => {
     const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
-    return d.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString(lang, {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: TZ,
+    });
   };
 
   const buildAvailability = (dateStrings = []) => {
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
+    const now = new Date(); // current instant
     const timesByDay = {};
     const days = [];
 
     const slots = dateStrings
-      .map((s) => ({ raw: s, d: new Date(s) }))
-      .filter(({ d }) => !isNaN(d) && d >= todayStart)
+      .map((s) => ({ raw: s, d: new Date(s) })) // keep as instants
+      .filter(({ d }) => !isNaN(d) && d >= now) // drop past instants
       .sort((a, b) => a.d - b.d);
 
     for (const { raw, d } of slots) {
-      const key = fmtDateKey(d);
+      const key = fmtDateKey(d); // <-- Cairo day bucket
       if (!timesByDay[key]) {
         timesByDay[key] = [];
         days.push(key);
@@ -1173,10 +1181,7 @@
       timesByDay[key].push({ label: timeLabel(d), value: raw, date: d });
     }
 
-    for (const k of days) {
-      timesByDay[k].sort((a, b) => a.date - b.date);
-    }
-
+    days.forEach((k) => timesByDay[k].sort((a, b) => a.date - b.date));
     return { days, timesByDay };
   };
 
@@ -1834,7 +1839,11 @@
     bmTime &&
       (bmTime.textContent = isNaN(t)
         ? ""
-        : t.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }));
+        : t.toLocaleTimeString(lang, {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: TZ,
+          }));
 
     bmAdults && (bmAdults.textContent = String(adultCount));
     bmChildren && (bmChildren.textContent = String(childCount));
@@ -1882,11 +1891,12 @@
 
       closeBookingModal();
 
-      const timeTxt =
-        new Date(payload.timeISO).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }) || "";
+      const timeTxt = new Date(payload.timeISO).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: TZ,
+      });
+
       toast(
         "success",
         tr("trip.booking.successTitle"),
