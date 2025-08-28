@@ -539,9 +539,16 @@
   <a href="/pages/trip-details.html?id=${t.id}"
      class="block bg-white rounded-lg shadow hover:scale-105 hover:shadow-lg transition overflow-hidden">
     <div class="flex flex-col sm:flex-row">
-      <img src="${esc(safeImg(t.mainImageURL))}" alt="${esc(t.name)}"
-           class="w-full sm:w-56 h-44 object-cover" loading="lazy" decoding="async"
-           onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'">
+      <div class="shrink-0 w-full sm:w-56 h-44 overflow-hidden bg-gray-100">
+        <img
+          src="${esc(safeImg(t.mainImageURL))}"
+          alt="${esc(t.name)}"
+          class="w-full h-full object-cover object-center"
+          loading="lazy"
+          decoding="async"
+          onerror="this.onerror=null;this.src='${FALLBACK_DATA_IMG}'"
+        />
+      </div>
 
       <div class="flex-1 p-4">
         <div class="flex items-center gap-2 text-xs">
