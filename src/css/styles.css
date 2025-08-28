@@ -315,3 +315,12 @@
     font-size: 1rem;
   }
 }
+
+/* ensure the featured link is clickable above bg layers */
+#featuredSection {
+  position: relative;
+}
+#featuredLink {
+  position: relative;
+  z-index: 20;
+}
