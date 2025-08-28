@@ -98,9 +98,6 @@
   // Always display/compute in Cairo
   const TZ = "Africa/Cairo";
 
-  // Your API returns local wall-clock times (no Z/offset)
-  const API_TIMES_ARE_UTC = false; // <-- important
-
   function ymdInTZ(date) {
     const parts = new Intl.DateTimeFormat("en-CA", {
       timeZone: TZ,
@@ -112,47 +109,31 @@
     return `${get("year")}-${get("month")}-${get("day")}`;
   }
 
-  // Interpret "YYYY-MM-DDTHH:mm:ss" as *Cairo local* and convert to a real instant
-  function parseISOAsTZ(iso, timeZone) {
-    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(
-      iso
-    );
-    if (!m) return new Date(NaN);
-    const [, y, mo, d, h, mi, se] = m.map(Number);
-
-    // Start with a UTC guess
-    let t = Date.UTC(y, mo - 1, d, h, mi, se || 0);
-
-    // What does that instant look like *in the zone*?
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    }).formatToParts(new Date(t));
-
-    const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-    const desiredMins = h * 60 + mi;
-    const gotMins = Number(map.hour) * 60 + Number(map.minute);
-    const dayDelta =
-      (Date.UTC(y, mo - 1, d) -
-        Date.UTC(Number(map.year), Number(map.month) - 1, Number(map.day))) /
-      86400000;
-
-    // Adjust minutes (+ day shift if DST boundary)
-    t += (desiredMins - gotMins + dayDelta * 1440) * 60000;
-    return new Date(t);
+  // ---- Localize to Africa/Cairo using API UTC (Z) inputs ----
+  function parseISOGuessTZ(iso) {
+    if (!iso) return null;
+    const hasTZ = /[zZ]|[+\-]\d{2}:\d{2}$/.test(iso);
+    const fixed = hasTZ ? iso : iso + "Z";
+    const d = new Date(fixed);
+    return isNaN(d) ? null : d;
   }
 
-  // Unified parser for API trip dates
-  function parseTripDate(s) {
-    if (!s) return new Date(NaN);
-    if (/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) return new Date(s); // already absolute
-    return API_TIMES_ARE_UTC ? new Date(s + "Z") : parseISOAsTZ(s, TZ);
+  function formatDateLocal(iso) {
+    const d = parseISOGuessTZ(iso);
+    if (!d) return "-";
+    try {
+      return new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Africa/Cairo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      }).format(d);
+    } catch {
+      return d.toLocaleString("en-GB");
+    }
   }
 
   const formatPrice = (value, currency = "EUR") => {
@@ -1211,7 +1192,7 @@
     const days = [];
 
     const slots = dateStrings
-      .map((s) => ({ raw: s, d: parseTripDate(s) }))
+      .map((s) => ({ raw: s, d: parseISOGuessTZ(s) }))
       .filter(({ d }) => !isNaN(d) && d >= now) // drop past instants
       .sort((a, b) => a.d - b.d);
 
@@ -1877,16 +1858,17 @@
     bmTripName && (bmTripName.textContent = currentTrip?.name || "Trip");
     bmDate && (bmDate.textContent = dateVal);
 
-    const t = parseTripDate(timeISO);
+    const t = parseISOGuessTZ(timeISO);
     const lang = localStorage.getItem("lang") === "deu" ? "de-DE" : "en-EG";
     bmTime &&
-      (bmTime.textContent = isNaN(t)
-        ? ""
-        : t.toLocaleTimeString(lang, {
+      (bmTime.textContent = t
+        ? new Intl.DateTimeFormat(lang, {
+            timeZone: TZ,
             hour: "2-digit",
             minute: "2-digit",
-            timeZone: TZ,
-          }));
+            hour12: true,
+          }).format(t)
+        : "");
 
     bmAdults && (bmAdults.textContent = String(adultCount));
     bmChildren && (bmChildren.textContent = String(childCount));
@@ -1934,11 +1916,12 @@
 
       closeBookingModal();
 
-      const timeTxt = parseTripDate(payload.timeISO).toLocaleTimeString([], {
+      const timeTxt = new Intl.DateTimeFormat(undefined, {
+        timeZone: TZ,
         hour: "2-digit",
         minute: "2-digit",
-        timeZone: TZ,
-      });
+        hour12: true,
+      }).format(parseISOGuessTZ(payload.timeISO));
 
       toast(
         "success",
