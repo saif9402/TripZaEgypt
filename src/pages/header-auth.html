@@ -2,8 +2,18 @@
   x-data="{ open: false }"
   class="fixed top-0 left-0 w-full z-30 bg-white/80 supports-[backdrop-filter]:bg-white/70 backdrop-blur-md text-gray-900 shadow-sm border-b border-gray-200 px-4 py-1 flex justify-between items-center"
 >
-  <div class="flex items-center justify-start h-9 md:h-12">
-    <a href="/index.html"></a>
+  <div class="relative flex items-center justify-start h-9 md:h-12">
+    <!-- invisible full-area link -->
+    <a
+      href="/index.html"
+      class="absolute inset-0 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      aria-label="Go to home"
+      data-i18n-aria-label="nav.home"
+    >
+      <span class="sr-only" data-i18n="nav.home">Home</span>
+    </a>
+
+    <!-- image ignores pointer events so the link underneath receives the click -->
     <img
       src="/img/Header.svg"
       class="h-50 object-contain -ml-9 flex items-start justify-start"
