@@ -1,6 +1,6 @@
 <header
   x-data="{ open: false }"
-  class="fixed top-0 left-0 w-full z-20 bg-white/60 backdrop-blur-lg text-white shadow-none border-b border-white/10 px-4 py-1 flex justify-between items-center"
+  class="fixed top-0 left-0 w-full z-20 bg-white/25 backdrop-blur-lg text-black shadow-none border-b border-white/10 px-4 py-1 flex justify-between items-center"
 >
   <div class="flex items-center justify-start h-9 md:h-12">
     <img
@@ -28,13 +28,13 @@
     <a
       data-i18n="nav.home"
       href="/index.html"
-      class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+      class="focus:outline-none px-3 py-1 rounded-full bg-black/20 hover:bg-black/30 transition"
       >Home</a
     >
     <a
       data-i18n="nav.about"
       href="/pages/about-us.html"
-      class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+      class="focus:outline-none px-3 py-1 rounded-full bg-black/20 hover:bg-black/30 transition"
       >About Us</a
     >
 
@@ -42,7 +42,7 @@
     <div x-data="{ openTrips: false }" class="relative">
       <button
         @click="openTrips = !openTrips"
-        class="focus:outline-none px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition"
+        class="focus:outline-none px-3 py-1 rounded-full bg-black/20 hover:bg-black/30 transition"
         data-i18n="nav.trips"
       >
         Our Trips
