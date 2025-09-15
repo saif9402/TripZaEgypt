@@ -15,6 +15,46 @@ const translations = {
     "slider.next": "Next image",
     "header.allTrips": "All Trips",
 
+    // …inside translations.en { … }
+    "web.title": "TripZaEgypt — Egypt Tours & Day Trips",
+
+    home: {
+      about: {
+        title: "About TripZaEgypt",
+        body: "We design Egypt tours and day trips that are easy to book and unforgettable to experience. From Red Sea adventures to culture-rich city breaks, our local team curates reliable, well-timed itineraries so you can focus on the journey—not the logistics.",
+        point1: "Licensed, local tour guides",
+        point2: "Punctual pickups & clear timing",
+        point3: "Small groups & comfortable transport",
+        point4: "Friendly support before & during your trip",
+        cta: { learn: "Learn more", browse: "Browse tours" },
+        imageAlt: "Travelers exploring Egypt with TripZaEgypt",
+      },
+      why: {
+        title: "Why Choose TripZaEgypt",
+        subtitle:
+          "Your time in Egypt should be effortless, safe, and memorable. Here’s how we make that happen.",
+        safeTitle: "Trusted & Safe",
+        safeCopy:
+          "Licensed operations, vetted partners, and clear communication from booking to drop-off.",
+        valueTitle: "Transparent Value",
+        valueCopy:
+          "Competitive pricing with no hidden fees—what you see is what you get.",
+        itineraryTitle: "Well-timed Itineraries",
+        itineraryCopy:
+          "Smart schedules that balance must-see highlights with downtime to enjoy the moment.",
+        languageTitle: "Multi-language Guides",
+        languageCopy:
+          "Friendly, knowledgeable guides who speak your language and share insider tips.",
+        easyTitle: "Easy Booking",
+        easyCopy:
+          "Book in minutes from mobile or desktop. Instant confirmation on most tours.",
+        supportTitle: "Responsive Support",
+        supportCopy:
+          "Real humans ready to help before, during, and after your trip.",
+        cta: "Plan your Egypt trip",
+      },
+    },
+
     // trending / slider labels
     "trending.mins": "min",
     "trending.available": "Available now",
@@ -524,6 +564,45 @@ const translations = {
     "slider.prev": "Vorheriges Bild",
     "slider.next": "Nächstes Bild",
     "header.allTrips": "Alle Reisen",
+
+    // …inside translations.deu { … }
+    "web.title": "TripZaEgypt — Ägypten-Touren & Tagesausflüge",
+
+    home: {
+      about: {
+        title: "Über TripZaEgypt",
+        body: "Wir entwerfen Ägypten-Touren und Tagesausflüge, die sich leicht buchen lassen und unvergesslich sind. Von Abenteuern am Roten Meer bis zu kulturreichen Städtetrips – unser lokales Team kuratiert verlässliche, gut getaktete Routen, damit Sie sich auf das Erlebnis konzentrieren können – nicht auf die Logistik.",
+        point1: "Lizenzierte, lokale Reiseleiter",
+        point2: "Pünktliche Abholung & klare Zeiten",
+        point3: "Kleine Gruppen & komfortabler Transport",
+        point4: "Freundlicher Support vor und während Ihrer Reise",
+        cta: { learn: "Mehr erfahren", browse: "Touren entdecken" },
+        imageAlt: "Reisende erkunden Ägypten mit TripZaEgypt",
+      },
+      why: {
+        title: "Warum TripZaEgypt?",
+        subtitle:
+          "Ihre Zeit in Ägypten sollte mühelos, sicher und unvergesslich sein. So machen wir das möglich.",
+        safeTitle: "Verlässlich & sicher",
+        safeCopy:
+          "Lizenzierter Betrieb, geprüfte Partner und klare Kommunikation von der Buchung bis zur Rückfahrt.",
+        valueTitle: "Transparenter Preis",
+        valueCopy:
+          "Faires Pricing ohne versteckte Gebühren – was Sie sehen, ist der Preis.",
+        itineraryTitle: "Gut getaktete Routen",
+        itineraryCopy:
+          "Durchdachte Zeitpläne, die Highlights und Erholung ausgewogen verbinden.",
+        languageTitle: "Mehrsprachige Guides",
+        languageCopy:
+          "Freundliche, kundige Guides, die Ihre Sprache sprechen und Insider-Tipps teilen.",
+        easyTitle: "Einfache Buchung",
+        easyCopy:
+          "In Minuten per Handy oder Desktop buchen. Sofortbestätigung bei den meisten Touren.",
+        supportTitle: "Schneller Support",
+        supportCopy: "Echte Menschen helfen vor, während und nach Ihrer Reise.",
+        cta: "Ihre Ägypten-Reise planen",
+      },
+    },
 
     // trending / slider labels
     "trending.mins": "Min.",

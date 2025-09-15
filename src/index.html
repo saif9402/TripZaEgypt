@@ -130,6 +130,99 @@
       class="text-center text-xs text-gray-500 mt-2 px-4"
     ></p>
 
+    <!-- About Us (Homepage) -->
+    <section id="about" class="py-16 bg-white">
+      <div
+        class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center"
+      >
+        <!-- Image / badge -->
+        <div class="relative">
+          <img
+            src="img/about-home.jpg"
+            alt="Travelers exploring Egypt with TripZaEgypt"
+            data-i18n-alt="home.about.imageAlt"
+            class="w-full aspect-[4/3] object-cover rounded-2xl shadow-lg"
+            loading="lazy"
+            width="800"
+            height="600"
+          />
+          <div
+            class="absolute -bottom-5 -right-4 bg-white/90 backdrop-blur rounded-xl shadow-md p-4 flex items-center gap-3"
+            aria-hidden="true"
+          >
+            <i class="fa-solid fa-map-location-dot text-yellow-500 text-xl"></i>
+            <p class="text-sm text-gray-700">
+              Hurghada • Luxor • Cairo • Red Sea
+            </p>
+          </div>
+        </div>
+
+        <!-- Copy -->
+        <div itemscope itemtype="https://schema.org/TravelAgency">
+          <meta itemprop="name" content="TripZaEgypt" />
+          <h2 class="text-3xl font-bold mb-3" data-i18n="home.about.title">
+            About TripZaEgypt
+          </h2>
+
+          <p
+            class="text-gray-700 mb-5 leading-relaxed"
+            data-i18n="home.about.body"
+          >
+            We design Egypt tours and day trips that are easy to book and
+            unforgettable to experience. From Red Sea adventures to culture-rich
+            city breaks, our local team curates reliable, well-timed itineraries
+            so you can focus on the journey—not the logistics.
+          </p>
+
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700">
+            <li class="flex items-start gap-3">
+              <i class="fa-solid fa-user-tie text-yellow-500 mt-1"></i>
+              <span data-i18n="home.about.point1"
+                >Licensed, local tour guides</span
+              >
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fa-solid fa-clock text-yellow-500 mt-1"></i>
+              <span data-i18n="home.about.point2"
+                >Punctual pickups & clear timing</span
+              >
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fa-solid fa-umbrella-beach text-yellow-500 mt-1"></i>
+              <span data-i18n="home.about.point3"
+                >Small groups & comfortable transport</span
+              >
+            </li>
+            <li class="flex items-start gap-3">
+              <i class="fa-solid fa-headset text-yellow-500 mt-1"></i>
+              <span data-i18n="home.about.point4"
+                >Friendly support before & during your trip</span
+              >
+            </li>
+          </ul>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              href="/pages/about.html"
+              class="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-3 rounded-xl hover:bg-black transition"
+              data-i18n="home.about.cta.learn"
+            >
+              Learn more
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <a
+              href="/pages/trips-list.html"
+              class="inline-flex items-center gap-2 bg-yellow-400 text-black font-semibold px-5 py-3 rounded-xl hover:bg-yellow-300 transition"
+              data-i18n="home.about.cta.browse"
+            >
+              Browse tours
+              <i class="fa-solid fa-compass"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Trending Trips Title Section -->
     <div class="text-center px-4 shadow-inner rounded-lg mb-2 mt-6">
       <h2
@@ -175,6 +268,137 @@
         Explore All the Trips
       </a>
     </div>
+
+    <!-- Why Choose Us -->
+    <section id="why-us" class="py-16 bg-blue-50">
+      <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center" data-i18n="home.why.title">
+          Why Choose TripZaEgypt
+        </h2>
+        <p
+          class="text-center text-gray-600 max-w-3xl mx-auto mt-3"
+          data-i18n="home.why.subtitle"
+        >
+          Your time in Egypt should be effortless, safe, and memorable. Here’s
+          how we make that happen.
+        </p>
+
+        <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Card -->
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fa-solid fa-shield-check text-yellow-500 text-2xl"></i>
+              <h3 class="text-lg font-semibold" data-i18n="home.why.safeTitle">
+                Trusted & Safe
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.safeCopy">
+              Licensed operations, vetted partners, and clear communication from
+              booking to drop-off.
+            </p>
+          </article>
+
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fa-solid fa-tags text-yellow-500 text-2xl"></i>
+              <h3 class="text-lg font-semibold" data-i18n="home.why.valueTitle">
+                Transparent Value
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.valueCopy">
+              Competitive pricing with no hidden fees—what you see is what you
+              get.
+            </p>
+          </article>
+
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fa-solid fa-route text-yellow-500 text-2xl"></i>
+              <h3
+                class="text-lg font-semibold"
+                data-i18n="home.why.itineraryTitle"
+              >
+                Well-timed Itineraries
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.itineraryCopy">
+              Smart schedules that balance must-see highlights with downtime to
+              enjoy the moment.
+            </p>
+          </article>
+
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fa-solid fa-language text-yellow-500 text-2xl"></i>
+              <h3
+                class="text-lg font-semibold"
+                data-i18n="home.why.languageTitle"
+              >
+                Multi-language Guides
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.languageCopy">
+              Friendly, knowledgeable guides who speak your language and share
+              insider tips.
+            </p>
+          </article>
+
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i
+                class="fa-solid fa-mobile-screen-button text-yellow-500 text-2xl"
+              ></i>
+              <h3 class="text-lg font-semibold" data-i18n="home.why.easyTitle">
+                Easy Booking
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.easyCopy">
+              Book in minutes from mobile or desktop. Instant confirmation on
+              most tours.
+            </p>
+          </article>
+
+          <article
+            class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fa-solid fa-headset text-yellow-500 text-2xl"></i>
+              <h3
+                class="text-lg font-semibold"
+                data-i18n="home.why.supportTitle"
+              >
+                Responsive Support
+              </h3>
+            </div>
+            <p class="text-gray-700" data-i18n="home.why.supportCopy">
+              Real humans ready to help before, during, and after your trip.
+            </p>
+          </article>
+        </div>
+
+        <div class="text-center mt-10">
+          <a
+            href="/pages/trips-list.html"
+            class="inline-flex items-center gap-2 bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl hover:bg-yellow-300 transition"
+            data-i18n="home.why.cta"
+          >
+            Plan your Egypt trip
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- Explore Popular Trips -->
     <div class="text-center px-4 mt-2">
       <h2 data-i18n="trips.sectionTitle" class="text-2xl font-bold mb-2">
@@ -243,5 +467,25 @@
         else mq.addListener(alignSearch); // older Safari
       })();
     </script>
+
+    <!-- this if for seo not now -->
+
+    <!-- <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TravelAgency",
+        "@id": "https://www.your-domain.com/#organization",
+        "name": "TripZaEgypt",
+        "url": "https://www.your-domain.com/",
+        "logo": "https://www.your-domain.com/img/Header.svg",
+        "image": "https://www.your-domain.com/img/about-home.jpg",
+        "inLanguage":["en","de"],
+        "availableLanguage":["en","de"],
+        "areaServed": ["Hurghada", "Luxor", "Cairo", "Red Sea", "Egypt"],
+        "sameAs": [],
+        "description": "Egypt tours and day trips from Hurghada, Luxor, Cairo, and the Red Sea with licensed local guides and easy booking.",
+        "brand": "TripZaEgypt"
+      }
+    </script> -->
   </body>
 </html>
