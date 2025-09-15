@@ -34,7 +34,6 @@ function _shuffleInPlace(arr) {
   }
   return arr;
 }
-
 // --- Global logout (works for desktop & mobile header) ---
 if (!window.logout) {
   window.logout = async function logout({ redirect = "/index.html" } = {}) {
@@ -620,6 +619,15 @@ async function refreshLanguageDependentContent(noCache = false) {
 }
 window.refreshLangData = refreshLanguageDependentContent;
 
+function afterIncludesLoaded() {
+  const savedLang = localStorage.getItem("lang") || "en";
+  if (typeof setLanguage === "function") setLanguage(savedLang);
+
+  refreshLanguageDependentContent(); // your existing boot
+  setupHomeSearch(); // 🔸 add/keep this line
+  if (typeof bindPageTransitions === "function") bindPageTransitions();
+}
+
 const _NO_TRANSLATION = /^\s*No Translation data\s*$/i;
 const _isMissingName = (s) => !s || _NO_TRANSLATION.test(String(s));
 
@@ -803,6 +811,14 @@ const _minsToLabel = (mins) => {
   return `${m} ${M}`;
 };
 
+const _activitiesPreview = (arr, max = 220) => {
+  const s = (arr || [])
+    .map((t) => t.replace(/^[•\-\s]+/, "").trim())
+    .filter(Boolean)
+    .join(" • ");
+  return s.length <= max ? s : s.slice(0, max).replace(/\s+\S*$/, "") + "…";
+};
+
 const _formatPrice = (value, currency = "EUR") => {
   const langCode = localStorage.getItem("lang") || "en";
   const locale = langCode === "deu" ? "de-DE" : "en-EG";
@@ -882,7 +898,7 @@ function tripCardHTML(t) {
   </a>`;
 }
 
-// ------- Main: fetch trips for a category and render (grid only; no featured) -------
+// ------- Main: fetch trips for a category and render (cards only) -------
 async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   const langCode = localStorage.getItem("lang") || "en";
   const langId = langCode === "deu" ? 1 : 2;
@@ -890,7 +906,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   const grid = document.getElementById("categoryTrips");
   if (!grid) return;
 
-  // skeletons while loading
+  // skeletons while loading (more columns now that there's no featured)
   grid.innerHTML = _skeletonCards(6);
 
   const params = new URLSearchParams({
@@ -917,8 +933,9 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
       return;
     }
 
-    // Render the first 6 trips as cards
-    const cards = trips.slice(0, 6).map(tripCardHTML).join("");
+    // Render the first N trips as cards (no featured)
+    const VISIBLE = Math.min(trips.length, 6);
+    const cards = trips.slice(0, VISIBLE).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
 
     // Ensure broken images show inline fallback
@@ -1157,7 +1174,7 @@ function setupHomeSearch() {
     if (sd) params.set("start", sd); // YYYY-MM-DD
     if (ed) params.set("end", ed); // YYYY-MM-DD
 
-    hint && (hint.textContent = ""); // clear
+    hint && (hint.textContent = ""); // clear any previous hint
 
     const url = `/pages/trips-list.html${
       params.toString() ? "?" + params : ""
