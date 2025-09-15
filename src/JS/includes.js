@@ -34,6 +34,45 @@ function _shuffleInPlace(arr) {
   }
   return arr;
 }
+
+function applyCenteredLayout(grid, count) {
+  // Clear previous layout choices
+  grid.classList.remove(
+    "md:grid-cols-1",
+    "lg:grid-cols-1",
+    "md:grid-cols-2",
+    "lg:grid-cols-2",
+    "lg:grid-cols-3",
+    "place-items-center",
+    "justify-center",
+    "[&>a]:max-w-[28rem]",
+    "[&>a]:w-full"
+  );
+
+  if (count <= 1) {
+    // Single card: one column + center the card and cap its width
+    grid.classList.add(
+      "md:grid-cols-1",
+      "lg:grid-cols-1",
+      "place-items-center",
+      "[&>a]:max-w-[28rem]",
+      "[&>a]:w-full"
+    );
+  } else if (count === 2) {
+    // Two cards: use 2 columns on lg and center items nicely
+    grid.classList.add(
+      "md:grid-cols-2",
+      "lg:grid-cols-2",
+      "place-items-center",
+      "[&>a]:max-w-[28rem]",
+      "[&>a]:w-full"
+    );
+  } else {
+    // 3+ cards: your normal grid
+    grid.classList.add("md:grid-cols-2", "lg:grid-cols-3");
+  }
+}
+
 // --- Global logout (works for desktop & mobile header) ---
 if (!window.logout) {
   window.logout = async function logout({ redirect = "/index.html" } = {}) {
@@ -935,6 +974,8 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
 
     // Render the first N trips as cards (no featured)
     const VISIBLE = Math.min(trips.length, 6);
+    applyCenteredLayout(grid, VISIBLE);
+
     const cards = trips.slice(0, VISIBLE).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
 
