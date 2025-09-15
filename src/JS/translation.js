@@ -29,28 +29,28 @@ const translations = {
     "home.about.cta.browse": "Browse tours",
     "home.about.imageAlt": "Travelers exploring Egypt with TripZaEgypt",
 
-    "why.title": "Why Choose TripZaEgypt",
-    "why.subtitle":
+    "home.why.title": "Why Choose TripZaEgypt",
+    "home.why.subtitle":
       "Your time in Egypt should be effortless, safe, and memorable. Here’s how we make that happen.",
-    "why.safeTitle": "Trusted & Safe",
-    "why.safeCopy":
+    "home.why.safeTitle": "Trusted & Safe",
+    "home.why.safeCopy":
       "Licensed operations, vetted partners, and clear communication from booking to drop-off.",
-    "why.valueTitle": "Transparent Value",
-    "why.valueCopy":
+    "home.why.valueTitle": "Transparent Value",
+    "home.why.valueCopy":
       "Competitive pricing with no hidden fees—what you see is what you get.",
-    "why.itineraryTitle": "Well-timed Itineraries",
-    "why.itineraryCopy":
+    "home.why.itineraryTitle": "Well-timed Itineraries",
+    "home.why.itineraryCopy":
       "Smart schedules that balance must-see highlights with downtime to enjoy the moment.",
-    "why.languageTitle": "Multi-language Guides",
-    "why.languageCopy":
+    "home.why.languageTitle": "Multi-language Guides",
+    "home.why.languageCopy":
       "Friendly, knowledgeable guides who speak your language and share insider tips.",
-    "why.easyTitle": "Easy Booking",
-    "why.easyCopy":
+    "home.why.easyTitle": "Easy Booking",
+    "home.why.easyCopy":
       "Book in minutes from mobile or desktop. Instant confirmation on most tours.",
-    "why.supportTitle": "Responsive Support",
-    "why.supportCopy":
+    "home.why.supportTitle": "Responsive Support",
+    "home.why.supportCopy":
       "Real humans ready to help before, during, and after your trip.",
-    "why.cta": "Plan your Egypt trip",
+    "home.why.cta": "Plan your Egypt trip",
 
     // trending / slider labels
     "trending.mins": "min",
@@ -576,29 +576,29 @@ const translations = {
     "home.about.cta.browse": "Touren entdecken",
     "home.about.imageAlt": "Reisende erkunden Ägypten mit TripZaEgypt",
 
-    "why.title": "Warum TripZaEgypt?",
-    "why.subtitle":
+    "home.why.title": "Warum TripZaEgypt?",
+    "home.why.subtitle":
       "Ihre Zeit in Ägypten sollte mühelos, sicher und unvergesslich sein. So machen wir das möglich.",
-    "why.safeTitle": "Verlässlich & sicher",
-    "why.safeCopy":
+    "home.why.safeTitle": "Verlässlich & sicher",
+    "home.why.safeCopy":
       "Lizenzierter Betrieb, geprüfte Partner und klare Kommunikation von der Buchung bis zur Rückfahrt.",
-    "why.valueTitle": "Transparenter Preis",
-    "why.valueCope":
+    "home.why.valueTitle": "Transparenter Preis",
+    "home.why.valueCope":
       "Faires Pricing ohne versteckte Gebühren – was Sie sehen, ist der Preis.",
-    "why.itineraryTitle": "Gut getaktete Routen",
+    "home.why.itineraryTitle": "Gut getaktete Routen",
 
-    "why.itineraryCopy":
+    "home.why.itineraryCopy":
       "Durchdachte Zeitpläne, die Highlights und Erholung ausgewogen verbinden.",
-    "why.languageTitle": "Mehrsprachige Guides",
-    "why.languageCopy":
+    "home.why.languageTitle": "Mehrsprachige Guides",
+    "home.why.languageCopy":
       "Freundliche, kundige Guides, die Ihre Sprache sprechen und Insider-Tipps teilen.",
-    "why.easyTitle": "Einfache Buchung",
-    "why.easyCopy":
+    "home.why.easyTitle": "Einfache Buchung",
+    "home.why.easyCopy":
       "In Minuten per Handy oder Desktop buchen. Sofortbestätigung bei den meisten Touren.",
-    "why.supportTitle": "Schneller Support",
-    "why.supportCopy":
+    "home.why.supportTitle": "Schneller Support",
+    "home.why.supportCopy":
       "Echte Menschen helfen vor, während und nach Ihrer Reise.",
-    "why.cta": "Ihre Ägypten-Reise planen",
+    "home.why.cta": "Ihre Ägypten-Reise planen",
 
     // trending / slider labels
     "trending.mins": "Min.",
