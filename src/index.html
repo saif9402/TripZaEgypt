@@ -62,7 +62,7 @@
     <!-- Modern Home Search (overlaps slider bottom) -->
     <form
       id="homeSearchForm"
-      class="relative z-30 -mt-8 sm:-mt-8 md:-mt-16 lg:-mt-16 px-4 flex justify-center"
+      class="relative z-0 md:z-30 mt-3 sm:mt-4 md:-mt-16 lg:-mt-16 px-4 flex justify-center"
     >
       <div
         class="w-full max-w-5xl rounded-2xl shadow-xl ring-1 ring-black/5 bg-white backdrop-blur flex flex-col md:flex-row items-stretch md:items-center overflow-hidden focus-within:ring-2 focus-within:ring-yellow-400 transition"
@@ -253,16 +253,26 @@
         const form = document.getElementById("homeSearchForm");
         if (!form) return;
         const card = form.firstElementChild; // inner wrapper div
+        const mq = window.matchMedia("(min-width: 768px)"); // Tailwind md breakpoint
 
-        function alignSearchToHeroBottom() {
+        function alignSearch() {
           if (!card) return;
-          const h = card.getBoundingClientRect().height;
-          form.style.marginTop = `-${Math.round(h / 2)}px`;
+
+          if (mq.matches) {
+            // Desktop/tablet: center the hero bottom through the card
+            const h = card.getBoundingClientRect().height;
+            form.style.marginTop = `-${Math.round(h / 2)}px`;
+          } else {
+            // Mobile: no auto-centering; use the normal mt-* classes
+            form.style.marginTop = "";
+          }
         }
 
-        alignSearchToHeroBottom();
-        new ResizeObserver(alignSearchToHeroBottom).observe(card);
-        window.addEventListener("resize", alignSearchToHeroBottom);
+        alignSearch();
+        new ResizeObserver(alignSearch).observe(card);
+        window.addEventListener("resize", alignSearch);
+        if (mq.addEventListener) mq.addEventListener("change", alignSearch);
+        else mq.addListener(alignSearch); // older Safari
       })();
     </script>
   </body>
