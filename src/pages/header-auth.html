@@ -204,7 +204,9 @@
     x-cloak
   >
     <!-- Mobile Logo -->
-    <div class="relative flex items-center justify-start h-9 md:h-12">
+    <div
+      class="relative inline-flex w-fit items-center justify-start h-9 md:h-12"
+    >
       <img
         src="/img/Header.svg"
         class="h-50 object-contain -ml-9 flex items-start justify-start"
@@ -212,12 +214,13 @@
         data-i18n-alt="header.logoAlt"
       />
 
-      <!-- Invisible clickable overlay to Home -->
+      <!-- Invisible clickable overlay to Home (matches logo size) -->
       <a
         href="/index.html"
         aria-label="Go to Home"
         title="Home"
-        class="absolute inset-0 opacity-0 focus:opacity-100"
+        class="absolute inset-0 opacity-0 focus:outline-none focus-visible:outline-none"
+        tabindex="-1"
       >
         <span class="sr-only">Home</span>
       </a>
