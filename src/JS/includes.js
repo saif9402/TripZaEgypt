@@ -34,6 +34,7 @@ function _shuffleInPlace(arr) {
   }
   return arr;
 }
+
 // --- Global logout (works for desktop & mobile header) ---
 if (!window.logout) {
   window.logout = async function logout({ redirect = "/index.html" } = {}) {
@@ -619,15 +620,6 @@ async function refreshLanguageDependentContent(noCache = false) {
 }
 window.refreshLangData = refreshLanguageDependentContent;
 
-function afterIncludesLoaded() {
-  const savedLang = localStorage.getItem("lang") || "en";
-  if (typeof setLanguage === "function") setLanguage(savedLang);
-
-  refreshLanguageDependentContent(); // your existing boot
-  setupHomeSearch(); // 🔸 add/keep this line
-  if (typeof bindPageTransitions === "function") bindPageTransitions();
-}
-
 const _NO_TRANSLATION = /^\s*No Translation data\s*$/i;
 const _isMissingName = (s) => !s || _NO_TRANSLATION.test(String(s));
 
@@ -811,14 +803,6 @@ const _minsToLabel = (mins) => {
   return `${m} ${M}`;
 };
 
-const _activitiesPreview = (arr, max = 220) => {
-  const s = (arr || [])
-    .map((t) => t.replace(/^[•\-\s]+/, "").trim())
-    .filter(Boolean)
-    .join(" • ");
-  return s.length <= max ? s : s.slice(0, max).replace(/\s+\S*$/, "") + "…";
-};
-
 const _formatPrice = (value, currency = "EUR") => {
   const langCode = localStorage.getItem("lang") || "en";
   const locale = langCode === "deu" ? "de-DE" : "en-EG";
@@ -855,142 +839,6 @@ const _emptyState = `
     ${_t("empty.noTripsInCategory")}
   </div>
 `;
-
-// --- Featured animation helpers (GLOBAL, used by renderFeatured + rotator) ---
-let _featuredAnim = window._featuredAnim || {
-  first: true,
-  stack: null,
-  a: null,
-  b: null,
-  active: "a",
-};
-window._featuredAnim = _featuredAnim;
-
-function _ensureFeaturedAnimStyles() {
-  if (document.getElementById("featured-anim-styles")) return;
-  const css = `
-  #featuredSection{position:relative; overflow:visible;}
-  #featuredSection .featured-bg-stack{position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
-  #featuredSection .featured-bg-layer{position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;
-    filter:brightness(1.06); opacity:0; transform:scale(1.04);
-    transition:opacity 700ms ease, transform 700ms ease; will-change:opacity,transform;}
-  #featuredSection .featured-bg-layer.is-active{opacity:1; transform:scale(1);}
-  #featuredSection .featured-gradient{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.20) 60%, rgba(0,0,0,.30) 100%);
-    pointer-events:none; z-index:1;}
-  #featuredSection .featured-content{position:relative; z-index:2;}
-
-  ._fade-swap{
-    transition:opacity 420ms cubic-bezier(.22,.61,.36,1),
-               transform 420ms cubic-bezier(.22,.61,.36,1);
-    will-change:opacity,transform;
-  }
-  ._fade-swap._out{opacity:0; transform:translateY(-6px);}
-  ._fade-swap._in{opacity:1; transform:translateY(0);}
-  
-  /* ✅ Featured tags wrap nicely on small screens */
-  #featuredTags{
-    display:flex;
-    flex-wrap:wrap;
-    gap:.5rem;
-    align-items:center;
-    max-width:100%;
-    overflow:visible;
-    white-space:normal;
-  }
-  #featuredTags > *{
-    flex:0 0 auto; /* don’t squish */
-  }
-  `;
-  const style = document.createElement("style");
-  style.id = "featured-anim-styles";
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-function _ensureFeaturedLayers() {
-  _ensureFeaturedAnimStyles();
-  const sec = document.getElementById("featuredSection");
-  if (!sec) return null;
-
-  if (!_featuredAnim.stack) {
-    const stack = document.createElement("div");
-    stack.className = "featured-bg-stack";
-    const a = document.createElement("div");
-    const b = document.createElement("div");
-    a.className = "featured-bg-layer";
-    b.className = "featured-bg-layer";
-
-    const grad = document.createElement("div");
-    grad.className = "featured-gradient";
-
-    stack.append(a, b, grad);
-    sec.prepend(stack);
-
-    // Make existing children sit above backgrounds
-    sec.querySelectorAll(":scope > *:not(.featured-bg-stack)").forEach((el) => {
-      if (!el.classList.contains("featured-content"))
-        el.classList.add("featured-content");
-    });
-
-    _featuredAnim.stack = stack;
-    _featuredAnim.a = a;
-    _featuredAnim.b = b;
-    _featuredAnim.active = "a";
-    _featuredAnim.first = true;
-  }
-  return sec;
-}
-
-function _swapFeaturedBackground(imgUrl) {
-  _ensureFeaturedLayers();
-  const { a, b } = _featuredAnim;
-  const showNext = _featuredAnim.active === "a" ? b : a;
-  const hideCur = _featuredAnim.active === "a" ? a : b;
-
-  showNext.style.backgroundImage = `url('${imgUrl}')`;
-
-  // Reset then animate
-  showNext.classList.remove("is-active");
-  void showNext.offsetWidth; // reflow
-  hideCur.classList.remove("is-active");
-  showNext.classList.add("is-active");
-
-  _featuredAnim.active = _featuredAnim.active === "a" ? "b" : "a";
-}
-
-function _swapText(el, newHTML, { asHTML = false } = {}) {
-  if (!el) return;
-
-  // First paint: no outgoing transition
-  if (_featuredAnim.first) {
-    if (asHTML) el.innerHTML = newHTML;
-    else el.textContent = newHTML;
-    el.classList.add("_fade-swap", "_in");
-    return;
-  }
-
-  el.classList.add("_fade-swap", "_out");
-
-  const doSwap = () => {
-    el.removeEventListener("transitionend", doSwap);
-    if (asHTML) el.innerHTML = newHTML;
-    else el.textContent = newHTML;
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.classList.remove("_out");
-        el.classList.add("_in");
-      });
-    });
-  };
-
-  el.addEventListener("transitionend", doSwap, { once: true });
-  // Safety fallback
-  setTimeout(() => {
-    if (el.classList.contains("_out")) doSwap();
-  }, 180);
-}
 
 // Build one trip card
 function tripCardHTML(t) {
@@ -1034,176 +882,7 @@ function tripCardHTML(t) {
   </a>`;
 }
 
-// Update the Featured Destination section with animations
-function renderFeatured(trip) {
-  if (!trip) return;
-
-  const sec = document.getElementById("featuredSection");
-  const link = document.getElementById("featuredLink");
-  const title = document.getElementById("featuredTitle");
-  const desc = document.getElementById("featuredDesc");
-  const tags = document.getElementById("featuredTags");
-  if (!sec) return;
-
-  // --- background (animated crossfade + subtle zoom) ---
-  const imgUrl = _esc(_safeImg(trip.mainImageURL));
-  _ensureFeaturedLayers();
-  if (_featuredAnim.first) {
-    // Prime both layers on first render = no flash
-    _featuredAnim.a.style.backgroundImage = `url('${imgUrl}')`;
-    _featuredAnim.a.classList.add("is-active");
-    _featuredAnim.b.style.backgroundImage = `url('${imgUrl}')`;
-  } else {
-    _swapFeaturedBackground(imgUrl);
-  }
-
-  // --- robust details URL (works on / and on /pages/) ---
-  const onPages = window.location.pathname.includes("/pages/");
-  const baseHref = onPages ? "trip-details.html" : "pages/trip-details.html";
-  const detailsURL = new URL(baseHref, window.location.href);
-  detailsURL.searchParams.set("id", String(trip.id ?? ""));
-
-  if (link) {
-    link.href = detailsURL.pathname + detailsURL.search;
-    link.dataset.featuredId = String(trip.id ?? "");
-    link.addEventListener(
-      "click",
-      (e) => {
-        if (!link.href.includes("id=")) {
-          e.preventDefault();
-          window.location.href = detailsURL.pathname + detailsURL.search;
-        }
-      },
-      { once: true }
-    );
-  }
-
-  // Make the whole section clickable
-  sec.style.cursor = "pointer";
-  sec.onclick = (ev) => {
-    const a = ev.target?.closest?.("#featuredLink");
-    if (a) return;
-    if (link?.href) window.location.href = link.href;
-  };
-
-  // --- text bits (animated swaps) ---
-  _swapText(title, trip.name || "Featured Trip");
-
-  const descText =
-    _activitiesPreview(trip.activities, 200) ||
-    "Explore this experience in Hurghada.";
-  _swapText(desc, descText);
-
-  if (tags) {
-    // Make sure the container itself wraps on mobile
-    tags.classList.add(
-      "flex",
-      "flex-wrap",
-      "gap-2",
-      "items-center",
-      "max-w-full"
-    );
-    // In case some global class forced no-wrap or hidden overflow:
-    tags.style.whiteSpace = "normal";
-    tags.style.overflow = "visible";
-
-    const pills = [];
-    if (trip.category)
-      pills.push({
-        c: "bg-blue-100 text-blue-600",
-        icon: "fa-map-marker-alt",
-        label: trip.category,
-      });
-    if (trip.isBestSeller)
-      pills.push({
-        c: "bg-yellow-100 text-yellow-700",
-        icon: "fa-bolt",
-        label: _t("featured.bestSeller"),
-      });
-    pills.push({
-      c: "bg-green-100 text-green-700",
-      icon: "fa-clock",
-      label: _minsToLabel(trip.duration),
-    });
-    pills.push({
-      c: "bg-purple-100 text-purple-600",
-      icon: "fa-star",
-      label: `${(Number(trip.rating) || 0).toFixed(1)}/5`,
-    });
-
-    // ✅ inline-flex + shrink-0 = no clipping + natural wrapping
-    const html = pills
-      .map(
-        (p) => `
-        <span class="${
-          p.c
-        } inline-flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full shrink-0">
-          <i class="fas ${p.icon} text-[10px]"></i>
-          <span>${_esc(p.label)}</span>
-        </span>`
-      )
-      .join("");
-
-    _swapText(tags, html, { asHTML: true });
-  }
-
-  _featuredAnim.first = false;
-}
-
-// --- Featured rotator ---
-let _featuredTimer = null;
-let _featuredIndex = 0;
-let _featuredIntervalMs = 8000; // change speed here
-let _featuredTrips = [];
-
-function stopFeaturedRotator() {
-  if (_featuredTimer) {
-    clearInterval(_featuredTimer);
-    _featuredTimer = null;
-  }
-}
-
-function startFeaturedRotator(trips, { intervalMs = 8000 } = {}) {
-  stopFeaturedRotator();
-  _featuredTrips = Array.isArray(trips) ? trips.slice() : [];
-  _featuredIntervalMs = intervalMs;
-
-  const sec = document.getElementById("featuredSection");
-  const link = document.getElementById("featuredLink");
-  if (!sec || !link || _featuredTrips.length <= 1) return; // nothing to rotate
-
-  _featuredIndex = 0;
-
-  const pause = () => stopFeaturedRotator();
-  const resume = () => {
-    if (!_featuredTrips.length || _featuredTrips.length <= 1) return;
-    if (_featuredTimer) return;
-    _featuredTimer = setInterval(tick, _featuredIntervalMs);
-  };
-
-  // Bind hover only once per page load
-  if (!sec.__featuredHoverBound) {
-    sec.addEventListener("mouseenter", pause);
-    sec.addEventListener("mouseleave", resume);
-    sec.__featuredHoverBound = true;
-  }
-
-  function tick() {
-    _featuredIndex = (_featuredIndex + 1) % _featuredTrips.length;
-    renderFeatured(_featuredTrips[_featuredIndex]); // animated swap
-  }
-
-  _featuredTimer = setInterval(tick, intervalMs);
-}
-
-// Optional: stop when tab hidden, resume when visible
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) stopFeaturedRotator();
-  else if (_featuredTrips.length > 1)
-    startFeaturedRotator(_featuredTrips, { intervalMs: _featuredIntervalMs });
-});
-
-// ------- Main: fetch trips for a category and render (random + rotator) -------
+// ------- Main: fetch trips for a category and render (grid only; no featured) -------
 async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   const langCode = localStorage.getItem("lang") || "en";
   const langId = langCode === "deu" ? 1 : 2;
@@ -1212,7 +891,7 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
   if (!grid) return;
 
   // skeletons while loading
-  grid.innerHTML = _skeletonCards(3);
+  grid.innerHTML = _skeletonCards(6);
 
   const params = new URLSearchParams({
     CategoryId: categoryId,
@@ -1235,20 +914,11 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
 
     if (!trips.length) {
       grid.innerHTML = _emptyState;
-      stopFeaturedRotator();
       return;
     }
 
-    // 1) Featured — pick first (already randomized)
-    renderFeatured(trips[0]);
-
-    // 🔁 Start rotating featured among the (randomized) list.
-    const rotateList = trips.slice(0, Math.min(trips.length, 10));
-    stopFeaturedRotator();
-    startFeaturedRotator(rotateList, { intervalMs: 8000 }); // 8s between swaps
-
-    // 2) Next up to 4 cards (randomized order)
-    const cards = trips.slice(1, 4).map(tripCardHTML).join("");
+    // Render the first 6 trips as cards
+    const cards = trips.slice(0, 6).map(tripCardHTML).join("");
     grid.innerHTML = cards || _emptyState;
 
     // Ensure broken images show inline fallback
@@ -1260,7 +930,6 @@ async function loadTripsByCategory(categoryId, { noCache = false } = {}) {
         ${_t("error.loadTrips")}
       </div>
     `;
-    stopFeaturedRotator();
   }
 }
 
@@ -1488,7 +1157,7 @@ function setupHomeSearch() {
     if (sd) params.set("start", sd); // YYYY-MM-DD
     if (ed) params.set("end", ed); // YYYY-MM-DD
 
-    hint && (hint.textContent = ""); // clear any previous hint
+    hint && (hint.textContent = ""); // clear
 
     const url = `/pages/trips-list.html${
       params.toString() ? "?" + params : ""

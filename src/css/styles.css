@@ -316,15 +316,6 @@
   }
 }
 
-/* ensure the featured link is clickable above bg layers */
-#featuredSection {
-  position: relative;
-}
-#featuredLink {
-  position: relative;
-  z-index: 20;
-}
-
 /* put this AFTER your other styles */
 .blob {
   width: auto !important;
