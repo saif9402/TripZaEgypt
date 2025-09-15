@@ -26,7 +26,6 @@
     typeof window.t === "function" ? window.t(k, params) : k;
 
   const slider = document.getElementById("slider");
-  const dotsContainer = document.getElementById("dots");
   const nextBtn = document.getElementById("nextBtn");
   const prevBtn = document.getElementById("prevBtn");
   if (!slider) return;
@@ -96,14 +95,6 @@
   let currentIndex = 0;
   let intervalId = null;
 
-  function updateDots() {
-    Array.from(dotsContainer.children).forEach((dot, i) => {
-      dot.style.background =
-        i === currentIndex ? "white" : "rgba(255,255,255,.4)";
-      dot.style.transform = i === currentIndex ? "scale(1)" : "scale(.9)";
-    });
-  }
-
   function show(index) {
     currentIndex = (index + imagePaths.length) % imagePaths.length;
     const src = imagePaths[currentIndex];
@@ -146,7 +137,6 @@
       });
 
       active = active === "A" ? "B" : "A";
-      updateDots();
     };
     pre.src = src;
   }
@@ -202,25 +192,6 @@
     }
   }
 
-  function buildDots() {
-    dotsContainer.innerHTML = "";
-    imagePaths.forEach((_, i) => {
-      const dot = document.createElement("button");
-      dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
-      dot.style.width = "10px";
-      dot.style.height = "10px";
-      dot.style.borderRadius = "9999px";
-      dot.style.background = "rgba(255,255,255,.4)";
-      dot.style.transition = "transform 200ms ease, background 200ms ease";
-      dot.addEventListener("click", () => {
-        stopAuto();
-        show(i);
-        startAuto();
-      });
-      dotsContainer.appendChild(dot);
-    });
-  }
-
   // Controls + keyboard
   nextBtn?.addEventListener("click", () => {
     stopAuto();
@@ -247,11 +218,10 @@
     }
   });
 
-  // Init (fetch -> dots -> first slide -> autoplay)
+  // Init (fetch  -> first slide -> autoplay)
   (async () => {
     await loadImageURLsFromAPI();
     if (!imagePaths.length) return; // nothing to show
-    buildDots();
     show(0);
     startAuto();
   })();

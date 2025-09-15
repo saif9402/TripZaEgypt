@@ -204,7 +204,7 @@
       <!-- Home -->
       <a
         href="/index.html"
-        class="group flex items-center justify-between rounded-2xl px-4 py-3 z-20 bg-gray-50/80 ring-1 ring-gray-200 hover:bg-gray-100 active:bg-gray-200/70 transition shadow-sm touch-manipulation"
+        class="group flex items-center justify-between rounded-2xl px-4 py-3 bg-gray-50/80 ring-1 ring-gray-200 hover:bg-gray-100 active:bg-gray-200/70 transition shadow-sm touch-manipulation"
       >
         <span class="flex items-center gap-3">
           <i class="fas fa-home opacity-70"></i>
@@ -248,31 +248,19 @@
         </ul>
       </div>
 
-      <!-- Profile -->
+      <!-- Sign In (accent) -->
       <a
-        href="/pages/profile.html"
-        class="group flex items-center justify-between rounded-2xl px-4 py-3 bg-gray-50/80 ring-1 ring-gray-200 hover:bg-gray-100 active:bg-gray-200/70 transition shadow-sm touch-manipulation"
+        href="/pages/sign-in.html"
+        class="group flex items-center justify-between rounded-2xl px-4 py-3 bg-yellow-50 ring-1 ring-yellow-200 text-yellow-700 hover:bg-yellow-100 active:bg-yellow-200/60 transition shadow-sm touch-manipulation"
       >
         <span class="flex items-center gap-3">
-          <i class="fas fa-user-circle opacity-70"></i>
-          <span data-i18n="nav.profile">Profile</span>
+          <i class="fas fa-sign-in-alt"></i>
+          <span data-i18n="nav.signin">Sign In</span>
         </span>
         <i
           class="fas fa-chevron-right text-sm opacity-60 group-hover:translate-x-0.5 transition-transform"
         ></i>
       </a>
-
-      <!-- Logout (destructive) -->
-      <button
-        onclick="logout()"
-        class="flex items-center justify-between rounded-2xl px-4 py-3 bg-red-50 ring-1 ring-red-200 text-red-600 hover:bg-red-100 active:bg-red-200/60 transition shadow-sm touch-manipulation text-left"
-      >
-        <span class="flex items-center gap-3">
-          <i class="fas fa-sign-out-alt"></i>
-          <span data-i18n="nav.logout">Logout</span>
-        </span>
-        <i class="fas fa-chevron-right text-sm opacity-60"></i>
-      </button>
 
       <!-- Language Switcher -->
       <div x-data="{ langOpen: false }" class="relative">
