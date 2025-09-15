@@ -2,13 +2,23 @@
   x-data="{ open: false }"
   class="fixed top-0 left-0 w-full z-20 bg-black/20 backdrop-blur-lg text-white shadow-none border-b border-white/10 px-4 py-1 flex justify-between items-center"
 >
-  <div class="flex items-center justify-start h-9 md:h-12">
+  <div class="relative flex items-center justify-start h-9 md:h-12">
     <img
       src="/img/Header.svg"
       class="h-50 object-contain -ml-9 flex items-start justify-start"
       alt="logo header"
       data-i18n-alt="header.logoAlt"
     />
+
+    <!-- Invisible clickable overlay to Home -->
+    <a
+      href="/index.html"
+      aria-label="Go to Home"
+      title="Home"
+      class="absolute inset-0 opacity-0 focus:opacity-100 focus:outline focus:outline-2 focus:outline-dashed focus:outline-white rounded"
+    >
+      <span class="sr-only">Home</span>
+    </a>
   </div>
 
   <!-- Hamburger Icon (Mobile) -->
@@ -194,13 +204,23 @@
     x-cloak
   >
     <!-- Mobile Logo -->
-    <div class="flex items-center justify-start h-9 md:h-12">
+    <div class="relative flex items-center justify-start h-9 md:h-12">
       <img
         src="/img/Header.svg"
         class="h-50 object-contain -ml-9 flex items-start justify-start"
         alt="logo header"
         data-i18n-alt="header.logoAlt"
       />
+
+      <!-- Invisible clickable overlay to Home -->
+      <a
+        href="/index.html"
+        aria-label="Go to Home"
+        title="Home"
+        class="absolute inset-0 opacity-0 focus:opacity-100 focus:outline focus:outline-2 focus:outline-dashed focus:outline-black rounded"
+      >
+        <span class="sr-only">Home</span>
+      </a>
     </div>
 
     <button
