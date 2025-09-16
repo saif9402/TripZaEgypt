@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0-beta3/css/all.min.css"
+    />
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+
+    <title>FAQ | TripZaEgypt</title>
+    <meta
+      name="description"
+      content="Answers about booking, pricing, cancellations, accessibility, pickup, and support for TripZaEgypt tours and day trips."
+    />
+  </head>
+
+  <body class="bg-white text-gray-800 font-sans">
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <!-- Hero -->
+    <section class="bg-blue-50 py-14">
+      <div class="max-w-6xl mx-auto px-4 text-center">
+        <h1 class="text-4xl font-extrabold" data-i18n="faq.hero.title">
+          Frequently Asked Questions
+        </h1>
+        <p
+          class="mt-3 text-gray-600 max-w-3xl mx-auto"
+          data-i18n="faq.hero.subtitle"
+        >
+          Quick answers about booking, payments, policies, pickup,
+          accessibility, and more.
+        </p>
+
+        <!-- Search -->
+        <div class="mt-6 max-w-2xl mx-auto">
+          <label for="faqSearch" class="sr-only" data-i18n="faq.search.label"
+            >Search FAQs</label
+          >
+          <div
+            class="flex items-center gap-3 bg-white rounded-xl shadow ring-1 ring-black/5 px-4 py-3"
+          >
+            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+            <input
+              id="faqSearch"
+              type="search"
+              class="w-full bg-transparent outline-none placeholder-gray-400"
+              placeholder="Search questions (e.g., cancellation, pickup)"
+              data-i18n-placeholder="faq.search.placeholder"
+              aria-describedby="faqSearchHint"
+            />
+          </div>
+          <p
+            id="faqSearchHint"
+            class="mt-2 text-xs text-gray-500"
+            data-i18n="faq.search.hint"
+          >
+            Results update as you type. Use keywords like “refund” or “hotel
+            pickup”.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Content -->
+    <main class="py-12">
+      <div class="max-w-6xl mx-auto px-4 space-y-10" id="faqRoot">
+        <!-- Booking & Payments -->
+        <section data-faq-section>
+          <h2
+            class="text-2xl font-bold mb-4 flex items-center gap-2"
+            data-i18n="faq.cat.booking"
+          >
+            Booking & Payments
+          </h2>
+
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-book-trip"
+            >
+              <summary
+                class="flex items-start justify-between cursor-pointer list-none"
+              >
+                <span class="font-semibold" data-i18n="faq.q.bookTrip"
+                  >How can I book a trip?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.bookTrip">
+                Select your trip, choose the date and number of guests, click
+                <strong>Book Now</strong>, fill in your details, and proceed
+                with payment.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-payment-methods"
+            >
+              <summary
+                class="flex items-start justify-between cursor-pointer list-none"
+              >
+                <span class="font-semibold" data-i18n="faq.q.paymentMethods"
+                  >What payment methods are available?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.paymentMethods">
+                cash on spot
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-confirmation"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.instantConfirm"
+                  >Will I receive instant confirmation?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.instantConfirm">
+                Yes, for trips with available seats. Some experiences require a
+                short review before confirmation.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-ticket"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.ticketDelivery"
+                  >How will I receive my ticket?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.ticketDelivery">
+                An electronic ticket will be sent to your email and WhatsApp
+                with your booking number.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-availability"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.checkAvailability"
+                  >How do I check availability?</span
+                >
+              </summary>
+              <div
+                class="mt-2 text-gray-700"
+                data-i18n="faq.a.checkAvailability"
+              >
+                The calendar on each trip page shows real-time availability.
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Pricing & Taxes -->
+        <section data-faq-section>
+          <h2 class="text-2xl font-bold mb-4" data-i18n="faq.cat.pricing">
+            Pricing & Taxes
+          </h2>
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-tax"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.taxesIncluded"
+                  >Are taxes included in the price?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.taxesIncluded">
+                Yes, all prices include Egypt’s 14% VAT unless stated otherwise.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-includes"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.included"
+                  >What is included in the trip price?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.included">
+                Transportation, meals, drinks, and entrance fees as listed in
+                the trip details.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-hidden-fees"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.hiddenFees"
+                  >Are there hidden fees?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.hiddenFees">
+                No, the final price is shown before checkout. Any extra charges
+                are clearly displayed.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-tips"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.tipsIncluded"
+                  >Are tips included?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.tipsIncluded">
+                Tips are optional unless stated in the trip details.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-local-foreign"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.priceByNationality"
+                  >Do prices differ for Egyptians and foreigners?</span
+                >
+              </summary>
+              <div
+                class="mt-2 text-gray-700"
+                data-i18n="faq.a.priceByNationality"
+              >
+                Yes, some attractions apply different ticket rates. This is
+                always mentioned in trip details.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-child-discounts"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.childDiscounts"
+                  >Are there child discounts?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.childDiscounts">
+                Yes, child pricing depends on age and trip type. Prices are
+                shown during booking.
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Changes & Cancellations -->
+        <section data-faq-section>
+          <h2 class="text-2xl font-bold mb-4" data-i18n="faq.cat.changes">
+            Changes & Cancellations
+          </h2>
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-change-date"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.changeDate"
+                  >Can I change my booking date?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.changeDate">
+                Yes, if the trip policy allows it. Changes are usually possible
+                up to 24 hours before departure.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-cancel-policy"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.cancelPolicy"
+                  >What is the cancellation policy?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.cancelPolicy">
+                Most trips offer free cancellation up to 24 hours before
+                departure. Some are non-refundable.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-weather-cancel"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.weatherCancel"
+                  >What happens if a trip is cancelled due to weather or
+                  unforeseen events?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.weatherCancel">
+                You can choose to reschedule, receive credit, or get a full
+                refund.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-no-show"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.noShow"
+                  >What if I don’t show up?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.noShow">
+                No-shows are considered used bookings and are non-refundable
+                unless stated otherwise.
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Logistics & Operations -->
+        <section data-faq-section>
+          <h2 class="text-2xl font-bold mb-4" data-i18n="faq.cat.logistics">
+            Logistics & Operations
+          </h2>
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-min-guests"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.minGuests"
+                  >Is there a minimum number of participants?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.minGuests">
+                Some trips require a minimum number of guests. We will inform
+                you and offer alternatives or a refund if the minimum is not
+                met.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-pickup"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.pickup"
+                  >Do you provide hotel pickup?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.pickup">
+                Yes, in selected areas. Extra charges may apply. Check pickup
+                points before confirming your booking.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-bus-delay"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.busDelay"
+                  >What if the bus is delayed?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.busDelay">
+                Traffic may cause slight delays. You will receive live updates
+                with the adjusted meeting point if needed.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-luggage"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.luggage"
+                  >What is the luggage policy?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.luggage">
+                One small backpack per guest is allowed. Larger luggage depends
+                on the trip type.
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Requirements & Accessibility -->
+        <section data-faq-section>
+          <h2 class="text-2xl font-bold mb-4" data-i18n="faq.cat.requirements">
+            Requirements & Accessibility
+          </h2>
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-docs"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.documents"
+                  >What documents do I need?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.documents">
+                Egyptians: National ID. <br />
+                Foreigners: Passport and booking ticket.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-bring"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.bring"
+                  >What should I bring?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.bring">
+                Valid ID, sun protection, water, and weather-appropriate
+                clothing. Follow safety instructions at all times.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-accessibility"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.accessible"
+                  >Are the trips accessible for travelers with
+                  disabilities?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.accessible">
+                Yes, some trips are wheelchair accessible. Look for the
+                accessibility icon or contact us for arrangements.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-permit"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.securityPermit"
+                  >Do I need a security permit?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.securityPermit">
+                For some destinations, yes. We will inform you and handle the
+                process once we receive your details in advance.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-languages"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.languages"
+                  >Which languages are available for guided tours?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.languages">
+                Most tours are available in English and Arabic. Other languages
+                may be available depending on the trip.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-insurance"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.insurance"
+                  >Do you offer travel insurance?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.insurance">
+                Insurance is available for selected trips. The option appears
+                during booking.
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Support & Extras -->
+        <section data-faq-section>
+          <h2 class="text-2xl font-bold mb-4" data-i18n="faq.cat.support">
+            Support & Extras
+          </h2>
+          <div class="space-y-3">
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-support-hours"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.support"
+                  >How can I contact support?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.support">
+                Live chat, phone, and email support are available daily from 9
+                AM to 11 PM (Cairo time).
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-loyalty"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.loyalty"
+                  >Do you have a loyalty program or discount codes?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.loyalty">
+                Yes, you can earn points with each booking and redeem seasonal
+                promo codes.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-group-booking"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.groupBooking"
+                  >Can I book for a company or a large group?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.groupBooking">
+                Yes, we provide tailored offers for corporate and group
+                bookings. Contact us for details.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-tax-invoice"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.taxInvoice"
+                  >Can I request a tax invoice?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.taxInvoice">
+                Yes, request it during booking or through customer support after
+                payment.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-report-issue"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.reportIssue"
+                  >How can I report an issue?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.reportIssue">
+                Submit a support ticket from your account with photos or videos.
+                We respond within 24 hours.
+              </div>
+            </details>
+
+            <details
+              class="group bg-white rounded-xl shadow p-4 ring-1 ring-black/5"
+              data-faq
+              id="faq-safety"
+            >
+              <summary class="flex items-start justify-between cursor-pointer">
+                <span class="font-semibold" data-i18n="faq.q.safety"
+                  >What safety measures do you follow?</span
+                >
+              </summary>
+              <div class="mt-2 text-gray-700" data-i18n="faq.a.safety">
+                All partners are licensed. Vehicles and safety equipment are
+                regularly inspected.
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+
+      <!-- No results message -->
+      <p
+        id="faqNoResults"
+        class="max-w-6xl mx-auto px-4 mt-8 text-center text-gray-500 hidden"
+        role="status"
+        aria-live="polite"
+        data-i18n="faq.noResults"
+      >
+        No matching questions. Try different keywords.
+      </p>
+
+      <!-- Contact CTA -->
+      <div class="max-w-6xl mx-auto px-4 mt-10">
+        <div
+          class="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        >
+          <div>
+            <h3 class="text-xl font-semibold" data-i18n="faq.cta.title">
+              Still need help?
+            </h3>
+            <p class="text-gray-700" data-i18n="faq.cta.copy">
+              Chat with us on WhatsApp to contact support—we’re happy to help.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <a
+              href="https://wa.me/201503967539?text=Hi%20TripZaEgypt!%20I%27d%20like%20help%20with%20a%20booking."
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
+              data-i18n="faq.cta.whatsapp"
+            >
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="../JS/translation.js"></script>
+    <script src="../JS/includes.js"></script>
+
+    <!-- Keep page title translated (like About page) -->
+    <script>
+      (function () {
+        function setFaqTitle() {
+          if (typeof window.t === "function") {
+            document.title = window.t("faq.pageTitle") || document.title;
+          }
+        }
+        document.addEventListener("DOMContentLoaded", setFaqTitle);
+        const prevRefresh = window.refreshLangData;
+        window.refreshLangData = async function (...args) {
+          const out = await prevRefresh?.apply(this, args);
+          setFaqTitle();
+          return out;
+        };
+      })();
+    </script>
+
+    <!-- Client-side search filter (no inline CSS, just classes) -->
+    <script>
+      (function () {
+        const input = document.getElementById("faqSearch");
+        const sections = Array.from(
+          document.querySelectorAll("[data-faq-section]")
+        );
+        const noResults = document.getElementById("faqNoResults");
+
+        function normalize(s) {
+          return (s || "").toLowerCase();
+        }
+
+        function filter() {
+          const q = normalize(input.value);
+          let anyVisible = false;
+
+          sections.forEach((section) => {
+            const items = Array.from(section.querySelectorAll("[data-faq]"));
+            let visibleInSection = 0;
+
+            items.forEach((item) => {
+              const text = normalize(item.innerText);
+              const match = !q || text.includes(q);
+              item.classList.toggle("hidden", !match);
+              if (match) visibleInSection++;
+            });
+
+            const hideSection = visibleInSection === 0;
+            section.classList.toggle("hidden", hideSection);
+            if (!hideSection) anyVisible = true;
+          });
+
+          noResults.classList.toggle("hidden", anyVisible);
+        }
+
+        input?.addEventListener("input", filter);
+      })();
+    </script>
+
+    <!-- Schema.org FAQPage (for rich results) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How can I book a trip?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Select your trip, choose the date and number of guests, click Book Now, fill in your details, and proceed with payment."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What payment methods are available?",
+            "acceptedAnswer": { "@type": "Answer", "text": "cash on spot" }
+          },
+          {
+            "@type": "Question",
+            "name": "Are taxes included in the price?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, all prices include Egypt’s 14% VAT unless stated otherwise."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is included in the trip price?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Transportation, meals, drinks, and entrance fees as listed in the trip details."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will I receive instant confirmation?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, for trips with available seats. Some experiences require a short review before confirmation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How will I receive my ticket?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "An electronic ticket will be sent to your email and WhatsApp with your booking number."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I change my booking date?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, if the trip policy allows it. Changes are usually possible up to 24 hours before departure."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the cancellation policy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most trips offer free cancellation up to 24 hours before departure. Some are non-refundable."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens if a trip is cancelled due to weather or unforeseen events?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can choose to reschedule, receive credit, or get a full refund."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a minimum number of participants?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Some trips require a minimum number of guests. We will inform you and offer alternatives or a refund if the minimum is not met."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What if I don’t show up?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No-shows are considered used bookings and are non-refundable unless stated otherwise."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are there child discounts?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, child pricing depends on age and trip type. Prices are shown during booking."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do prices differ for Egyptians and foreigners?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, some attractions apply different ticket rates. This is always mentioned in trip details."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you provide hotel pickup?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, in selected areas. Extra charges may apply. Check pickup points before confirming your booking."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What documents do I need?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Egyptians: National ID. Foreigners: Passport and booking ticket."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What should I bring?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Valid ID, sun protection, water, and weather-appropriate clothing. Follow safety instructions at all times."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are the trips accessible for travelers with disabilities?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, some trips are wheelchair accessible. Look for the accessibility icon or contact us for arrangements."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need a security permit?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For some destinations, yes. We will inform you and handle the process once we receive your details in advance."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you offer travel insurance?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Insurance is available for selected trips. The option appears during booking."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I contact support?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Live chat, phone, and email support are available daily from 9 AM to 11 PM (Cairo time)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you have a loyalty program or discount codes?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, you can earn points with each booking and redeem seasonal promo codes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I book for a company or a large group?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, we provide tailored offers for corporate and group bookings. Contact us for details."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I request a tax invoice?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, request it during booking or through customer support after payment."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which languages are available for guided tours?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most tours are available in English and Arabic. Other languages may be available depending on the trip."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What if the bus is delayed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Traffic may cause slight delays. You will receive live updates with the adjusted meeting point if needed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the luggage policy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "One small backpack per guest is allowed. Larger luggage depends on the trip type."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I check availability?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The calendar on each trip page shows real-time availability."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are there hidden fees?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, the final price is shown before checkout. Any extra charges are clearly displayed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I report an issue?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Submit a support ticket from your account with photos or videos. We respond within 24 hours."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What safety measures do you follow?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "All partners are licensed. Vehicles and safety equipment are regularly inspected."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are tips included?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tips are optional unless stated in the trip details."
+            }
+          }
+        ]
+      }
+    </script>
+  </body>
+</html>
