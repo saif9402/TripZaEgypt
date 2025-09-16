@@ -321,3 +321,26 @@
   width: auto !important;
   height: auto !important;
 }
+
+/* Subtle float animation */
+@keyframes wa-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.animate-wa-float {
+  animation: wa-float 4s ease-in-out infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-wa-float {
+    animation: none;
+  }
+}

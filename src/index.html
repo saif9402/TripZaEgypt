@@ -131,7 +131,7 @@
     ></p>
 
     <!-- About Us (Homepage) -->
-    <section id="about" class="py-16 bg-white">
+    <section id="about" class="py-16 bg-blue-50">
       <div
         class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center"
       >
@@ -433,6 +433,52 @@
         Explore All the Trips
       </a>
     </div>
+
+    <!-- Sticky WhatsApp FAB -->
+    <a
+      href="https://wa.me/201503967539?text=Hi%20TripZaEgypt!%20I%27d%20like%20help%20planning%20a%20trip."
+      target="_blank"
+      rel="noopener"
+      aria-label="Chat with us on WhatsApp"
+      class="fixed z-50 right-4 bottom-4 md:right-6 md:bottom-6 group"
+    >
+      <!-- Outer ring (subtle pulse) -->
+      <span
+        class="absolute inset-0 -m-2 rounded-full bg-green-500/20 blur-[2px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-hidden="true"
+      ></span>
+
+      <!-- Button -->
+      <span
+        class="relative inline-flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-[#25D366] shadow-xl ring-1 ring-black/5 transition-transform duration-300 ease-out hover:scale-[1.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/60 animate-wa-float"
+      >
+        <!-- WhatsApp SVG -->
+        <svg
+          viewBox="0 0 32 32"
+          class="h-7 w-7 md:h-8 md:w-8 fill-white"
+          aria-hidden="true"
+        >
+          <path
+            d="M19.1 17.6c-.3-.2-1.7-.8-2-.9s-.5-.2-.7.2-.8.9-1 .9-.5 0-.9-.4-1.2-1.1-1.6-1.9.2-.6.5-.9.3-.5.5-.8 0-.6 0-.8-.7-1.8-1-2.4-.5-.5-.7-.5h-.6c-.2 0-.6.1-1 .6s-1.3 1.3-1.3 3.2 1.4 3.7 1.6 4s2.8 4.3 6.8 6 4.1 1 4.8 1 .9-.1 1.4-.6 1.6-1.5 1.8-2.9-.1-2.6-.4-2.9-.6-.4-1-.6z"
+          />
+          <path
+            d="M26.4 5.6C23.8 3 20.3 1.6 16.6 1.6 9.3 1.6 3.4 7.5 3.4 14.8c0 2.3.6 4.5 1.8 6.5L3.1 30l8.9-2.9c1.9 1 4.1 1.5 6.3 1.5 7.3 0 13.2-5.9 13.2-13.2 0-3.5-1.4-6.9-3.9-9.4zm-9.8 21.8c-2 .0-3.9-.5-5.6-1.4l-.4-.2-5.3 1.7 1.7-5.2-.3-.5c-1.1-1.8-1.7-3.8-1.7-5.9 0-6.2 5-11.2 11.2-11.2s11.2 5 11.2 11.2-5 11.5-11.2 11.5z"
+          />
+        </svg>
+      </span>
+
+      <!-- Tooltip -->
+      <span
+        class="absolute right-0 mr-[4.5rem] md:mr-[5.5rem] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-gray-900 text-white/95 text-xs md:text-sm px-3 py-1 shadow-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+        role="tooltip"
+      >
+        WhatsApp us
+        <span
+          class="ml-2 inline-block rounded-full bg-white/15 px-2 py-[2px] text-[10px] align-middle"
+          >~2 min avg reply</span
+        >
+      </span>
+    </a>
 
     <!-- Footer -->
     <div id="footer-placeholder"></div>
