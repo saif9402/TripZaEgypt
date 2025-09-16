@@ -1,16 +1,24 @@
 <footer class="bg-gray-900 text-white py-8 px-4">
   <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-    <div>
-      <h4 data-i18n="footer.lang" class="font-bold mb-2">Language</h4>
-      <select
-        id="languageSelect"
-        title="language Select"
-        class="bg-gray-800 p-1 w-8xl"
+    <div class="relative flex items-center justify-start h-9 md:h-12">
+      <img
+        src="/img/Header.svg"
+        class="h-50 object-contain mt-40 flex items-start justify-start"
+        alt="logo header"
+        data-i18n-alt="header.logoAlt"
+      />
+
+      <!-- Invisible clickable overlay to Home -->
+      <a
+        href="/index.html"
+        aria-label="Go to Home"
+        title="Home"
+        class="absolute inset-0 opacity-0"
       >
-        <option value="en">English</option>
-        <option value="deu">German</option>
-      </select>
+        <span class="sr-only">Home</span>
+      </a>
     </div>
+
     <div>
       <h4 data-i18n="footer.company" class="font-bold mb-2">Company</h4>
       <ul>
