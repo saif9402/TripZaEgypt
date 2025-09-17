@@ -1688,8 +1688,8 @@
 
   function getCounts() {
     const a = Math.max(
-      1,
-      parseInt(document.getElementById("adultCount")?.value || "1", 10)
+      0,
+      parseInt(document.getElementById("adultCount")?.value || "0", 10)
     );
     const c = Math.max(
       0,
@@ -1757,7 +1757,7 @@
       );
     };
 
-    wire("adultCount", 1);
+    wire("adultCount", 0);
     wire("childCount", 0);
 
     priceCalcWired = true;
