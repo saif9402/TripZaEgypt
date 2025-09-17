@@ -536,38 +536,40 @@
             </h3>
 
             <div class="space-y-3 sm:space-y-4">
-              <div>
-                <label
-                  for="tripDateInput"
-                  class="block text-sm font-medium mb-1"
-                  data-i18n="trip.booking.date"
-                  >Date</label
-                >
-                <input
-                  id="tripDateInput"
-                  type="text"
-                  class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
-                />
-              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label
+                    for="tripDateInput"
+                    class="block text-sm font-medium mb-1"
+                    data-i18n="trip.booking.date"
+                    >Date</label
+                  >
+                  <input
+                    id="tripDateInput"
+                    type="text"
+                    class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+                  />
+                </div>
 
-              <div>
-                <label
-                  for="tripTimeSelect"
-                  class="block text-sm font-medium mb-1"
-                  data-i18n="trip.booking.time"
-                  >Time</label
-                >
-                <select
-                  id="tripTimeSelect"
-                  class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500 disabled:opacity-50"
-                  disabled
-                  title="Select Time"
-                  data-i18n-title="trip.booking.timeTitle"
-                >
-                  <option value="" data-i18n="trip.booking.timeSelect">
-                    Select time
-                  </option>
-                </select>
+                <div>
+                  <label
+                    for="tripTimeSelect"
+                    class="block text-sm font-medium mb-1"
+                    data-i18n="trip.booking.time"
+                    >Time</label
+                  >
+                  <select
+                    id="tripTimeSelect"
+                    class="w-full border border-gray-300 px-3 py-2 rounded outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500 disabled:opacity-50"
+                    disabled
+                    title="Select Time"
+                    data-i18n-title="trip.booking.timeTitle"
+                  >
+                    <option value="" data-i18n="trip.booking.timeSelect">
+                      Select time
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
