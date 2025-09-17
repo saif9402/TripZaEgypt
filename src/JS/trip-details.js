@@ -1681,6 +1681,89 @@
     });
   };
 
+  // ---------------- price calc helpers  ----------------
+
+  // --- Live price calculator ---
+  let priceCalcWired = false;
+
+  function getCounts() {
+    const a = Math.max(
+      1,
+      parseInt(document.getElementById("adultCount")?.value || "1", 10)
+    );
+    const c = Math.max(
+      0,
+      parseInt(document.getElementById("childCount")?.value || "0", 10)
+    );
+    return { adults: a, children: c };
+  }
+
+  function computeBookingPrice() {
+    const perAdult = Number(currentTrip?.price) || 0; // base price from API
+    const { adults, children } = getCounts();
+    const perChild = perAdult * 0.5; // 2–11 years: 50% (per your UI text)
+    const total = perAdult * adults + perChild * children;
+    return { perAdult, perChild, adults, children, total };
+  }
+
+  function updateBookingPriceUI() {
+    const box = document.getElementById("tripPrice");
+    if (!box) return;
+
+    const perAdult = Number(currentTrip?.price);
+    if (!(perAdult >= 0)) {
+      box.textContent = "";
+      return;
+    }
+
+    const { perChild, adults, children, total } = computeBookingPrice();
+
+    const totalLabel =
+      tr("trip.booking.total") || tr("trip.booking.modal.total") || "Total";
+
+    // Accessible, no inline CSS; Tailwind classes only
+    box.innerHTML = `
+    <div class="flex items-baseline justify-between">
+      <span class="text-gray-600 text-sm">${totalLabel}</span>
+      <span class="text-green-600">${formatPrice(total, "EUR")}</span>
+    </div>
+    <div class="text-xs text-gray-500 mt-1">
+      ${formatPrice(perAdult, "EUR")} / ${
+      tr("trip.booking.adults")?.replace(/s$/, "") || "Adult"
+    }
+      • ${formatPrice(perChild, "EUR")} / ${
+      tr("trip.booking.children")?.replace(/ren$/, "") || "Child"
+    }
+      <span class="ml-1 text-gray-400">(${adults} A${
+      children ? `, ${children} C` : ""
+    })</span>
+    </div>
+  `;
+  }
+
+  function initPriceCalculator() {
+    if (priceCalcWired) return;
+
+    const wire = (id, min) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const clampAndUpdate = () => {
+        const n = parseInt(el.value || "0", 10);
+        el.value = String(Math.max(min, isNaN(n) ? min : n));
+        updateBookingPriceUI();
+      };
+      ["input", "change", "blur"].forEach((evt) =>
+        el.addEventListener(evt, clampAndUpdate)
+      );
+    };
+
+    wire("adultCount", 1);
+    wire("childCount", 0);
+
+    priceCalcWired = true;
+    updateBookingPriceUI();
+  }
+
   // ---------------- Render trip ----------------
   let currentTrip = null;
 
@@ -1736,9 +1819,7 @@
         .join("");
     }
 
-    $("tripPrice") &&
-      ($("tripPrice").innerHTML =
-        t.price != null ? `${formatPrice(t.price, "EUR")}` : "");
+    if ($("tripPrice")) updateBookingPriceUI();
 
     setUnavailableUI(!!t.isAvailable);
 
@@ -2123,6 +2204,7 @@
     wireReviewsSection();
     loadTrip();
     initWishlistToggle();
+    initPriceCalculator();
   });
   document.addEventListener("i18n:change", () => {
     // Re-apply availability placeholders
@@ -2146,5 +2228,7 @@
 
     // Re-apply review counts/labels
     applyReviewsUI();
+
+    updateBookingPriceUI();
   });
 })();
